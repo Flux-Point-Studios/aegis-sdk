@@ -1,0 +1,21 @@
+# dependencies / build output
+node_modules/
+dist/
+
+# never commit secrets or env
+.env
+.env.*
+.npmrc
+*.skey
+*.vkey
+*.cbor
+
+# logs / packs / coverage / OS
+*.log
+*.tgz
+coverage/
+.DS_Store
+Thumbs.db
+
+# internal proof/scratch tooling (kept out of the public SDK)
+_proof/

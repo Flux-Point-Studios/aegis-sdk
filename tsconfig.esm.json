@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "outDir": "./dist/esm"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "examples", "src/**/*.test.ts", "src/**/__tests__/**"]
+}

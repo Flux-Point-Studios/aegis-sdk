@@ -1,0 +1,56 @@
+{
+  "name": "@fluxpointstudios/aegis-sdk",
+  "version": "1.0.1-v4.0",
+  "description": "Aegis parametric insurance SDK for Cardano. Build insurance policy datums, calculate premiums, and compose Aegis outputs into your own transactions -- zero runtime dependencies.",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/cjs/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "rimraf dist && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json && node scripts/finish-build.cjs",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cardano",
+    "insurance",
+    "defi",
+    "parametric",
+    "aegis",
+    "charli3",
+    "sdk"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Flux-Point-Studios/aegis-sdk.git"
+  },
+  "homepage": "https://github.com/Flux-Point-Studios/aegis-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/Flux-Point-Studios/aegis-sdk/issues"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "examples/",
+    "README.md",
+    "PARTNERS.md",
+    "CHANGELOG.md"
+  ],
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "rimraf": "^5.0.0",
+    "vitest": "^1.6.0"
+  }
+}
