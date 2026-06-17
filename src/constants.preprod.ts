@@ -1,8 +1,8 @@
 // AUTO-GENERATED from release/preprod.json — do not edit.
-// Source manifest: release_commit=7f9bc19c6d873554e6eefb08ac5730858e4079bd
+// Source manifest: release_commit=34e215b567e23919eb4993b40aa3eee768c91191
 // Network: preprod
 // Compiler: v1.1.22+39d6b04
-// Frozen at: 2026-06-13T01:00:45Z
+// Frozen at: 2026-06-17T22:30:00Z
 //
 // Regenerate via:
 //   python scripts/sync_sdk_constants_from_manifest.py \
@@ -10,29 +10,29 @@
 
 
 export const AEGIS_NETWORK = 'preprod';
-export const AEGIS_POOL_ADDRESS = 'addr_test1wr6harrzp9wzdcaknmzmsz02zq22zx4qdvuk5kjqyd0xgegwkary8';
-export const AEGIS_POOL_NFT_POLICY_ID = '35c08c6208244791f313db85a7734523b1f7d9bb76891f565611fe94';
-export const AEGIS_POOL_NFT_ASSET_NAME = 'AEGIS_POOL_SURF_V1';
+export const AEGIS_POOL_ADDRESS = 'addr_test1wp5p7udv5m7mdfep39hqjhg7z0ws0525552tt5was486dgsfkvwv8';
+export const AEGIS_POOL_NFT_POLICY_ID = 'da986312812002c71c24a04156c61e65b7e38bb2f81322618eff2725';
+export const AEGIS_POOL_NFT_ASSET_NAME = 'AEGIS_POOL_12H_V1';
 
 // Applied script hashes (live on-chain).
-export const AEGIS_POLICY_VALIDATOR_HASH = 'd14c087823266a6148b66d1cbe9416520e318526edae283af420eaa5';
-export const AEGIS_POOL_VALIDATOR_HASH = 'f57e8c62095c26e3b69ec5b809ea1014a11aa06b396a5a40235e6465';
-export const AEGIS_POLICY_MARKER_HASH = '15a06a6aac5032456333d426f5a37c0bc31a8038ac8148af1a09b1ed';
-export const AEGIS_LP_TOKEN_HASH = '3d80317808446ace1e574d596cd94a3cd5f6e884a27066d6388c22a9';
+export const AEGIS_POLICY_VALIDATOR_HASH = 'ff7469ffe5f3598289ce06c687942790d1a115e0c01d58ed3036ccc2';
+export const AEGIS_POOL_VALIDATOR_HASH = '681f71aca6fdb6a721896e095d1e13dd07d154a514b5d1dd854fa6a2';
+export const AEGIS_POLICY_MARKER_HASH = 'b89348874aeddf60dd300200de714c104bd546e39f8a0f96a78ced17';
+export const AEGIS_LP_TOKEN_HASH = '732dcebec69abcd76a69863f9b0d31bc2745af3a6b8e6f3a6934ab3b';
 
 // Reference UTxOs (empty when ref script not yet published).
-export const AEGIS_POLICY_REF_TX = '0bd1f3980cafa5020635a04b3a4d9ff5526d4f1d14fcb6a41f727cc8bd62fc36';
+export const AEGIS_POLICY_REF_TX = '3398d40d3b7ee10e5112fa453c99dd23c4f5cffbbb208586e6491c35152549c6';
 export const AEGIS_POLICY_REF_IDX = 0;
-export const AEGIS_POLICY_REF_UTXO = '0bd1f3980cafa5020635a04b3a4d9ff5526d4f1d14fcb6a41f727cc8bd62fc36#0';
-export const AEGIS_POOL_REF_TX = 'd3826d870b354a85918052fedaa8691b1f871d1cc0a5d591716fabf11fb009d0';
+export const AEGIS_POLICY_REF_UTXO = '3398d40d3b7ee10e5112fa453c99dd23c4f5cffbbb208586e6491c35152549c6#0';
+export const AEGIS_POOL_REF_TX = '56d366b0ac7596edffe41300be174922284eb28ebb72144a120f8d146dc0e619';
 export const AEGIS_POOL_REF_IDX = 0;
-export const AEGIS_POOL_REF_UTXO = 'd3826d870b354a85918052fedaa8691b1f871d1cc0a5d591716fabf11fb009d0#0';
-export const AEGIS_MARKER_REF_TX = '5cf8891c17c790aa3b0d6e44cce205748220e83ef19187b7faf6d8204d13a267';
+export const AEGIS_POOL_REF_UTXO = '56d366b0ac7596edffe41300be174922284eb28ebb72144a120f8d146dc0e619#0';
+export const AEGIS_MARKER_REF_TX = 'a0b9348b7f6b7ab0956c5246f1f07431dd1252c21155846ae31f3d44c8b176f7';
 export const AEGIS_MARKER_REF_IDX = 0;
-export const AEGIS_MARKER_REF_UTXO = '5cf8891c17c790aa3b0d6e44cce205748220e83ef19187b7faf6d8204d13a267#0';
-export const AEGIS_LP_REF_TX = '9d7db8b03fc1fd95a9591c6fa8adfda5eeb111818d3cc4aaf4faf67702edea10';
+export const AEGIS_MARKER_REF_UTXO = 'a0b9348b7f6b7ab0956c5246f1f07431dd1252c21155846ae31f3d44c8b176f7#0';
+export const AEGIS_LP_REF_TX = '77b51f0f64bd9acfd047ff898a06c2699dba3b0b77ac47af97fb2cd2dde8490f';
 export const AEGIS_LP_REF_IDX = 0;
-export const AEGIS_LP_REF_UTXO = '9d7db8b03fc1fd95a9591c6fa8adfda5eeb111818d3cc4aaf4faf67702edea10#0';
+export const AEGIS_LP_REF_UTXO = '77b51f0f64bd9acfd047ff898a06c2699dba3b0b77ac47af97fb2cd2dde8490f#0';
 
 // Economic constants (BigInt-typed; matches on-chain types.ak).
 export const AEGIS_TEAM_ADDRESS = 'addr_test1qrph8epfa8dg6wjwmls873g0xllyjnlt3hh08nv9kcrw9ln40ur83k9c87dpxuar3jucqrg0sc54zvzmf53pu6due2eqa5m8d2';

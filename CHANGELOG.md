@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.2-v4.0 — canonical policy_id + feed registry (2026-06-17)
+
+Additive (no breaking changes):
+
+- **Canonical `policy_id`**: zero-dep BLAKE2b-224 (`derivePolicyId`,
+  golden-tested against `api/policies.py::_generate_policy_id`). The composer now
+  derives the policy_id this way by default, so a composed policy is found under
+  the same key by the Aegis claim indexer / `/api/policies` with zero partner
+  effort. The on-chain validator treats `policy_id` as opaque bytes; an explicit
+  override is still honored for exact reproduction.
+- **Named feed registry** (`FEEDS`, `MAINNET_FEEDS`, `GENERIC_FEEDS`,
+  `feedsByKind`, `findFeedByPolicyId`): look feeds up by symbol
+  (`FEEDS.ADA_USD.policyId`) instead of pasting hex, with the right `riskClass`
+  per feed. Verified against the publisher's canonical-NFT manifest.
+- Docs/examples generalized — the SDK is protocol-agnostic; any loan/CDP/vault
+  dApp integrates the same way.
+
 ## 1.0.1-v4.0 — developer-experience layer + dual ESM/CJS build (2026-06-17)
 
 Gold-standard partner DX, all additive (no breaking changes):
@@ -38,7 +55,7 @@ partner integration surface.
 - `fees.ts` (fee/treasury math), `address.ts` (CIP-19 bech32), `decodePoolDatum`.
 - Constants regenerated to the live V4 mainnet pool (`c08edc7f`,
   `AEGIS_POOL_V4`, 10 canonical feeds) and the pool-funded preprod pool.
-- `PARTNERS.md` + MeshJS (Surf) and Lucid (Indigo CDP) examples.
+- `PARTNERS.md` + MeshJS and Lucid integration examples.
 
 ## 0.5.0-r17.0 — R17 refresh (2026-05-26)
 

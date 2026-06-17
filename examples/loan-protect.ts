@@ -1,11 +1,12 @@
 /**
- * D:\aegis\sdk\examples\surf-loan-protect.ts
+ * examples/loan-protect.ts
  *
- * Example: one-click "add liquidation insurance" on a Surf loan, composed into
- * the SAME transaction the borrower already signs at loan setup — using the V4
+ * Example: one-click "add liquidation insurance" to a loan, composed into the
+ * SAME transaction the borrower already signs at loan setup — using the V4
  * pool-funded composer (@fluxpointstudios/aegis-sdk buildUnderwriteParts) + MeshJS.
  *
- * The eUTxO model lets Surf open the borrower's loan AND underwrite an Aegis
+ * This is generic: ANY lending / borrow protocol can splice it in. The eUTxO
+ * model lets the protocol open the borrower's loan AND underwrite an Aegis
  * barrier policy against liquidation in one tx, one signature, one fee. The
  * Aegis pool funds the coverage; the borrower pays only the premium + the tiny
  * treasury donation + fees.
@@ -24,29 +25,31 @@ import {
   quoteForPosition,
   decodePoolDatum,
   hexToBytes,
+  FEEDS,
   type PoolDatum,
 } from '@fluxpointstudios/aegis-sdk';
 
 const AEGIS_API = 'https://api.aegis.fluxpointstudios.com';
 
 /**
- * Splice Aegis liquidation cover into a Surf borrow transaction.
+ * Splice Aegis liquidation cover into a borrow transaction.
  *
  * @param wallet         connected MeshJS BrowserWallet
  * @param borrowerPkh    borrower payment key hash (56 hex)
- * @param collateralAda  the Surf loan collateral (drives the coverage amount)
- * @param surfFeedNft    the canonical Surf-event oracle NFT for this market
+ * @param collateralAda  the loan collateral (drives the coverage amount)
+ * @param oracleFeedNft  the canonical oracle NFT for the priced asset
+ *                       (e.g. FEEDS.ADA_USD.policyId)
  */
-export async function addSurfLiquidationCover(
+export async function addLiquidationCover(
   wallet: any,
   borrowerPkh: string,
   collateralAda: number,
-  surfFeedNft: string,
+  oracleFeedNft: string = FEEDS.ADA_USD.policyId,
 ) {
   const bindings = aegisBindings('mainnet');
 
-  // 1. Pick the cover terms. For a Surf liquidation barrier the strike is the
-  //    market's liquidation price; here we cover `collateralAda` ADA of value
+  // 1. Pick the cover terms. For a liquidation barrier the strike is the
+  //    position's liquidation price; here we cover `collateralAda` ADA of value
   //    against a 25%-below-spot touch over 30 days.
   const coverageLovelace = BigInt(Math.round(collateralAda * 1_000_000));
   const spotScaled = 800_000n; // $0.80 spot (read from the Aegis price API)
@@ -64,7 +67,7 @@ export async function addSurfLiquidationCover(
       strike_price: Number(strikeScaled),
       spot_price: Number(spotScaled),
       days: durationDays,
-      asset: 'ALT_LIQUID',
+      asset: 'ADA',
     }),
   }).then((r) => r.json());
   const premiumLovelace = BigInt(quote.premium_lovelace);
@@ -103,16 +106,16 @@ export async function addSurfLiquidationCover(
     coverageLovelace,
     premiumLovelace,
     durationDays,
-    oraclePolicyId: surfFeedNft,
+    oraclePolicyId: oracleFeedNft,
     oracleProvider: 'AegisSelf',
     riskClass: 'Barrier',
   });
 
-  // 6. Splice the parts into the Surf borrow tx. (Pseudo-MeshJS — the same tx
-  //    that opens the loan also carries the Aegis outputs.)
+  // 6. Splice the parts into your borrow tx. (Pseudo-MeshJS — the same tx that
+  //    opens the loan also carries the Aegis outputs.)
   //
   // const tx = new Transaction({ initiator: wallet })
-  //   // ... Surf's own loan output(s) ...
+  //   // ... your protocol's own loan output(s) ...
   //   .redeemValue({ value: poolUtxo, script: poolRefScript, redeemer: { data: parts.poolRedeemerCbor } })
   //   .mintAsset(markerRefScript, { policyId: parts.mint.policyId, assetName: parts.mint.assetNameHex,
   //     assetQuantity: '1', redeemer: { data: parts.mint.redeemerCbor } })

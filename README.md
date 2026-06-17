@@ -62,7 +62,7 @@ const parts = buildUnderwriteParts({
 built (floor, dead-zone, pool can't cover, concentration cap, ratio).
 
 **See [`PARTNERS.md`](./PARTNERS.md) for the full integration guide** and
-[`examples/`](./examples/) for MeshJS (Surf) and Lucid (Indigo CDP) walkthroughs.
+[`examples/`](./examples/) for MeshJS and Lucid walkthroughs.
 
 ## Also exported
 

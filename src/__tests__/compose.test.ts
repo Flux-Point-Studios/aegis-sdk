@@ -9,6 +9,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { buildUnderwriteParts, aegisBindings } from '../compose';
+import { derivePolicyId } from '../blake2b';
 import { decodePoolRedeemer, decodeMarkerRedeemer, encodePoolDatum, decodePoolDatum, encodeConstr, encodeInt, encodeBytes, hexToBytes, bytesToHex } from '../cbor';
 import type { PoolDatum } from '../types';
 
@@ -154,6 +155,37 @@ describe('buildUnderwriteParts — byte-exact reconstruction of the live dd56e6d
       expiryTimeMs: 0x019f019b472fn,
     });
     expect(parts.policyOutput.inlineDatumCbor).toBe(TRUTH);
+  });
+});
+
+describe('buildUnderwriteParts — default policy_id is the canonical BLAKE2b derivation', () => {
+  const parts = buildUnderwriteParts({ bindings: mainnetBindings(), pool: freshPool(), ...BARRIER, nowMs: 1_750_000_000_000, startMarginMs: 120_000 });
+
+  it('matches the authoritative api/policies.py::_generate_policy_id golden', () => {
+    // golden = hashlib.blake2b(preimage, 28) over the consumed pool UTxO ref
+    expect(bytesToHex(parts.policyDatum.policyId)).toBe('31d7d7a5333a9d4ec5e4f2eb560544b30e65e7bc69dad1add9bc0b9a');
+  });
+
+  it('equals derivePolicyId() over the same inputs (anchored to the pool input ref)', () => {
+    const expected = derivePolicyId({
+      insuredPkh: BARRIER.insuredPkh,
+      strikePriceScaled: BARRIER.strikePriceScaled,
+      coverageLovelace: BARRIER.coverageLovelace,
+      startTimeMs: parts.validity.startTimeMs,
+      expiryTimeMs: parts.validity.expiryTimeMs,
+      poolNft: freshPool().datum.poolNft,
+      underwriteTxHash: freshPool().utxoRef.txHash,
+      underwriteOutputIndex: freshPool().utxoRef.index,
+    });
+    expect(bytesToHex(parts.policyDatum.policyId)).toBe(bytesToHex(expected));
+  });
+
+  it('an explicit override still wins over the default', () => {
+    const override = buildUnderwriteParts({
+      bindings: mainnetBindings(), pool: freshPool(), ...BARRIER,
+      policyId: '739cce791c33ec85aa531b119da20f9624eaf7a4470e10e3282a3f65',
+    });
+    expect(bytesToHex(override.policyDatum.policyId)).toBe('739cce791c33ec85aa531b119da20f9624eaf7a4470e10e3282a3f65');
   });
 });
 

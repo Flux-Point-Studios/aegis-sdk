@@ -30,6 +30,7 @@ import {
   bytesToHex,
 } from './cbor';
 import { scriptEnterpriseAddress, keyAddress, type Network } from './address';
+import { derivePolicyId } from './blake2b';
 import {
   calculateFeeTotal,
   calculateNetPoolGrowth,
@@ -146,7 +147,8 @@ export interface BuildUnderwritePartsParams {
   oracleProvider?: OracleProvider;
   riskClass?: RiskClass;
   partner?: { address: PlutusAddress; shareBps: bigint };
-  /** Optional 28-byte policy id (hex or bytes); default a deterministic tag. */
+  /** Optional 28-byte policy id (hex or bytes); default = the canonical
+   *  BLAKE2b-224 derivation (matches the Aegis claim indexer's key). */
   policyId?: string | Uint8Array;
   /** Wall-clock now (ms); default Date.now(). */
   nowMs?: number;
@@ -211,26 +213,6 @@ export interface UnderwriteParts {
   reason: string | null;
   /** The typed PolicyDatum (for inspection / off-chain indexing). */
   policyDatum: PolicyDatum;
-}
-
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
-/** Deterministic 28-byte opaque policy id (on-chain treats it as bytes). */
-function deterministicPolicyId(input: string): Uint8Array {
-  const result = new Uint8Array(28);
-  let h = 0x811c9dc5;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
-  }
-  for (let i = 0; i < 28; i++) {
-    h ^= h >>> 13;
-    h = Math.imul(h, 0x5bd1e995);
-    result[i] = (h >>> ((i % 4) * 8)) & 0xff;
-  }
-  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -342,13 +324,23 @@ export function buildUnderwriteParts(params: BuildUnderwritePartsParams): Underw
 
   // ── PolicyDatum (14 fields). poolScriptHash = POOL validator hash; poolNft
   //    copied from the consumed pool datum (validator binds the policy to it). ─
+  // Default policy_id is the canonical BLAKE2b-224 derivation (byte-identical to
+  // api/policies.py::_generate_policy_id over the consumed pool UTxO's
+  // OutputReference), so the composed policy is found under the same key by the
+  // Aegis claim indexer / /api/policies. The on-chain validator treats policy_id
+  // as opaque bytes — an explicit override is accepted for exact reproduction.
   const policyIdBytes =
     params.policyId === undefined
-      ? deterministicPolicyId(
-          `${insuredPkh}:${strikePriceScaled}:${coverageLovelace}:${premiumLovelace}:` +
-            `${startTime}:${expiryTime}:${bytesToHex(pool.datum.poolNft)}:` +
-            `${pool.utxoRef.txHash}#${pool.utxoRef.index}`,
-        )
+      ? derivePolicyId({
+          insuredPkh,
+          strikePriceScaled,
+          coverageLovelace,
+          startTimeMs: startTime,
+          expiryTimeMs: expiryTime,
+          poolNft: pool.datum.poolNft,
+          underwriteTxHash: pool.utxoRef.txHash,
+          underwriteOutputIndex: pool.utxoRef.index,
+        })
       : typeof params.policyId === 'string'
         ? hexToBytes(params.policyId)
         : params.policyId;

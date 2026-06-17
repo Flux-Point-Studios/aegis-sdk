@@ -21,6 +21,9 @@ interface NetworkBindings {
   poolAddress: string;
   poolNftPolicyId: string;
   policyValidatorHash: string;
+  /** Pool validator hash — written into PolicyDatum.pool_script_hash (field 9).
+   *  This is the POOL validator hash, not the policy validator hash. */
+  poolValidatorHash: string;
   charli3AdaUsdNft: string;
 }
 
@@ -30,6 +33,7 @@ function loadPreprod(): NetworkBindings {
     poolAddress: preprod.AEGIS_POOL_ADDRESS,
     poolNftPolicyId: preprod.AEGIS_POOL_NFT_POLICY_ID,
     policyValidatorHash: preprod.AEGIS_POLICY_VALIDATOR_HASH,
+    poolValidatorHash: preprod.AEGIS_POOL_VALIDATOR_HASH,
     charli3AdaUsdNft: preprod.AEGIS_CHARLI3_ADA_USD_NFT,
   };
 }
@@ -45,6 +49,7 @@ function loadMainnet(): NetworkBindings {
     poolAddress: mn.AEGIS_POOL_ADDRESS,
     poolNftPolicyId: mn.AEGIS_POOL_NFT_POLICY_ID,
     policyValidatorHash: mn.AEGIS_POLICY_VALIDATOR_HASH,
+    poolValidatorHash: mn.AEGIS_POOL_VALIDATOR_HASH,
     charli3AdaUsdNft: mn.AEGIS_CHARLI3_ADA_USD_NFT,
   };
 }
@@ -115,7 +120,7 @@ export class AegisSDK {
 
     // Oracle backend + NFT. Mainnet default is AegisSelf; Charli3/Orcfax are
     // soft-disabled. AegisSelf has a per-asset NFT (spot ADA/BTC/ETH/USDC/USDT,
-    // the iUSD relay, or a Surf event slot) so there is NO single default —
+    // the iUSD relay, or an event slot) so there is NO single default —
     // the canonical feed NFT must be supplied explicitly.
     const provider: OracleProvider = oracleProvider ?? 'AegisSelf';
     if (!oraclePolicyId) {
@@ -141,6 +146,18 @@ export class AegisSDK {
       );
     }
 
+    // PolicyDatum.pool_script_hash (field 9) is the POOL validator hash, not the
+    // policy validator hash — verified byte-exact against the live mainnet
+    // dd56e6df policy. (buildUnderwriteParts is the canonical V4 path; this
+    // legacy facade is kept correct for any remaining R17 consumers.)
+    const poolScriptHashHex = this.bindings.poolValidatorHash;
+    if (!poolScriptHashHex || poolScriptHashHex.length !== 56) {
+      throw new Error(
+        'pool validator hash is empty in the network manifest. ' +
+          'Re-run scripts/sync_sdk_constants_from_manifest.py against a frozen release/<network>.json.',
+      );
+    }
+
     // Deterministic-enough policy id for client-side use; on-chain only
     // requires a byte sequence so length and uniqueness are the concern.
     const policyIdInput = `${insuredPkh}:${strikePriceScaled}:${coverageLovelace}:${startTime}`;
@@ -155,7 +172,7 @@ export class AegisSDK {
       startTime,
       expiryTime,
       oracleNft: hexToBytes(oracleNftHex),
-      poolScriptHash: hexToBytes(policyScriptHashHex),
+      poolScriptHash: hexToBytes(poolScriptHashHex),
       poolNft: hexToBytes(poolNftHex),
       oracleProvider: provider,
       partnerAddress: null,

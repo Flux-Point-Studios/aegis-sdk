@@ -81,6 +81,24 @@ export type {
 } from './compose';
 
 // ---------------------------------------------------------------------------
+// Canonical policy_id derivation (BLAKE2b-224) — matches the Aegis claim
+// indexer's key, so composed policies are first-class in /api/policies.
+// ---------------------------------------------------------------------------
+export { blake2b, blake2b224, derivePolicyId } from './blake2b';
+
+// ---------------------------------------------------------------------------
+// Named oracle-feed registry (canonical mainnet feeds).
+// ---------------------------------------------------------------------------
+export {
+  MAINNET_FEEDS,
+  FEEDS,
+  GENERIC_FEEDS,
+  feedsByKind,
+  findFeedByPolicyId,
+} from './feeds';
+export type { OracleFeed, FeedKind } from './feeds';
+
+// ---------------------------------------------------------------------------
 // Developer experience: typed errors, chain/wallet error decoding, formatters,
 // and an optional quote-fetch helper.
 // ---------------------------------------------------------------------------

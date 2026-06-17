@@ -66,7 +66,7 @@ you never emit a tx that would silently fail on chain.
 
 ## Risk classes
 
-- **Barrier** (loan/CDP liquidation, Surf events): price-touch cover. Requires a
+- **Barrier** (loan/CDP liquidation, price events): price-touch cover. Requires a
   `spotPriceScaled` for the floor pre-flight and an oracle reference input on
   chain. Strike must sit ≥ 15% below spot.
 - **Depeg** (stablecoins): Poisson-hazard cover. No spot needed; the strike must
@@ -74,10 +74,10 @@ you never emit a tx that would silently fail on chain.
 
 ## Worked examples
 
-- [`examples/surf-loan-protect.ts`](./examples/surf-loan-protect.ts) — MeshJS,
-  Surf liquidation barrier.
-- [`examples/indigo-cdp-protect.ts`](./examples/indigo-cdp-protect.ts) — Lucid,
-  Indigo iUSD CDP (ADA barrier via the iUSD relay feed).
+- [`examples/loan-protect.ts`](./examples/loan-protect.ts) — MeshJS, a
+  loan/borrow liquidation barrier.
+- [`examples/cdp-protect.ts`](./examples/cdp-protect.ts) — Lucid, an
+  ADA-collateralized CDP / vault barrier.
 
 The older `examples/*-integration.ts` / `one-tx-cdp-insurance.ts` files
 demonstrate the legacy R17 premium-funded model and are superseded by the two
@@ -85,12 +85,23 @@ above for the live V4 pool-funded protocol.
 
 ## Oracle feeds (mainnet)
 
-Pass the canonical feed NFT policy id for your product as `oraclePolicyId`:
+Pass the canonical feed NFT policy id for the priced asset as `oraclePolicyId`.
+Look it up by symbol from the `FEEDS` registry instead of pasting hex:
 
-- Indigo iUSD relay (ADA barrier for CDPs): `f6458f3b7a6b2027fe89c39a622956336ec3253b7d65971f0cb64b02`
-- USDC depeg: `a8231f0c10b514659fd590f6ee7420acf4e145cce36909a7f5fe1c5e`
-- USDT depeg: `82a324a3de0be7bc9c4b8450db5350cf0479fa1393eb8eee2481c652`
-- Surf event slots: `c2f62874…`, `f4e78f36…`, `68a1b0c1…`, `47c16934…`
+```ts
+import { FEEDS, GENERIC_FEEDS } from '@fluxpointstudios/aegis-sdk';
+
+FEEDS.ADA_USD.policyId   // ADA/USD spot   → riskClass 'Barrier'
+FEEDS.USDC_USD.policyId  // USDC depeg     → riskClass 'Depeg'
+FEEDS.USDT_USD.policyId  // USDT depeg     → riskClass 'Depeg'
+FEEDS.IUSD_USD.policyId  // iUSD/USD relay → riskClass 'Barrier'
+GENERIC_FEEDS            // every non-bespoke feed (spot + depeg + relay)
+```
+
+`spot` / `depeg` / `relay` feeds are generic — any dApp pricing that underlying
+uses them directly. `event` feeds (`EVENT_SLOT_1…4`) are bespoke: each emits a
+binary alive/liquidated value for one integrated market and is provisioned per
+integration — ask us for a feed NFT if your product needs an event trigger.
 
 The full live set is exported as `AEGIS_PUBLISHER_CANONICAL_NFTS`.
 
