@@ -1,6 +1,8 @@
 version: 2
 updates:
   # Keep dev tooling (typescript, vitest, rimraf) patched for security.
+  # Patch/minor only — major bumps (e.g. TypeScript 6, Vitest 4) are breaking
+  # and reviewed manually, not auto-proposed.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -8,6 +10,9 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "deps"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
   # Keep the GitHub Actions used by CI patched.
   - package-ecosystem: "github-actions"
     directory: "/"
