@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased — T2 Coverage Vault composers
+
+Additive (no breaking changes):
+
+- **`buildAddLiquidityParts` / `buildRemoveLiquidityParts`**: pool-funded LP
+  deposit / withdraw composers a partner splices into their own Lucid tx (the
+  T2 Coverage Vault primitive). They mirror `buildUnderwriteParts`' rigor —
+  insurability/pool gates run FIRST and throw a named `InputError`/`PoolError`
+  rather than emit parts that fail phase-2 on chain. Each returns the pool
+  continuation (NFT preserved, `PoolDatum` updated), the provider LP-receipt /
+  returned-ADA output, the signed `aLP` mint, and the pool + LP redeemers.
+- LP math is validator-authoritative (mirrors
+  `contracts/lib/aegis/pool.ak`): first deposit bootstraps 1:1 (`total == 0`),
+  subsequent `lpMinted = deposit·lpSupply/total`, withdraw
+  `withdrawn = lpBurned·total/lpSupply` — integer-floor, always favouring the
+  pool. Exposed as `calculateLpMint` / `calculateWithdrawal`.
+- **Solvency invariant** enforced: a `RemoveLiquidity` that would push
+  `activeCoverage` above the remaining `totalLiquidity` throws `PoolError`
+  (`can_withdraw`).
+- `AegisBindings` gains `lpRefUtxo` (LP-token mint-policy reference script);
+  `aegisBindings(network)` populates it from the frozen manifest.
+- Golden-CBOR regression locking the **T1 iUSD depeg** path
+  (`buildUnderwriteParts` with `riskClass:'Depeg'`, `oracleProvider:'Indigo'`,
+  `oraclePolicyId = FEEDS.IUSD_USD.policyId`, partner share) — no signature
+  change, byte-for-byte vector.
+
 ## 1.0.2-v4.0 — canonical policy_id + feed registry (2026-06-17)
 
 Additive (no breaking changes):

@@ -61,6 +61,30 @@ const parts = buildUnderwriteParts({
 `buildUnderwriteParts` throws a named reason if the policy can't be validly
 built (floor, dead-zone, pool can't cover, concentration cap, ratio).
 
+### 3. Coverage Vault: add / remove liquidity (T2)
+
+```ts
+import { aegisBindings, buildAddLiquidityParts, buildRemoveLiquidityParts, decodePoolDatum, hexToBytes } from '@fluxpointstudios/aegis-sdk';
+
+const pool = { utxoRef, lovelace, datum: decodePoolDatum(hexToBytes(poolDatumHex)) };
+
+// Deposit ADA → receive aLP. lpMinted is validator-exact (favours the pool).
+const add = buildAddLiquidityParts({ bindings: aegisBindings('mainnet'), pool, providerPkh, depositLovelace });
+// add: poolOutput, providerOutput (aLP receipt), mint (+aLP MintLP),
+//      poolRedeemerCbor (AddLiquidity), lpRedeemerCbor (MintLP), references, lpMinted
+
+// Burn aLP → receive proportional ADA. Throws PoolError if it would impair coverage.
+const rem = buildRemoveLiquidityParts({ bindings: aegisBindings('mainnet'), pool, providerPkh, lpTokensToBurn });
+// rem: poolOutput, providerOutput (returned ADA), mint (−aLP BurnLP),
+//      poolRedeemerCbor (RemoveLiquidity), lpRedeemerCbor (BurnLP), references, withdrawnLovelace
+```
+
+Like `buildUnderwriteParts`, both gate first and throw a named
+`InputError`/`PoolError` (non-positive amount, dust-floors-to-zero,
+burn exceeds supply, **solvency**: a withdrawal that pushes `activeCoverage`
+above the remaining `totalLiquidity`) rather than emit parts that fail on
+chain. `calculateLpMint` / `calculateWithdrawal` expose the raw validator math.
+
 **See [`PARTNERS.md`](./PARTNERS.md) for the full integration guide** and
 [`examples/`](./examples/) for MeshJS and Lucid walkthroughs.
 

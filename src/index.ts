@@ -64,7 +64,16 @@ export type { Network } from './address';
 // Pool-funded Underwrite composer — the one-click "add insurance" primitive
 // partners splice into their own loan/CDP tx.
 // ---------------------------------------------------------------------------
-export { buildUnderwriteParts, aegisBindings, preflightUnderwrite, assertPoolMatchesManifest } from './compose';
+export {
+  buildUnderwriteParts,
+  buildAddLiquidityParts,
+  buildRemoveLiquidityParts,
+  calculateLpMint,
+  calculateWithdrawal,
+  aegisBindings,
+  preflightUnderwrite,
+  assertPoolMatchesManifest,
+} from './compose';
 export type {
   AegisBindings,
   LivePoolState,
@@ -78,6 +87,14 @@ export type {
   RefUtxo,
   PreflightCheck,
   PreflightResult,
+  BuildAddLiquidityPartsParams,
+  AddLiquidityParts,
+  BuildRemoveLiquidityPartsParams,
+  RemoveLiquidityParts,
+  LpAsset,
+  LpProviderOutputPart,
+  LpMintPart,
+  VaultReferences,
 } from './compose';
 
 // ---------------------------------------------------------------------------
