@@ -1,8 +1,32 @@
 # Changelog
 
-## Unreleased — T3 Crash Shield golden + T7 FEAR index decoder
+## Unreleased — T3 Crash Shield golden + T7 FEAR index decoder + N2 event cover
 
 Additive (no breaking changes):
+
+- **N2 Event-class cover** — no new composer and **no new risk class**: event
+  cover is a `Barrier` underwrite bound to an `EVENT_SLOT` feed (`feeds.ts`,
+  `kind:'event'`). `buildUnderwriteParts` already composes it; `event_golden.test.ts`
+  locks the EVENT_SLOT underwrite byte-for-byte (the policy datum is identical to
+  the ADA barrier golden except the oracle NFT). Adds a thin ergonomic wrapper
+  `buildEventUnderwriteParts` that defaults `riskClass:'Barrier'` and resolves the
+  EVENT_SLOT feed NFT (accepts a registry symbol or a raw 28-byte policy id) — it
+  forwards to `buildUnderwriteParts` and adds **no** composition logic.
+- **`decodeEventDatum(raw)`** reads the on-chain EVENT_SLOT feed datum — the SAME
+  Charli3 GenericData wire form `decodeFearDatum` handles
+  (`Tag 121([Tag 123([{0: value, 1: created_ms, 2: expiry_ms}])])`) — into
+  `{ value, createdMs, expiryMs }`. Golden vectors are byte-for-byte the Python
+  publisher output; accepts hex or bytes and both the definite and indefinite
+  array forms. The raw CBOR walk was extracted into `generic_data.ts`
+  (`readGenericData`) so `decodeFearDatum` and `decodeEventDatum` share one reader
+  and cannot drift — **no datum format was invented**.
+- **`isTriggered(value, strike = 0n)`** — the `value ≤ strike` settlement
+  predicate (a binary feed struck at 0: value 0 = liquidated ⇒ triggered, value 1
+  = alive ⇒ not). Boundary-tested (closed at `value == strike`).
+- **Event pricing reuses the barrier quote**: `quoteEventCover` is a documented
+  re-export of `quoteBarrier` (a binary liquidation event is a barrier struck at
+  the liquidation level; the floor table is asset-independent) — **no separate
+  `quoteEvent` model** to maintain.
 
 - **T3 Crash Shield (Barrier)** — no new composer; `buildUnderwriteParts`
   already supports `riskClass:'Barrier'`. Adds `barrier_golden.test.ts` locking

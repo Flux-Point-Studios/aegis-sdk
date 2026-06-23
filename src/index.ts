@@ -112,6 +112,24 @@ export { decodeFearDatum, classifyFear } from './fear';
 export type { FearReading, FearBand } from './fear';
 
 // ---------------------------------------------------------------------------
+// N2 Event-class cover — read the on-chain binary event state + compose an
+// event underwrite. Event cover is a Barrier underwrite (NO new risk class)
+// bound to an EVENT_SLOT feed; the event datum is the SAME Charli3 GenericData
+// wire form the FEAR gauge / price oracle use (no new datum format), and event
+// pricing reuses quoteBarrier (quoteEventCover is a documented re-export).
+// ---------------------------------------------------------------------------
+export {
+  decodeEventDatum,
+  isTriggered,
+  quoteEventCover,
+  buildEventUnderwriteParts,
+  EVENT_FEEDS,
+} from './event';
+export type { EventReading, BuildEventUnderwritePartsParams } from './event';
+export { readGenericData } from './generic_data';
+export type { GenericData } from './generic_data';
+
+// ---------------------------------------------------------------------------
 // Named oracle-feed registry (canonical mainnet feeds).
 // ---------------------------------------------------------------------------
 export {
