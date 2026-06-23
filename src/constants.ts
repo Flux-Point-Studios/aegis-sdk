@@ -124,6 +124,13 @@ export const CANCELLATION_FEE_BPS = 1_000n;
 /** Charli3 price scale (1e6). */
 export const PRICE_SCALE = 1_000_000n;
 
+/**
+ * AEGIS/FEAR index scale (1e6) — the published on-chain fear value is the 0-100
+ * index multiplied by this, matching the Charli3 price-feed scale
+ * (api/fear_index.py::FEAR_SCALE). Used by `decodeFearDatum`.
+ */
+export const FEAR_SCALE = 1_000_000n;
+
 /** Minimum UTxO lovelace assumed on policy/pool outputs. */
 export const MIN_UTXO_LOVELACE = 2_000_000n;
 
