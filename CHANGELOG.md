@@ -1,5 +1,65 @@
 # Changelog
 
+## Unreleased — T3 Crash Shield golden + T7 FEAR index decoder
+
+Additive (no breaking changes):
+
+- **T3 Crash Shield (Barrier)** — no new composer; `buildUnderwriteParts`
+  already supports `riskClass:'Barrier'`. Adds `barrier_golden.test.ts` locking
+  the Barrier underwrite path byte-for-byte for the three canonical crash-shield
+  feeds — **ADA** (`FEEDS.ADA_USD`), **iBTC** (`FEEDS.BTC_USD`), **iETH**
+  (`FEEDS.ETH_USD`) — each with `oracleProvider:'AegisSelf'` (these are the
+  canonical `AEGIS_PUBLISHER_CANONICAL_NFTS` publisher feeds) and the feed's
+  oracle NFT. The three policy datums differ only in the oracle-NFT field; a
+  Barrier policy sets `references.oracleRequired = true`.
+- **Barrier insurability boundary** table tests on `quoteForPosition`: a strike
+  exactly 15% below spot PASSES (`dBps == MIN_STRIKE_DISTANCE_BPS == 1500`),
+  14.9% / 14.99% are rejected with `BELOW_MIN_STRIKE_DISTANCE`, and a strike at
+  or above spot is rejected with `STRIKE_NOT_BELOW_SPOT`.
+- **iSOL / SOL is out of scope**: there is no canonical mainnet SOL feed in
+  `FEEDS` / `AEGIS_PUBLISHER_CANONICAL_NFTS` (iSOL exists only as an Indigo CDP
+  mock with a placeholder oracle). A test documents the absence; the SDK does
+  **not** invent a policy id for it.
+- **T7 AEGIS/FEAR index**: `decodeFearDatum(raw)` reads the on-chain fear-feed
+  inline datum — the Charli3-compatible GenericData wire form
+  (`Tag 121([Tag 123([{0: fear_scaled, 1: created_ms, 2: expiry_ms}])])`,
+  authoritative `api/fear_index.py::build_fear_datum_cbor`) — into
+  `{ fearIndex, fearScaled, createdMs, expiryMs, band }`. Golden vectors are
+  byte-for-byte the Python publisher output; accepts hex or bytes and both the
+  definite (publisher) and indefinite (re-serialized) array forms. The 0-100
+  compute stays API-side by design.
+- **`classifyFear(score)`**: maps a 0-100 score to its band (`<16` Extreme Calm,
+  `<31` Low Fear, `<51` Moderate, `<71` Elevated, `<86` High Fear, else Extreme
+  Fear) — matches `FearPanel.tsx` and `fear_index.py` exactly.
+- New constant `FEAR_SCALE` (1e6). New exports: `decodeFearDatum`,
+  `classifyFear`, types `FearReading` / `FearBand`.
+
+## Unreleased — T2 Coverage Vault composers
+
+Additive (no breaking changes):
+
+- **`buildAddLiquidityParts` / `buildRemoveLiquidityParts`**: pool-funded LP
+  deposit / withdraw composers a partner splices into their own Lucid tx (the
+  T2 Coverage Vault primitive). They mirror `buildUnderwriteParts`' rigor —
+  insurability/pool gates run FIRST and throw a named `InputError`/`PoolError`
+  rather than emit parts that fail phase-2 on chain. Each returns the pool
+  continuation (NFT preserved, `PoolDatum` updated), the provider LP-receipt /
+  returned-ADA output, the signed `aLP` mint, and the pool + LP redeemers.
+- LP math is validator-authoritative (mirrors
+  `contracts/lib/aegis/pool.ak`): first deposit bootstraps 1:1 (`total == 0`),
+  subsequent `lpMinted = deposit·lpSupply/total`, withdraw
+  `withdrawn = lpBurned·total/lpSupply` — integer-floor, always favouring the
+  pool. Exposed as `calculateLpMint` / `calculateWithdrawal`.
+- **Solvency invariant** enforced: a `RemoveLiquidity` that would push
+  `activeCoverage` above the remaining `totalLiquidity` throws `PoolError`
+  (`can_withdraw`).
+- `AegisBindings` gains `lpRefUtxo` (LP-token mint-policy reference script);
+  `aegisBindings(network)` populates it from the frozen manifest.
+- Golden-CBOR regression locking the **T1 iUSD depeg** path
+  (`buildUnderwriteParts` with `riskClass:'Depeg'`, `oracleProvider:'Indigo'`,
+  `oraclePolicyId = FEEDS.IUSD_USD.policyId`, partner share) — no signature
+  change, byte-for-byte vector.
+
 ## 1.0.2-v4.0 — canonical policy_id + feed registry (2026-06-17)
 
 Additive (no breaking changes):

@@ -26,6 +26,7 @@ import {
   encodePoolDatum,
   encodePoolRedeemer,
   encodeMarkerRedeemer,
+  encodeLPTokenRedeemer,
   hexToBytes,
   bytesToHex,
 } from './cbor';
@@ -39,7 +40,7 @@ import {
 } from './fees';
 import { quoteForPosition, type QuoteVerdict } from './quote';
 import { InputError, InsurabilityError, PoolError, ChainError } from './errors';
-import { MIN_UTXO_LOVELACE, MAX_COVERAGE_RATIO } from './constants';
+import { MIN_UTXO_LOVELACE, MAX_COVERAGE_RATIO, LP_TOKEN_NAME } from './constants';
 import * as MAINNET_CONSTS from './constants.mainnet';
 import * as PREPROD_CONSTS from './constants.preprod';
 
@@ -49,6 +50,8 @@ const MARKER_ASSET_NAME_HEX = '41454749535f504f4c494359';
 const COVERAGE_CAP_FACTOR = 3n;
 const DEFAULT_START_MARGIN_MS = 120_000n;
 const MS_PER_DAY = 86_400_000n;
+/** "aLP" — the LP token asset name (3 bytes, ASCII) hard-coded by the validator. */
+const LP_ASSET_NAME_HEX = bytesToHex(LP_TOKEN_NAME);
 
 /** Hex of an ASCII asset name (Cardano protocol asset names are ASCII). */
 function asciiToHex(s: string): string {
@@ -90,6 +93,8 @@ export interface AegisBindings {
   poolRefUtxo?: RefUtxo;
   /** Marker mint-policy reference-script UTxO. */
   markerRefUtxo?: RefUtxo;
+  /** LP-token mint-policy reference-script UTxO (vault add/remove liquidity). */
+  lpRefUtxo?: RefUtxo;
 }
 
 /**
@@ -112,6 +117,9 @@ export function aegisBindings(network: Network): AegisBindings {
       : undefined,
     markerRefUtxo: c.AEGIS_MARKER_REF_TX
       ? { txHash: c.AEGIS_MARKER_REF_TX, index: c.AEGIS_MARKER_REF_IDX }
+      : undefined,
+    lpRefUtxo: c.AEGIS_LP_REF_TX
+      ? { txHash: c.AEGIS_LP_REF_TX, index: c.AEGIS_LP_REF_IDX }
       : undefined,
   };
 }
@@ -419,6 +427,343 @@ export function buildUnderwriteParts(params: BuildUnderwritePartsParams): Underw
     insurable: true,
     reason: null,
     policyDatum,
+  };
+}
+
+// ===========================================================================
+// T2 Coverage Vault — AddLiquidity / RemoveLiquidity composers.
+//
+// Both mirror buildUnderwriteParts' structure: gates run FIRST and throw a
+// named reason (InputError / PoolError) rather than emit parts that would
+// fail phase-2 on chain, then exact tx parts are returned.
+//
+// The LP math is the validator-authoritative form from
+// contracts/lib/aegis/pool.ak (calculate_lp_mint / calculate_withdrawal):
+//   * AddLiquidity:    lp_minted = total==0 ? deposit : deposit*lp_supply/total
+//                      (integer floor — slightly favours the pool)
+//   * RemoveLiquidity: withdrawn = lp_burned*total/lp_supply
+//                      (integer floor — slightly favours the pool)
+// and the matching PoolDatum transitions verify_add_liquidity_datum /
+// verify_remove_liquidity_datum enforce (active_coverage unchanged;
+// lp_token_policy / protocol_fee_bps / pool_nft immutable). The LP token is
+// (pool_datum.lp_token_policy, "aLP") — the policy id is read from the live
+// pool datum (the validator authorises the mint against that exact field).
+// ===========================================================================
+
+/**
+ * LP tokens minted for a deposit, validator-exact
+ * (contracts/lib/aegis/pool.ak::calculate_lp_mint). First deposit into an
+ * empty pool (total_liquidity == 0) bootstraps 1:1; otherwise proportional
+ * with integer-floor division (favours the pool — never over-mints).
+ */
+export function calculateLpMint(
+  deposit: bigint,
+  totalLiquidity: bigint,
+  lpSupply: bigint,
+): bigint {
+  if (totalLiquidity === 0n) return deposit;
+  return (deposit * lpSupply) / totalLiquidity;
+}
+
+/**
+ * ADA returned for burning LP tokens, validator-exact
+ * (contracts/lib/aegis/pool.ak::calculate_withdrawal):
+ *   withdrawn = lp_burned * total_liquidity / lp_supply  (integer floor).
+ * The validator REQUIRES the RemoveLiquidity redeemer's `amount` to equal
+ * this value exactly, so the composer computes it here and routes it as both
+ * the returned ADA and the redeemer amount. Floors favour the pool.
+ */
+export function calculateWithdrawal(
+  lpBurned: bigint,
+  totalLiquidity: bigint,
+  lpSupply: bigint,
+): bigint {
+  if (lpSupply === 0n) {
+    throw new PoolError('INVALID_INPUT', 'cannot withdraw: pool lpSupply is zero');
+  }
+  return (lpBurned * totalLiquidity) / lpSupply;
+}
+
+// ---------------------------------------------------------------------------
+// Vault inputs / outputs
+// ---------------------------------------------------------------------------
+
+export interface LpAsset {
+  /** LP-token mint policy id (28 hex) — = pool datum's lpTokenPolicy. */
+  policyId: string;
+  /** LP-token asset name, HEX-encoded ("aLP" -> "614c50"). */
+  assetNameHex: string;
+  quantity: bigint;
+}
+
+export interface LpProviderOutputPart {
+  /** bech32 key address the LP receipt / returned ADA is paid to. */
+  address: string;
+  lovelace: bigint;
+  /** The LP token paid out (AddLiquidity only); null on RemoveLiquidity. */
+  lpToken: LpAsset | null;
+}
+
+export interface LpMintPart {
+  policyId: string;
+  assetNameHex: string;
+  /** Signed: +minted on AddLiquidity, −burned on RemoveLiquidity. */
+  quantity: bigint;
+  redeemerCbor: string;
+}
+
+export interface VaultReferences {
+  poolValidator: RefUtxo | null;
+  lpToken: RefUtxo | null;
+}
+
+export interface BuildAddLiquidityPartsParams {
+  bindings: AegisBindings;
+  pool: LivePoolState;
+  /** LP receipt recipient payment key hash (56 hex / 28 bytes). */
+  providerPkh: string;
+  /** ADA deposited into the pool (lovelace). */
+  depositLovelace: bigint;
+  /** Optional stake key hash (56 hex) for the provider receipt base address. */
+  providerStakePkh?: string;
+  /** Optional trace hook — called with (event, data) at each step. */
+  onTrace?: (event: string, data?: unknown) => void;
+}
+
+export interface AddLiquidityParts {
+  /** Pool continuation: value = old + deposit, NFT preserved, datum updated. */
+  poolOutput: PoolOutputPart;
+  /** LP receipt output: lpMinted aLP tokens to the provider. */
+  providerOutput: LpProviderOutputPart;
+  /** +lpMinted aLP MintLP of the pool's lpTokenPolicy. */
+  mint: LpMintPart;
+  /** AddLiquidity{amount: deposit}. */
+  poolRedeemerCbor: string;
+  /** MintLP. */
+  lpRedeemerCbor: string;
+  /** The pool UTxO to spend (script input). */
+  poolInput: RefUtxo;
+  references: VaultReferences;
+  /** LP tokens minted for this deposit (validator-exact). */
+  lpMinted: bigint;
+  /** The typed PoolDatum written to the continuation (for inspection). */
+  poolDatum: PoolDatum;
+}
+
+export interface BuildRemoveLiquidityPartsParams {
+  bindings: AegisBindings;
+  pool: LivePoolState;
+  /** Returned-ADA recipient payment key hash (56 hex / 28 bytes). */
+  providerPkh: string;
+  /** aLP tokens burned (lovelace-denominated count). */
+  lpTokensToBurn: bigint;
+  /** Optional stake key hash (56 hex) for the provider return base address. */
+  providerStakePkh?: string;
+  /** Optional trace hook — called with (event, data) at each step. */
+  onTrace?: (event: string, data?: unknown) => void;
+}
+
+export interface RemoveLiquidityParts {
+  /** Pool continuation: value = old − withdrawn, NFT preserved, datum updated. */
+  poolOutput: PoolOutputPart;
+  /** Returned-ADA output: withdrawn lovelace to the provider (no LP token). */
+  providerOutput: LpProviderOutputPart;
+  /** −lpBurned aLP BurnLP of the pool's lpTokenPolicy. */
+  mint: LpMintPart;
+  /** RemoveLiquidity{amount: withdrawn}. */
+  poolRedeemerCbor: string;
+  /** BurnLP. */
+  lpRedeemerCbor: string;
+  /** The pool UTxO to spend (script input). */
+  poolInput: RefUtxo;
+  references: VaultReferences;
+  /** ADA returned for the burned LP tokens (validator-exact). */
+  withdrawnLovelace: bigint;
+  /** The typed PoolDatum written to the continuation (for inspection). */
+  poolDatum: PoolDatum;
+}
+
+// ---------------------------------------------------------------------------
+// AddLiquidity composer
+// ---------------------------------------------------------------------------
+
+export function buildAddLiquidityParts(params: BuildAddLiquidityPartsParams): AddLiquidityParts {
+  const { bindings, pool, providerPkh, depositLovelace } = params;
+  const trace = params.onTrace ?? (() => {});
+
+  if (!providerPkh || providerPkh.length !== 56) {
+    throw new InputError('INVALID_INPUT', `providerPkh must be 56 hex chars (28 bytes), got ${providerPkh?.length ?? 0}`);
+  }
+  if (params.providerStakePkh !== undefined && params.providerStakePkh.length !== 56) {
+    throw new InputError('INVALID_INPUT', `providerStakePkh must be 56 hex chars (28 bytes), got ${params.providerStakePkh.length}`);
+  }
+  // Validator: `amount_positive = amount > 0`.
+  if (depositLovelace <= 0n) {
+    throw new InputError('INVALID_INPUT', 'depositLovelace must be positive');
+  }
+
+  // LP minted, validator-exact.
+  const { totalLiquidity, lpSupply } = pool.datum;
+  const lpMinted = calculateLpMint(depositLovelace, totalLiquidity, lpSupply);
+
+  // Validator: `lp_minted = mint_qty == lp_supply_delta && mint_qty > 0` — a
+  // deposit that floors to zero LP cannot be built (it would mint 0, failing
+  // the on-chain `mint_qty > 0` gate). Reject it here with an actionable hint.
+  if (lpMinted <= 0n) {
+    throw new PoolError('INVALID_INPUT',
+      `deposit ${depositLovelace} is too small to mint any LP (floors to 0 at the current pool ratio)`,
+      { hint: `raise the deposit to at least ceil(totalLiquidity/lpSupply) = ${lpSupply === 0n ? 1n : (totalLiquidity + lpSupply - 1n) / lpSupply} lovelace so it mints ≥ 1 LP` },
+    );
+  }
+
+  const newPoolLovelace = pool.lovelace + depositLovelace;
+  const newPoolDatum: PoolDatum = {
+    totalLiquidity: totalLiquidity + depositLovelace,
+    activeCoverage: pool.datum.activeCoverage,
+    lpTokenPolicy: pool.datum.lpTokenPolicy,
+    protocolFeeBps: pool.datum.protocolFeeBps,
+    poolNft: pool.datum.poolNft,
+    lpSupply: lpSupply + lpMinted,
+  };
+  trace('add-liquidity', { lpMinted, newPoolLovelace, newTotal: newPoolDatum.totalLiquidity, newLpSupply: newPoolDatum.lpSupply });
+
+  // LP token policy id is read from the live pool datum — the validator
+  // authorises the mint against `datum.lp_token_policy` exactly.
+  const lpPolicyId = bytesToHex(pool.datum.lpTokenPolicy);
+
+  return {
+    poolOutput: {
+      address: bindings.poolAddress,
+      lovelace: newPoolLovelace,
+      poolNft: { policyId: bindings.poolNftPolicyId, assetNameHex: bindings.poolNftAssetNameHex, quantity: 1n },
+      inlineDatumCbor: bytesToHex(encodePoolDatum(newPoolDatum)),
+    },
+    providerOutput: {
+      address: keyAddress(
+        hexToBytes(providerPkh),
+        params.providerStakePkh !== undefined ? hexToBytes(params.providerStakePkh) : null,
+        bindings.network,
+      ),
+      lovelace: MIN_UTXO_LOVELACE,
+      lpToken: { policyId: lpPolicyId, assetNameHex: LP_ASSET_NAME_HEX, quantity: lpMinted },
+    },
+    mint: {
+      policyId: lpPolicyId,
+      assetNameHex: LP_ASSET_NAME_HEX,
+      quantity: lpMinted,
+      redeemerCbor: bytesToHex(encodeLPTokenRedeemer({ kind: 'MintLP' })),
+    },
+    poolRedeemerCbor: bytesToHex(encodePoolRedeemer({ kind: 'AddLiquidity', amount: depositLovelace })),
+    lpRedeemerCbor: bytesToHex(encodeLPTokenRedeemer({ kind: 'MintLP' })),
+    poolInput: pool.utxoRef,
+    references: {
+      poolValidator: bindings.poolRefUtxo ?? null,
+      lpToken: bindings.lpRefUtxo ?? null,
+    },
+    lpMinted,
+    poolDatum: newPoolDatum,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// RemoveLiquidity composer
+// ---------------------------------------------------------------------------
+
+export function buildRemoveLiquidityParts(params: BuildRemoveLiquidityPartsParams): RemoveLiquidityParts {
+  const { bindings, pool, providerPkh, lpTokensToBurn } = params;
+  const trace = params.onTrace ?? (() => {});
+
+  if (!providerPkh || providerPkh.length !== 56) {
+    throw new InputError('INVALID_INPUT', `providerPkh must be 56 hex chars (28 bytes), got ${providerPkh?.length ?? 0}`);
+  }
+  if (params.providerStakePkh !== undefined && params.providerStakePkh.length !== 56) {
+    throw new InputError('INVALID_INPUT', `providerStakePkh must be 56 hex chars (28 bytes), got ${params.providerStakePkh.length}`);
+  }
+  if (lpTokensToBurn <= 0n) {
+    throw new InputError('INVALID_INPUT', 'lpTokensToBurn must be positive');
+  }
+  const { totalLiquidity, activeCoverage, lpSupply } = pool.datum;
+  if (lpTokensToBurn > lpSupply) {
+    throw new PoolError('INVALID_INPUT',
+      `lpTokensToBurn ${lpTokensToBurn} exceeds pool lpSupply ${lpSupply}`,
+      { hint: `burn at most ${lpSupply} LP tokens` },
+    );
+  }
+
+  // Withdrawn ADA, validator-exact. This is BOTH the returned-ADA amount AND
+  // the RemoveLiquidity redeemer's `amount` (the validator requires they match).
+  const withdrawn = calculateWithdrawal(lpTokensToBurn, totalLiquidity, lpSupply);
+
+  // Validator: `amount_positive = amount > 0` — a burn flooring to 0 ADA is
+  // un-buildable (the RemoveLiquidity branch requires a positive amount).
+  if (withdrawn <= 0n) {
+    throw new PoolError('INVALID_INPUT',
+      `burning ${lpTokensToBurn} LP returns 0 ADA (floors to zero at the current pool ratio)`,
+      { hint: `burn more LP tokens, or wait for the pool's per-LP value to rise` },
+    );
+  }
+
+  // ── Solvency invariant (contracts/lib/aegis/pool.ak::can_withdraw):
+  //    total_liquidity − withdrawn >= active_coverage. A withdrawal that would
+  //    push active coverage above the remaining liquidity MUST be rejected.
+  if (totalLiquidity - withdrawn < activeCoverage) {
+    throw new PoolError('POOL_CANNOT_COVER',
+      `withdrawal of ${withdrawn} would impair active coverage: remaining liquidity ${totalLiquidity - withdrawn} < active coverage ${activeCoverage}`,
+      { hint: `withdraw at most ${totalLiquidity - activeCoverage} lovelace of value (burn fewer LP tokens) so coverage stays funded` },
+    );
+  }
+
+  const newPoolLovelace = pool.lovelace - withdrawn;
+  if (newPoolLovelace < MIN_UTXO_LOVELACE) {
+    throw new PoolError('POOL_MIN_UTXO',
+      `pool continuation lovelace ${newPoolLovelace} would fall below min-utxo ${MIN_UTXO_LOVELACE}`,
+      { hint: 'burn fewer LP tokens so the pool keeps at least min-utxo lovelace' },
+    );
+  }
+
+  const newPoolDatum: PoolDatum = {
+    totalLiquidity: totalLiquidity - withdrawn,
+    activeCoverage,
+    lpTokenPolicy: pool.datum.lpTokenPolicy,
+    protocolFeeBps: pool.datum.protocolFeeBps,
+    poolNft: pool.datum.poolNft,
+    lpSupply: lpSupply - lpTokensToBurn,
+  };
+  trace('remove-liquidity', { withdrawn, newPoolLovelace, newTotal: newPoolDatum.totalLiquidity, newLpSupply: newPoolDatum.lpSupply });
+
+  const lpPolicyId = bytesToHex(pool.datum.lpTokenPolicy);
+
+  return {
+    poolOutput: {
+      address: bindings.poolAddress,
+      lovelace: newPoolLovelace,
+      poolNft: { policyId: bindings.poolNftPolicyId, assetNameHex: bindings.poolNftAssetNameHex, quantity: 1n },
+      inlineDatumCbor: bytesToHex(encodePoolDatum(newPoolDatum)),
+    },
+    providerOutput: {
+      address: keyAddress(
+        hexToBytes(providerPkh),
+        params.providerStakePkh !== undefined ? hexToBytes(params.providerStakePkh) : null,
+        bindings.network,
+      ),
+      lovelace: withdrawn,
+      lpToken: null,
+    },
+    mint: {
+      policyId: lpPolicyId,
+      assetNameHex: LP_ASSET_NAME_HEX,
+      quantity: -lpTokensToBurn,
+      redeemerCbor: bytesToHex(encodeLPTokenRedeemer({ kind: 'BurnLP' })),
+    },
+    poolRedeemerCbor: bytesToHex(encodePoolRedeemer({ kind: 'RemoveLiquidity', amount: withdrawn })),
+    lpRedeemerCbor: bytesToHex(encodeLPTokenRedeemer({ kind: 'BurnLP' })),
+    poolInput: pool.utxoRef,
+    references: {
+      poolValidator: bindings.poolRefUtxo ?? null,
+      lpToken: bindings.lpRefUtxo ?? null,
+    },
+    withdrawnLovelace: withdrawn,
+    poolDatum: newPoolDatum,
   };
 }
 

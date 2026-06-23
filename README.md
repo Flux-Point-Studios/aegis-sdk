@@ -61,6 +61,50 @@ const parts = buildUnderwriteParts({
 `buildUnderwriteParts` throws a named reason if the policy can't be validly
 built (floor, dead-zone, pool can't cover, concentration cap, ratio).
 
+### 3. Coverage Vault: add / remove liquidity (T2)
+
+```ts
+import { aegisBindings, buildAddLiquidityParts, buildRemoveLiquidityParts, decodePoolDatum, hexToBytes } from '@fluxpointstudios/aegis-sdk';
+
+const pool = { utxoRef, lovelace, datum: decodePoolDatum(hexToBytes(poolDatumHex)) };
+
+// Deposit ADA → receive aLP. lpMinted is validator-exact (favours the pool).
+const add = buildAddLiquidityParts({ bindings: aegisBindings('mainnet'), pool, providerPkh, depositLovelace });
+// add: poolOutput, providerOutput (aLP receipt), mint (+aLP MintLP),
+//      poolRedeemerCbor (AddLiquidity), lpRedeemerCbor (MintLP), references, lpMinted
+
+// Burn aLP → receive proportional ADA. Throws PoolError if it would impair coverage.
+const rem = buildRemoveLiquidityParts({ bindings: aegisBindings('mainnet'), pool, providerPkh, lpTokensToBurn });
+// rem: poolOutput, providerOutput (returned ADA), mint (−aLP BurnLP),
+//      poolRedeemerCbor (RemoveLiquidity), lpRedeemerCbor (BurnLP), references, withdrawnLovelace
+```
+
+Like `buildUnderwriteParts`, both gate first and throw a named
+`InputError`/`PoolError` (non-positive amount, dust-floors-to-zero,
+burn exceeds supply, **solvency**: a withdrawal that pushes `activeCoverage`
+above the remaining `totalLiquidity`) rather than emit parts that fail on
+chain. `calculateLpMint` / `calculateWithdrawal` expose the raw validator math.
+
+### 4. Read the on-chain AEGIS/FEAR index (T7)
+
+```ts
+import { decodeFearDatum, classifyFear } from '@fluxpointstudios/aegis-sdk';
+
+// `rawDatumHex` is the inline datum of the fear-feed UTxO (read via CIP-31).
+const fear = decodeFearDatum(rawDatumHex);
+// → { fearIndex: 75, fearScaled: 75_000_000n, createdMs, expiryMs, band: 'High Fear' }
+
+classifyFear(42); // → 'Moderate'
+```
+
+The AEGIS/FEAR index is a 0-100 fear gauge (a VIX analogue) computed from Aegis
+insurance demand and **published on chain** as a Charli3-compatible GenericData
+datum, consumable by any Cardano protocol via a CIP-31 reference input. The
+0-100 compute stays API-side (`/api/fear-index`); `decodeFearDatum` reads the
+published datum bytes back (zero deps), and `classifyFear` maps the score to its
+band (`<16` Extreme Calm · `<31` Low Fear · `<51` Moderate · `<71` Elevated ·
+`<86` High Fear · else Extreme Fear).
+
 **See [`PARTNERS.md`](./PARTNERS.md) for the full integration guide** and
 [`examples/`](./examples/) for MeshJS and Lucid walkthroughs.
 
@@ -74,6 +118,8 @@ built (floor, dead-zone, pool can't cover, concentration cap, ratio).
 - `calculateFeeTotal` / `calculateProtocolFeeSplit` / `calculateTreasuryCut` —
   the fee/treasury math the validator enforces to the lovelace.
 - `scriptEnterpriseAddress` / `keyAddress` — CIP-19 bech32 address encoders.
+- `decodeFearDatum` / `classifyFear` — read the on-chain AEGIS/FEAR index datum
+  (T7) and map a 0-100 score to its qualitative band.
 - Per-network frozen-manifest constants (`AEGIS_POOL_ADDRESS`, the canonical
   oracle feed NFTs, ref-script UTxOs, …) for `mainnet` and `preprod`.
 
