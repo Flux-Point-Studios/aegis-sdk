@@ -214,4 +214,38 @@ describe('PolicyDatum optional payout field (15th, address-typed)', () => {
     // stake = Some(Inline(VerificationKey[hash])) = Constr0[Constr0[Constr0[hash]]].
     expect(hex).toContain('d8799fd8799fd8799f581c' + STAKE_KEY);
   });
+
+  it('cross-stack golden: byte-identical to the API/Python encoder (script payout)', () => {
+    // This exact hex is pinned IDENTICALLY by the API encoder's test
+    // (api/tests/test_policy_datum_v12.py::test_cross_stack_payout_golden), so
+    // the two off-chain encoders are locked to byte-identity for the 15-field
+    // form. If either drifts, one of the two pins breaks.
+    const CROSS_STACK_PAYOUT_HEX =
+      'd8799f581c00112233445566778899aabbccddeeff00112233445566778899aabb' +
+      '581caabbccddeeff00112233445566778899aabbccddeeff001122334455' +
+      '1a000557301b000000012a05f2001a05f5e1001b0000018bcfe568001b0000018bf3f1ec00' +
+      '581c886dcb2363e160c944e63cf544ce6f6265b22ef7c4e2478dd975078e' +
+      '581cc08edc7fd1b082e92c97a9aebcf63a647688ec8092581646d6ff667f' +
+      '581c9a649b75a85f0088eb68c1b72c3529b41f874fcdc603031a1444abb3' +
+      'd87b80d87a8000d87980' +
+      'd8799fd8799fd87a9f581cdadadadadadadadadadadadadadadadadadadadadadadadadadadadaffd87a80ffffff';
+    const datum: PolicyDatum = {
+      policyId: hexToBytes('00112233445566778899aabbccddeeff00112233445566778899aabb'),
+      insured: hexToBytes('aabbccddeeff00112233445566778899aabbccddeeff001122334455'),
+      strikePrice: 350_000n,
+      coverageAmount: 5_000_000_000n,
+      premiumPaid: 100_000_000n,
+      startTime: 1_700_000_000_000n,
+      expiryTime: 1_700_604_800_000n,
+      oracleNft: hexToBytes('886dcb2363e160c944e63cf544ce6f6265b22ef7c4e2478dd975078e'),
+      poolScriptHash: hexToBytes('c08edc7fd1b082e92c97a9aebcf63a647688ec8092581646d6ff667f'),
+      poolNft: hexToBytes('9a649b75a85f0088eb68c1b72c3529b41f874fcdc603031a1444abb3'),
+      oracleProvider: 'AegisSelf',
+      partnerAddress: null,
+      partnerShareBps: 0n,
+      riskClass: 'Barrier',
+      payoutAddress: scriptPayoutTarget('da'.repeat(28)),
+    };
+    expect(bytesToHex(encodePolicyDatum(datum))).toBe(CROSS_STACK_PAYOUT_HEX);
+  });
 });
