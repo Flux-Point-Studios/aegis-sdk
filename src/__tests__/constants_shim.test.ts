@@ -6,13 +6,13 @@ import { describe, it, expect } from 'vitest';
 
 describe('constants.ts shim', () => {
   it('exposes the preprod manifest constants by default', async () => {
-    // Pinned to the live pool-funded preprod deployment (AEGIS_POOL_12H_V1,
-    // release/preprod.json frozen 2026-06-17). If this changes, preprod was
+    // Pinned to the live pool-funded preprod deployment (AEGIS_POOL_V4,
+    // release/preprod.json release_commit 7097ee1). If this changes, preprod was
     // redeployed and the SDK constants must be re-synced from the manifest.
     const c = await import('../constants');
     expect(c.AEGIS_NETWORK).toBe('preprod');
     expect(c.AEGIS_POOL_NFT_POLICY_ID).toBe(
-      'da986312812002c71c24a04156c61e65b7e38bb2f81322618eff2725',
+      '2b8d7869526eb5af6b7e7ff08c55b345f16e6eca9079e3f429325a05',
     );
     expect(c.AEGIS_MIN_PREMIUM).toBe(2_000_000n);
   });
