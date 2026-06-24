@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased — preprod V4 pool constants refresh
+## 1.0.3-v4.0 — Coverage Vault + Crash Shield + FEAR + preprod V4 constants (2026-06-23)
+
+### preprod V4 pool constants refresh
 
 Preprod/testing only (mainnet constants unchanged):
 
@@ -14,7 +16,7 @@ Preprod/testing only (mainnet constants unchanged):
   (`valid_contract: True`, finite validity bounds — resolves
   `aegis-parametric-insurance#62`).
 
-## Unreleased — T3 Crash Shield golden + T7 FEAR index decoder
+### T3 Crash Shield golden + T7 FEAR index decoder
 
 Additive (no breaking changes):
 
@@ -48,7 +50,7 @@ Additive (no breaking changes):
 - New constant `FEAR_SCALE` (1e6). New exports: `decodeFearDatum`,
   `classifyFear`, types `FearReading` / `FearBand`.
 
-## Unreleased — T2 Coverage Vault composers
+### T2 Coverage Vault composers
 
 Additive (no breaking changes):
 
