@@ -57,7 +57,7 @@ export {
   calculateTreasuryCut,
   TREASURY_SHARE_BPS,
 } from './fees';
-export { scriptEnterpriseAddress, keyAddress } from './address';
+export { scriptEnterpriseAddress, keyAddress, scriptPayoutTarget } from './address';
 export type { Network } from './address';
 
 // ---------------------------------------------------------------------------
@@ -153,6 +153,7 @@ export {
   encodePolicyDatum,
   encodePoolDatum,
   decodePoolDatum,
+  encodeFullAddress,
   // Redeemers
   encodePolicyRedeemer,
   decodePolicyRedeemer,
@@ -213,6 +214,8 @@ export type {
   OracleProvider,
   RiskClass,
   PlutusAddress,
+  PlutusCredential,
+  PlutusFullAddress,
   PolicyDatum,
   PoolDatum,
   PolicyRedeemer,

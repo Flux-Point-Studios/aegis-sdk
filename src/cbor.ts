@@ -21,6 +21,8 @@ import type {
   LPTokenRedeemer,
   MarkerRedeemer,
   PlutusAddress,
+  PlutusCredential,
+  PlutusFullAddress,
   OracleProvider,
   PolicyDatum,
   PolicyRedeemer,
@@ -282,17 +284,56 @@ function encodePartnerOption(addr: PlutusAddress | null): Uint8Array {
   return encodeConstr(0, [encodePlutusAddress(addr)]); // Some(addr)
 }
 
+/**
+ * Encode a Plutus credential. Mirrors Aiken's `Credential`:
+ *   VerificationKey vkh -> Constr 0 [hash]
+ *   Script          sh  -> Constr 1 [hash]
+ */
+function encodeCredential(c: PlutusCredential): Uint8Array {
+  if (c.hash.length !== 28) {
+    throw new Error(`credential hash must be 28 bytes (got ${c.hash.length}).`);
+  }
+  return encodeConstr(c.kind === 'script' ? 1 : 0, [encodeBytes(c.hash)]);
+}
+
+/**
+ * Encode a full Plutus Data Address with arbitrary payment + optional inline
+ * stake credentials (each a key or a script). Mirrors the on-chain Aiken
+ * `Address` record and the api/policies.py `_PlutusAddress` shape, so a script
+ * payment credential round-trips byte-for-byte.
+ */
+export function encodeFullAddress(addr: PlutusFullAddress): Uint8Array {
+  const payment = encodeCredential(addr.payment);
+  // Stake: Option<Referenced<Credential>>, Inline only.
+  const stake =
+    addr.stake === null
+      ? encodeConstr(1, []) // None
+      : encodeConstr(0, [encodeConstr(0, [encodeCredential(addr.stake)])]); // Some(Inline(cred))
+  return encodeConstr(0, [payment, stake]);
+}
+
+/** Encode an `Option<Address>` over the full (script-capable) address shape. */
+function encodeFullAddressOption(addr: PlutusFullAddress | null): Uint8Array {
+  if (addr === null) return encodeConstr(1, []); // None
+  return encodeConstr(0, [encodeFullAddress(addr)]); // Some(addr)
+}
+
 function encodeRiskClass(rc: RiskClass): Uint8Array {
   // Aiken RiskClass: Barrier=Constr0, Depeg=Constr1 (zero-field variants).
   return encodeConstr(rc === 'Barrier' ? 0 : 1, []);
 }
 
 /**
- * Encode a PolicyDatum to CBOR. Produces the V4 14-field positional form:
+ * Encode a PolicyDatum to CBOR. Produces the 14-field positional form:
  *   Constr 0 [ bytes, bytes, int, int, int, int, int, bytes, bytes, bytes,
  *              OracleProvider, Option<Address>, int, RiskClass ]
- * The 14th field (risk_class) is mandatory on V4 — a 13-field datum is
- * rejected by the on-chain `expect pdat: PolicyDatum` decoder.
+ * The 14th field (risk_class) is mandatory — a 13-field datum is rejected by
+ * the on-chain `expect pdat: PolicyDatum` decoder.
+ *
+ * If `payoutAddress` is set (an address, or explicit `null`), an Option<Address>
+ * is appended as the 15th positional field. When `payoutAddress` is omitted the
+ * 14-field form is produced unchanged, so callers targeting a validator without
+ * the field are unaffected.
  */
 export function encodePolicyDatum(d: PolicyDatum): Uint8Array {
   if (d.partnerAddress === null && d.partnerShareBps !== 0n) {
@@ -300,7 +341,7 @@ export function encodePolicyDatum(d: PolicyDatum): Uint8Array {
       'partnerAddress is null but partnerShareBps != 0 — set partnerShareBps=0n or supply a partner address.',
     );
   }
-  return encodeConstr(0, [
+  const fields: Uint8Array[] = [
     encodeBytes(d.policyId),
     encodeBytes(d.insured),
     encodeInt(d.strikePrice),
@@ -315,7 +356,14 @@ export function encodePolicyDatum(d: PolicyDatum): Uint8Array {
     encodePartnerOption(d.partnerAddress),
     encodeInt(d.partnerShareBps),
     encodeRiskClass(d.riskClass),
-  ]);
+  ];
+  // Optional 15th field — the address-typed payout target. Omitted entirely
+  // when undefined (the 14-field wire form); appended as Option<Address> when
+  // present (an address, or `null` to pay the insured's own key).
+  if (d.payoutAddress !== undefined) {
+    fields.push(encodeFullAddressOption(d.payoutAddress));
+  }
+  return encodeConstr(0, fields);
 }
 
 // ---------------------------------------------------------------------------

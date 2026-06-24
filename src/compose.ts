@@ -20,7 +20,7 @@
 // Insurability + pool gates run first; an un-buildable policy THROWS a named
 // reason rather than emitting parts that would silently fail phase-2 on chain.
 
-import type { OracleProvider, PlutusAddress, PolicyDatum, PoolDatum, RiskClass } from './types';
+import type { OracleProvider, PlutusAddress, PlutusFullAddress, PolicyDatum, PoolDatum, RiskClass } from './types';
 import {
   encodePolicyDatum,
   encodePoolDatum,
@@ -155,6 +155,15 @@ export interface BuildUnderwritePartsParams {
   oracleProvider?: OracleProvider;
   riskClass?: RiskClass;
   partner?: { address: PlutusAddress; shareBps: bigint };
+  /**
+   * Optional payout target for the Claim coverage. When set (e.g. a
+   * contract-controlled beneficiary built via `scriptPayoutTarget`), the
+   * coverage is paid to this exact address at claim time and the policy datum
+   * carries the extended 15th field. When omitted, the coverage pays the
+   * insured's own key (the standard 14-field datum). Only set this against a
+   * validator that expects the field.
+   */
+  payout?: PlutusFullAddress;
   /** Optional 28-byte policy id (hex or bytes); default = the canonical
    *  BLAKE2b-224 derivation (matches the Aegis claim indexer's key). */
   policyId?: string | Uint8Array;
@@ -368,6 +377,9 @@ export function buildUnderwriteParts(params: BuildUnderwritePartsParams): Underw
     partnerAddress: partner ? partner.address : null,
     partnerShareBps: partner ? partner.shareBps : 0n,
     riskClass,
+    // Optional payout target — appended as the 15th datum field only when set;
+    // omitted (undefined) leaves the standard 14-field datum unchanged.
+    payoutAddress: params.payout,
   };
 
   const updatedPoolDatum: PoolDatum = {
