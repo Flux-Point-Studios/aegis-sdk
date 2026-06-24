@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.5-v4.0 — crashShieldFeedFor underlying-ticker helper (2026-06-24)
+
+Additive (no breaking changes):
+
+- **`crashShieldFeedFor(underlying, network?)`** — sugar over `findFeed` that
+  maps an underlying ticker (`'ADA'`, `'BTC'`, `'ETH'`) to its `*_USD` **spot**
+  (Barrier) feed on the target network. Case-insensitive; also accepts the full
+  `_USD` symbol. Returns `undefined` for non-crash-shield underlyings
+  (depeg/relay/event) and unknowns. `crashShieldFeedFor('ADA', 'preprod')` →
+  the live preprod ADA/USD feed `d2f08410…`.
+
 ## 1.0.4-v4.0 — network-aware preprod feed registry (2026-06-24)
 
 Additive (no breaking changes):

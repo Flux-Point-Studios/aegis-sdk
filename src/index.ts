@@ -122,6 +122,7 @@ export {
   feedsByKind,
   feedsFor,
   findFeed,
+  crashShieldFeedFor,
   findFeedByPolicyId,
 } from './feeds';
 export type { OracleFeed, FeedKind, FeedNetwork } from './feeds';

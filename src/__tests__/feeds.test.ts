@@ -8,6 +8,7 @@ import {
   feedsFor,
   findFeed,
   findFeedByPolicyId,
+  crashShieldFeedFor,
 } from '../feeds';
 import { AEGIS_PUBLISHER_CANONICAL_NFTS } from '../constants.mainnet';
 import { AEGIS_PUBLISHER_CANONICAL_NFTS as PREPROD_CANONICAL_NFTS } from '../constants.preprod';
@@ -113,5 +114,40 @@ describe('preprod feed registry (network-aware lookup)', () => {
     expect(
       findFeedByPolicyId('d2f08410f9f999b2afff902ec4ef47cc7b1677709887d20e0f13938f')?.symbol,
     ).toBe('ADA_USD');
+  });
+});
+
+describe('crashShieldFeedFor (underlying-ticker sugar)', () => {
+  it('maps an underlying ticker to its Barrier spot feed (mainnet default)', () => {
+    expect(crashShieldFeedFor('ADA')).toBe(FEEDS.ADA_USD);
+    expect(crashShieldFeedFor('BTC')).toBe(FEEDS.BTC_USD);
+    expect(crashShieldFeedFor('ETH')).toBe(FEEDS.ETH_USD);
+    expect(crashShieldFeedFor('ADA')?.riskClass).toBe('Barrier');
+    expect(crashShieldFeedFor('ADA')?.kind).toBe('spot');
+  });
+
+  it('is network-aware', () => {
+    expect(crashShieldFeedFor('ADA', 'preprod')?.policyId).toBe(
+      'd2f08410f9f999b2afff902ec4ef47cc7b1677709887d20e0f13938f',
+    );
+    expect(crashShieldFeedFor('ADA', 'mainnet')?.policyId).toBe(FEEDS.ADA_USD.policyId);
+  });
+
+  it('is case-insensitive and accepts the full _USD symbol', () => {
+    expect(crashShieldFeedFor('ada')).toBe(FEEDS.ADA_USD);
+    expect(crashShieldFeedFor('ADA_USD')).toBe(FEEDS.ADA_USD);
+    expect(crashShieldFeedFor('ada_usd')).toBe(FEEDS.ADA_USD);
+  });
+
+  it('returns undefined for non-crash-shield underlyings (depeg/relay) and unknowns', () => {
+    expect(crashShieldFeedFor('USDC')).toBeUndefined(); // depeg, not a barrier spot
+    expect(crashShieldFeedFor('USDT')).toBeUndefined(); // depeg
+    expect(crashShieldFeedFor('IUSD')).toBeUndefined(); // relay
+    expect(crashShieldFeedFor('NOPE')).toBeUndefined();
+  });
+
+  it('returns undefined when the underlying has no feed on the target network', () => {
+    // IUSD has no preprod feed at all, and isn't a crash-shield underlying anyway.
+    expect(crashShieldFeedFor('IUSD', 'preprod')).toBeUndefined();
   });
 });

@@ -170,6 +170,27 @@ export function findFeed(
   return feedsFor(network).find((f) => f.symbol === symbol);
 }
 
+/** Crash-Shield feed for an underlying ticker — sugar over `findFeed`.
+ *
+ * Crash Shield is Barrier coverage on a volatile asset's spot price, so this
+ * resolves an underlying (`'ADA'`, `'BTC'`, `'ETH'`) to its `*_USD` **spot**
+ * feed on the target network. Case-insensitive; also accepts the full `_USD`
+ * symbol. Returns `undefined` for non-spot underlyings (depeg/relay/event
+ * feeds are not crash-shield) and unknowns.
+ *
+ *     crashShieldFeedFor('ADA')             // mainnet ADA/USD spot (Barrier)
+ *     crashShieldFeedFor('ADA', 'preprod')  // preprod ADA/USD (d2f08410…)
+ */
+export function crashShieldFeedFor(
+  underlying: string,
+  network: FeedNetwork = 'mainnet',
+): OracleFeed | undefined {
+  const u = underlying.toUpperCase();
+  const symbol = u.endsWith('_USD') ? u : `${u}_USD`;
+  const feed = findFeed(symbol, network);
+  return feed?.kind === 'spot' ? feed : undefined;
+}
+
 /** All generic (non-`event`) feeds — the building blocks any dApp can use. */
 export const GENERIC_FEEDS: readonly OracleFeed[] = MAINNET_FEEDS.filter(
   (f) => f.kind !== 'event',
