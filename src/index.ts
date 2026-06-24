@@ -112,16 +112,19 @@ export { decodeFearDatum, classifyFear } from './fear';
 export type { FearReading, FearBand } from './fear';
 
 // ---------------------------------------------------------------------------
-// Named oracle-feed registry (canonical mainnet feeds).
+// Named oracle-feed registry (mainnet + preprod, network-aware lookup).
 // ---------------------------------------------------------------------------
 export {
   MAINNET_FEEDS,
+  PREPROD_FEEDS,
   FEEDS,
   GENERIC_FEEDS,
   feedsByKind,
+  feedsFor,
+  findFeed,
   findFeedByPolicyId,
 } from './feeds';
-export type { OracleFeed, FeedKind } from './feeds';
+export type { OracleFeed, FeedKind, FeedNetwork } from './feeds';
 
 // ---------------------------------------------------------------------------
 // Developer experience: typed errors, chain/wallet error decoding, formatters,

@@ -1,6 +1,6 @@
 {
   "name": "@fluxpointstudios/aegis-sdk",
-  "version": "1.0.3-v4.0",
+  "version": "1.0.4-v4.0",
   "description": "Aegis parametric insurance SDK for Cardano. Build insurance policy datums, calculate premiums, and compose Aegis outputs into your own transactions -- zero runtime dependencies.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",

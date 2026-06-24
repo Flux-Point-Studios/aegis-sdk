@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.4-v4.0 — network-aware preprod feed registry (2026-06-24)
+
+Additive (no breaking changes):
+
+- **`PREPROD_FEEDS` + `feedsFor(network)` + `findFeed(symbol, network)`** — the
+  feed registry is now network-aware so preprod consumers no longer hardcode the
+  preprod feed NFT. `findFeed('ADA_USD', 'preprod')` returns the live preprod
+  publisher feed `d2f08410…` (asset `AEGIS_PRICE_FEED_V1`); `findFeed(...)`
+  defaults to mainnet, preserving existing behaviour. Each preprod entry was
+  confirmed against its NFT's on-chain asset name and shares all metadata with
+  its mainnet twin except `policyId`. `IUSD_USD` has no preprod feed and is
+  intentionally absent. `findFeedByPolicyId` now resolves preprod NFTs too
+  (mainnet-first). New export: `FeedNetwork` type. (Addresses the
+  `aegis-parametric-insurance#62` preprod-feed DX note.)
+
 ## 1.0.3-v4.0 — Coverage Vault + Crash Shield + FEAR + preprod V4 constants (2026-06-23)
 
 ### preprod V4 pool constants refresh
