@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — preprod V4 pool constants refresh
+
+Preprod/testing only (mainnet constants unchanged):
+
+- **`constants.preprod.ts` resynced to the fresh preprod V4 pool** (manifest
+  `release_commit 7097ee1`, supersedes the retired `AEGIS_POOL_12H_V1` /
+  `681f71ac`). New pool validator `d5ff8ab1`, policy `9385ef13`, marker
+  `9b62c882`, lp `adf71eb2`; NFT policy `2b8d7869` (`AEGIS_POOL_V4`) at
+  `addr_test1wr2llz43u…`; new ref UTxOs (pool `07752a5b#0`, marker
+  `d9fba00c#0`, policy `f7fa2138#0`, lp `2ff3e3b8#0`). Verified on-chain:
+  add-liquidity `15e4d202` + Crash-Shield underwrite `3aed3d7f`
+  (`valid_contract: True`, finite validity bounds — resolves
+  `aegis-parametric-insurance#62`).
+
 ## Unreleased — T3 Crash Shield golden + T7 FEAR index decoder
 
 Additive (no breaking changes):
