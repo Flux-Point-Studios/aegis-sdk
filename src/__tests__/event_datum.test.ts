@@ -141,4 +141,19 @@ describe('isTriggered — value <= strike settlement predicate', () => {
     expect(isTriggered(decodeEventDatum(GOLDEN.triggered_v0).value)).toBe(true);
     expect(isTriggered(decodeEventDatum(GOLDEN.alive_v1).value)).toBe(false);
   });
+
+  it('pins the DEPLOYED Materios geometry: $0.10 triggered / $1.00 alive vs $0.50 strike (1e6 scale)', () => {
+    // The whole rail's settlement convention is alive=$1.00=1_000_000,
+    // triggered=$0.10=100_000, strike=$0.50=500_000 (pinned in the Python bridge,
+    // the C# InsuranceConstants, the on-chain n1_strike, and surf_watch). The SDK
+    // read-side predicate must agree against the EXPLICIT 500_000 strike — the
+    // default strike of 0n would wrongly read the real triggered value 100_000 as
+    // alive (100_000 <= 0 is false), so this must pass the deployed strike.
+    const ALIVE = 1_000_000n;
+    const TRIGGERED = 100_000n;
+    const STRIKE = 500_000n;
+    expect(isTriggered(TRIGGERED, STRIKE)).toBe(true); // $0.10 <= $0.50 → fired
+    expect(isTriggered(ALIVE, STRIKE)).toBe(false); // $1.00 > $0.50 → alive
+    expect(isTriggered(STRIKE, STRIKE)).toBe(true); // boundary closed: == strike fires
+  });
 });
