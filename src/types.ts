@@ -99,6 +99,19 @@ export interface PolicyDatum {
    * decoder, so this field is mandatory.
    */
   riskClass: RiskClass;
+  /**
+   * V5 AI-cover receipt binding (15th positional field, appended AFTER
+   * `riskClass` — contracts/lib/aegis/types.ak PolicyDatum field index 14).
+   * `null`/omitted encodes `None` (CBOR `d87a80`) — every non-AI policy;
+   * `Some(commitment)` (CBOR `d8799f<32B>ff`) binds the policy so it can ONLY
+   * be claimed via `ClaimWithReceipt` by revealing a preimage that hashes to
+   * `commitment` = blake2b-256(receipt_id ++ threshold_be8 ++ config_hash).
+   *
+   * This field is V5-only: `encodePolicyDatum` (the live V4 encoder) ignores
+   * it; use `encodePolicyDatumV5` to emit the 15-field datum. Omitting it on a
+   * V4 datum is a no-op, so existing 14-field call sites are unaffected.
+   */
+  receiptCommitment?: Uint8Array | null;
 }
 
 // ---------------------------------------------------------------------------

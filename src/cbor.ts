@@ -287,20 +287,23 @@ function encodeRiskClass(rc: RiskClass): Uint8Array {
   return encodeConstr(rc === 'Barrier' ? 0 : 1, []);
 }
 
+function encodeReceiptOption(rc: Uint8Array | null | undefined): Uint8Array {
+  // Aiken Option<ByteArray>: None=Constr1 [] (d87a80), Some=Constr0 [bytes].
+  if (rc === null || rc === undefined) return encodeConstr(1, []); // None
+  return encodeConstr(0, [encodeBytes(rc)]); // Some(commitment)
+}
+
 /**
- * Encode a PolicyDatum to CBOR. Produces the V4 14-field positional form:
- *   Constr 0 [ bytes, bytes, int, int, int, int, int, bytes, bytes, bytes,
- *              OracleProvider, Option<Address>, int, RiskClass ]
- * The 14th field (risk_class) is mandatory on V4 — a 13-field datum is
- * rejected by the on-chain `expect pdat: PolicyDatum` decoder.
+ * The 14 positional fields shared by the V4 and V5 PolicyDatum wire forms.
+ * Kept in one place so the two encoders cannot drift in field order/encoding.
  */
-export function encodePolicyDatum(d: PolicyDatum): Uint8Array {
+function policyDatumBaseFields(d: PolicyDatum): Uint8Array[] {
   if (d.partnerAddress === null && d.partnerShareBps !== 0n) {
     throw new Error(
       'partnerAddress is null but partnerShareBps != 0 — set partnerShareBps=0n or supply a partner address.',
     );
   }
-  return encodeConstr(0, [
+  return [
     encodeBytes(d.policyId),
     encodeBytes(d.insured),
     encodeInt(d.strikePrice),
@@ -315,7 +318,143 @@ export function encodePolicyDatum(d: PolicyDatum): Uint8Array {
     encodePartnerOption(d.partnerAddress),
     encodeInt(d.partnerShareBps),
     encodeRiskClass(d.riskClass),
+  ];
+}
+
+/**
+ * Encode a PolicyDatum to the **V4** 14-field positional form (the schema of
+ * the live mainnet validator `1677dc4a…`):
+ *   Constr 0 [ bytes, bytes, int, int, int, int, int, bytes, bytes, bytes,
+ *              OracleProvider, Option<Address>, int, RiskClass ]
+ * The 14th field (risk_class) is mandatory on V4 — a 13-field datum is
+ * rejected by the on-chain `expect pdat: PolicyDatum` decoder. `receiptCommitment`
+ * is ignored here; use `encodePolicyDatumV5` for the AI-cover binding schema.
+ */
+export function encodePolicyDatum(d: PolicyDatum): Uint8Array {
+  return encodeConstr(0, policyDatumBaseFields(d));
+}
+
+/**
+ * Encode a PolicyDatum to the **V5** 15-field form (the schema of the
+ * receipt-binding validator `36c5e975…`): the V4 fields followed by
+ * `receipt_commitment: Option<ByteArray>` at index 14. A `null`/omitted
+ * `receiptCommitment` encodes `None` (so the V5 form of a non-AI policy is
+ * byte-identical to its V4 form plus a trailing `d87a80`).
+ */
+export function encodePolicyDatumV5(d: PolicyDatum): Uint8Array {
+  return encodeConstr(0, [
+    ...policyDatumBaseFields(d),
+    encodeReceiptOption(d.receiptCommitment ?? null),
   ]);
+}
+
+// ---------------------------------------------------------------------------
+// PolicyDatum decode (accepts V4 14-field and V5 15-field forms)
+// ---------------------------------------------------------------------------
+
+type PlutusData = bigint | Uint8Array | { constr: number; fields: PlutusData[] };
+
+/** Recursively decode one Plutus data item (int / byte string / Constr). */
+function decodeData(r: Reader): PlutusData {
+  const major = r.buf[r.off] >> 5;
+  if (major === 0 || major === 1) return decodeInt(r);
+  if (major === 2) return decodeBytes(r);
+  if (major === 6) {
+    const constr = readConstrTag(r);
+    return { constr, fields: decodeConstrBody(r, decodeData) };
+  }
+  throw new Error(`CBOR: unsupported major type ${major} in PolicyDatum`);
+}
+
+function asConstr(
+  x: PlutusData,
+  ctx: string,
+): { constr: number; fields: PlutusData[] } {
+  if (typeof x !== 'object' || x instanceof Uint8Array) {
+    throw new Error(`PolicyDatum: expected Constr for ${ctx}`);
+  }
+  return x;
+}
+
+function asBytes(x: PlutusData, ctx: string): Uint8Array {
+  if (!(x instanceof Uint8Array)) throw new Error(`PolicyDatum: expected bytes for ${ctx}`);
+  return x;
+}
+
+function asInt(x: PlutusData, ctx: string): bigint {
+  if (typeof x !== 'bigint') throw new Error(`PolicyDatum: expected int for ${ctx}`);
+  return x;
+}
+
+function decodeOracleProviderData(x: PlutusData): OracleProvider {
+  const c = asConstr(x, 'oracleProvider');
+  const name = (['Charli3', 'Orcfax', 'AegisSelf', 'Indigo'] as const)[c.constr];
+  if (name === undefined) throw new Error(`PolicyDatum: bad OracleProvider constr ${c.constr}`);
+  return name;
+}
+
+function decodeRiskClassData(x: PlutusData): RiskClass {
+  const c = asConstr(x, 'riskClass');
+  if (c.constr === 0) return 'Barrier';
+  if (c.constr === 1) return 'Depeg';
+  throw new Error(`PolicyDatum: bad RiskClass constr ${c.constr}`);
+}
+
+/** Option<ByteArray>: Constr1=None, Constr0[bytes]=Some — mirrors encodeReceiptOption. */
+function decodeReceiptData(x: PlutusData): Uint8Array | null {
+  const c = asConstr(x, 'receiptCommitment');
+  if (c.constr === 1) return null;
+  if (c.constr === 0) return asBytes(c.fields[0], 'receiptCommitment.some');
+  throw new Error(`PolicyDatum: bad Option<ByteArray> constr ${c.constr}`);
+}
+
+/** Inverse of encodePartnerOption / encodePlutusAddress (Some/None). */
+function decodePartnerData(x: PlutusData): PlutusAddress | null {
+  const opt = asConstr(x, 'partnerAddress');
+  if (opt.constr === 1) return null; // None
+  const addr = asConstr(opt.fields[0], 'partnerAddress.address');
+  const payCred = asConstr(addr.fields[0], 'partnerAddress.paymentCredential');
+  const paymentVkh = asBytes(payCred.fields[0], 'partnerAddress.paymentVkh');
+  const stakeOpt = asConstr(addr.fields[1], 'partnerAddress.stake');
+  let stakeVkh: Uint8Array | null = null;
+  if (stakeOpt.constr === 0) {
+    const inline = asConstr(stakeOpt.fields[0], 'partnerAddress.inline');
+    const stakeCred = asConstr(inline.fields[0], 'partnerAddress.stakeCredential');
+    stakeVkh = asBytes(stakeCred.fields[0], 'partnerAddress.stakeVkh');
+  }
+  return { paymentVkh, stakeVkh };
+}
+
+/**
+ * Decode a PolicyDatum from CBOR. Accepts both the V4 14-field form and the
+ * V5 15-field form; a 14-field datum yields `receiptCommitment: null`. The
+ * inverse of `encodePolicyDatumV5` for round-trip fidelity.
+ */
+export function decodePolicyDatum(bytes: Uint8Array): PolicyDatum {
+  const r: Reader = { buf: bytes, off: 0 };
+  const top = asConstr(decodeData(r), 'PolicyDatum');
+  if (top.constr !== 0) throw new Error(`PolicyDatum: expected Constr 0, got ${top.constr}`);
+  const f = top.fields;
+  if (f.length !== 14 && f.length !== 15) {
+    throw new Error(`PolicyDatum: expected 14 (V4) or 15 (V5) fields, got ${f.length}`);
+  }
+  return {
+    policyId: asBytes(f[0], 'policyId'),
+    insured: asBytes(f[1], 'insured'),
+    strikePrice: asInt(f[2], 'strikePrice'),
+    coverageAmount: asInt(f[3], 'coverageAmount'),
+    premiumPaid: asInt(f[4], 'premiumPaid'),
+    startTime: asInt(f[5], 'startTime'),
+    expiryTime: asInt(f[6], 'expiryTime'),
+    oracleNft: asBytes(f[7], 'oracleNft'),
+    poolScriptHash: asBytes(f[8], 'poolScriptHash'),
+    poolNft: asBytes(f[9], 'poolNft'),
+    oracleProvider: decodeOracleProviderData(f[10]),
+    partnerAddress: decodePartnerData(f[11]),
+    partnerShareBps: asInt(f[12], 'partnerShareBps'),
+    riskClass: decodeRiskClassData(f[13]),
+    receiptCommitment: f.length === 15 ? decodeReceiptData(f[14]) : null,
+  };
 }
 
 // ---------------------------------------------------------------------------

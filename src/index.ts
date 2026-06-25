@@ -165,6 +165,8 @@ export type { FetchQuoteParams, FetchQuoteOptions, FetchedQuote, MinimalFetch } 
 export {
   // Datum
   encodePolicyDatum,
+  encodePolicyDatumV5,
+  decodePolicyDatum,
   encodePoolDatum,
   decodePoolDatum,
   // Redeemers
