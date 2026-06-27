@@ -136,6 +136,21 @@ export interface PolicyDatum {
    *   a validator that expects the field.
    */
   payoutAddress?: PlutusFullAddress | null;
+  /**
+   * Optional `receipt_commitment: Option<ByteArray>` — the 16th positional
+   * field of the unified V5+P1 PolicyDatum (contracts/lib/aegis/types.ak,
+   * AFTER payoutAddress).
+   *
+   * - **Omitted** (`undefined`) — the datum keeps the 14- or 15-field form
+   *   (V4 / V5-payout). Existing callers are unaffected.
+   * - **Present** — the datum encodes the full 16-field unified form (Aiken's
+   *   record `expect` is STRICT on field count, so this is what the deployed
+   *   V5+P1 pool/policy validators decode). `null` → `None` (Constr 1), keeping
+   *   the policy on the plain-Claim path; a 32-byte commitment → `Some` (Constr
+   *   0), binding it to ClaimWithReceipt (AI-cover / Materios). When set,
+   *   `payoutAddress` (field 15) is emitted too (defaulting to `None`).
+   */
+  receiptCommitment?: Uint8Array | null;
 }
 
 // ---------------------------------------------------------------------------

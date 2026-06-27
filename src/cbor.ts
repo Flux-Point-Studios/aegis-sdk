@@ -357,10 +357,21 @@ export function encodePolicyDatum(d: PolicyDatum): Uint8Array {
     encodeInt(d.partnerShareBps),
     encodeRiskClass(d.riskClass),
   ];
-  // Optional 15th field — the address-typed payout target. Omitted entirely
-  // when undefined (the 14-field wire form); appended as Option<Address> when
-  // present (an address, or `null` to pay the insured's own key).
-  if (d.payoutAddress !== undefined) {
+  // Optional extended fields. Aiken's record `expect` is STRICT on field count,
+  // so a datum must carry EXACTLY the field count its target validator declares:
+  //   - 14 fields (V4)            — neither payoutAddress nor receiptCommitment.
+  //   - 15 fields (V5 payout)     — payoutAddress set, receiptCommitment omitted.
+  //   - 16 fields (V5+P1 unified) — receiptCommitment set (the deployed V5+P1
+  //     pool/policy validators decode this form). payout (field 15) is emitted
+  //     too, defaulting to None when not supplied.
+  if (d.receiptCommitment !== undefined) {
+    fields.push(encodeFullAddressOption(d.payoutAddress ?? null));
+    fields.push(
+      d.receiptCommitment === null
+        ? encodeConstr(1, []) // None -> Constr 1 [] (plain-Claim path)
+        : encodeConstr(0, [encodeBytes(d.receiptCommitment)]), // Some(commitment)
+    );
+  } else if (d.payoutAddress !== undefined) {
     fields.push(encodeFullAddressOption(d.payoutAddress));
   }
   return encodeConstr(0, fields);

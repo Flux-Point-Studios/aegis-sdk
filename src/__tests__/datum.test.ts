@@ -215,11 +215,12 @@ describe('PolicyDatum optional payout field (15th, address-typed)', () => {
     expect(hex).toContain('d8799fd8799fd8799f581c' + STAKE_KEY);
   });
 
-  it('cross-stack golden: byte-identical to the API/Python encoder (script payout)', () => {
+  it('cross-stack golden: byte-identical to the API/Python encoder (16-field unified, script payout, receipt=None)', () => {
     // This exact hex is pinned IDENTICALLY by the API encoder's test
     // (api/tests/test_policy_datum_v12.py::test_cross_stack_payout_golden), so
-    // the two off-chain encoders are locked to byte-identity for the 15-field
-    // form. If either drifts, one of the two pins breaks.
+    // the two off-chain encoders are locked to byte-identity for the unified
+    // V5+P1 16-field form (payout @14 + receipt_commitment @15). The receipt
+    // tail is None -> d87a80 (Constr 1). If either encoder drifts, one pin breaks.
     const CROSS_STACK_PAYOUT_HEX =
       'd8799f581c00112233445566778899aabbccddeeff00112233445566778899aabb' +
       '581caabbccddeeff00112233445566778899aabbccddeeff001122334455' +
@@ -228,7 +229,8 @@ describe('PolicyDatum optional payout field (15th, address-typed)', () => {
       '581cc08edc7fd1b082e92c97a9aebcf63a647688ec8092581646d6ff667f' +
       '581c9a649b75a85f0088eb68c1b72c3529b41f874fcdc603031a1444abb3' +
       'd87b80d87a8000d87980' +
-      'd8799fd8799fd87a9f581cdadadadadadadadadadadadadadadadadadadadadadadadadadadadaffd87a80ffffff';
+      'd8799fd8799fd87a9f581cdadadadadadadadadadadadadadadadadadadadadadadadadadadadaffd87a80ffff' +
+      'd87a80ff';
     const datum: PolicyDatum = {
       policyId: hexToBytes('00112233445566778899aabbccddeeff00112233445566778899aabb'),
       insured: hexToBytes('aabbccddeeff00112233445566778899aabbccddeeff001122334455'),
@@ -245,6 +247,7 @@ describe('PolicyDatum optional payout field (15th, address-typed)', () => {
       partnerShareBps: 0n,
       riskClass: 'Barrier',
       payoutAddress: scriptPayoutTarget('da'.repeat(28)),
+      receiptCommitment: null,
     };
     expect(bytesToHex(encodePolicyDatum(datum))).toBe(CROSS_STACK_PAYOUT_HEX);
   });
