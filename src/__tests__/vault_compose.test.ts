@@ -30,6 +30,7 @@ import {
   bytesToHex,
 } from '../cbor';
 import { PoolError, InputError } from '../errors';
+import { scriptEnterpriseAddress } from '../address';
 import type { PoolDatum } from '../types';
 
 // ── V4 preprod bindings (release/preprod.json) ─────────────────────────────
@@ -148,6 +149,33 @@ describe('buildAddLiquidityParts — proportional deposit value flow', () => {
     expect(parts.poolInput).toEqual(pool().utxoRef);
   });
 });
+
+describe('buildAddLiquidityParts — script (vault) aLP recipient', () => {
+  // L4VA / underwriter-vault: the minted aLP must be deliverable to a SCRIPT
+  // (vault) address, not only a wallet key, so a fractionalization vault can
+  // custody the underwriting position. providerScriptHash overrides the key
+  // recipient with a script enterprise address.
+  const VAULT_SCRIPT = 'aabbccddeeff00112233445566778899aabbccddeeff001122334455';
+  const parts = buildAddLiquidityParts({
+    bindings: bindings(),
+    pool: pool(),
+    providerPkh: PROVIDER_PKH,
+    providerScriptHash: VAULT_SCRIPT,
+    depositLovelace: 2_000_000_000n,
+  });
+
+  it('delivers the aLP to the script enterprise address (addr_test1w…)', () => {
+    expect(parts.providerOutput.address).toBe(
+      scriptEnterpriseAddress(VAULT_SCRIPT, 'preprod'));
+    expect(parts.providerOutput.address.startsWith('addr_test1w')).toBe(true);
+  });
+
+  it('still mints the proportional aLP to that script address', () => {
+    expect(parts.providerOutput.lpToken).toEqual({
+      policyId: LP_TOKEN_HASH, assetNameHex: ALP_HEX, quantity: 1_000_000_000n });
+  });
+});
+
 
 describe('buildAddLiquidityParts — first deposit (empty pool bootstraps 1:1)', () => {
   const parts = buildAddLiquidityParts({
