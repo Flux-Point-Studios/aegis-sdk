@@ -12,6 +12,7 @@
 //   bech32 (NOT bech32m) over the 5-bit regrouped payload, HRP "addr"/"addr_test".
 
 import { hexToBytes } from './cbor';
+import type { PlutusFullAddress } from './types';
 
 const CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 
@@ -130,4 +131,21 @@ export function keyAddress(
   payload.set(paymentVkh, 1);
   payload.set(stakeVkh, 29);
   return encodeAddr(network, payload);
+}
+
+/**
+ * Build a full Plutus address with a SCRIPT payment credential and no stake
+ * credential (an enterprise script address). This is the typical shape for a
+ * contract-controlled payout target — e.g. a governance/treasury or
+ * native-multisig script that should receive the Claim coverage. Pass the
+ * result as the `payout` option to `buildUnderwriteParts`.
+ *
+ * @param scriptHashHex 56-char hex (28-byte validator / native-script hash).
+ */
+export function scriptPayoutTarget(scriptHashHex: string): PlutusFullAddress {
+  const hash = hexToBytes(scriptHashHex);
+  if (hash.length !== 28) {
+    throw new Error(`script hash must be 28 bytes (got ${hash.length})`);
+  }
+  return { payment: { kind: 'script', hash }, stake: null };
 }

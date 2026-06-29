@@ -17,8 +17,16 @@
 //   14 risk_class          : RiskClass (Barrier=0, Depeg=1)   <-- V4 (absent in R17)
 
 import { describe, it, expect } from 'vitest';
-import { encodePolicyDatum, encodePoolDatum, bytesToHex, hexToBytes } from '../cbor';
-import type { PolicyDatum, PoolDatum } from '../types';
+import {
+  encodePolicyDatum,
+  encodePoolDatum,
+  encodeConstr,
+  encodeFullAddress,
+  bytesToHex,
+  hexToBytes,
+} from '../cbor';
+import { scriptPayoutTarget } from '../address';
+import type { PolicyDatum, PoolDatum, PlutusFullAddress } from '../types';
 
 // GROUND TRUTH: the real mainnet V4 policy dd56e6df…#1 inline datum, fetched
 // from-chain via Blockfrost. The SDK MUST encode byte-identical to this — it is
@@ -148,5 +156,99 @@ describe('PoolDatum CBOR (6 fields)', () => {
       lpSupply: 100_000_000_000n,
     };
     expect(bytesToHex(encodePoolDatum(datum))).toBe(TRUTH_POOL);
+  });
+});
+
+describe('PolicyDatum optional payout field (15th, address-typed)', () => {
+  const base: PolicyDatum = {
+    policyId: hexToBytes('aabb'),
+    insured: hexToBytes('00112233445566778899001122334455667788990011223344556677'),
+    strikePrice: 350_000n,
+    coverageAmount: 5_000_000_000n,
+    premiumPaid: 100_000_000n,
+    startTime: 1_700_000_000_000n,
+    expiryTime: 1_700_604_800_000n,
+    oracleNft: hexToBytes('886dcb2363e160c944e63cf544ce6f6265b22ef7c4e2478dd975078e'),
+    poolScriptHash: hexToBytes('aabbccdd11223344556677889900112233445566778899001122334455'),
+    poolNft: hexToBytes('deadbeef00112233445566778899aabbccddeeff00112233445566'),
+    oracleProvider: 'Charli3',
+    partnerAddress: null,
+    partnerShareBps: 0n,
+    riskClass: 'Barrier',
+  };
+  const SCRIPT_HASH = 'da'.repeat(28); // 28-byte script hash
+  const STAKE_KEY = 'bb'.repeat(28);
+
+  it('omitting the payout field is byte-identical to the 14-field form', () => {
+    expect(bytesToHex(encodePolicyDatum(base))).toBe(TRUTH_POLICY_CHARLI3_SOLO);
+    // an explicit `undefined` is the same as omitting it.
+    expect(bytesToHex(encodePolicyDatum({ ...base, payoutAddress: undefined }))).toBe(
+      TRUTH_POLICY_CHARLI3_SOLO,
+    );
+  });
+
+  it('payoutAddress=null appends Option::None (d87a80) as the 15th field', () => {
+    const with15 = bytesToHex(encodePolicyDatum({ ...base, payoutAddress: null }));
+    // 14-field bytes with the trailing array break replaced by None + break.
+    expect(with15).toBe(TRUTH_POLICY_CHARLI3_SOLO.slice(0, -2) + 'd87a80' + 'ff');
+  });
+
+  it('a script payout target appends Some(<script address>)', () => {
+    const target = scriptPayoutTarget(SCRIPT_HASH);
+    const with15 = bytesToHex(encodePolicyDatum({ ...base, payoutAddress: target }));
+    const someOption = bytesToHex(encodeConstr(0, [encodeFullAddress(target)]));
+    expect(with15).toBe(TRUTH_POLICY_CHARLI3_SOLO.slice(0, -2) + someOption + 'ff');
+    // Script payment credential = Aiken `Credential::Script` = Constr 1 [hash]
+    // = CBOR tag 122 over an indefinite array (d87a9f … ff).
+    expect(someOption).toContain('d87a9f581c' + SCRIPT_HASH + 'ff');
+  });
+
+  it('encodeFullAddress round-trips a base script address (script payment + key stake)', () => {
+    const addr: PlutusFullAddress = {
+      payment: { kind: 'script', hash: hexToBytes(SCRIPT_HASH) },
+      stake: { kind: 'key', hash: hexToBytes(STAKE_KEY) },
+    };
+    const hex = bytesToHex(encodeFullAddress(addr));
+    expect(hex.startsWith('d8799f')).toBe(true); // Address = Constr 0 [...]
+    expect(hex).toContain('d87a9f581c' + SCRIPT_HASH + 'ff'); // payment = Script
+    // stake = Some(Inline(VerificationKey[hash])) = Constr0[Constr0[Constr0[hash]]].
+    expect(hex).toContain('d8799fd8799fd8799f581c' + STAKE_KEY);
+  });
+
+  it('cross-stack golden: byte-identical to the API/Python encoder (16-field unified, script payout, receipt=None)', () => {
+    // This exact hex is pinned IDENTICALLY by the API encoder's test
+    // (api/tests/test_policy_datum_v12.py::test_cross_stack_payout_golden), so
+    // the two off-chain encoders are locked to byte-identity for the unified
+    // V5+P1 16-field form (payout @14 + receipt_commitment @15). The receipt
+    // tail is None -> d87a80 (Constr 1). If either encoder drifts, one pin breaks.
+    const CROSS_STACK_PAYOUT_HEX =
+      'd8799f581c00112233445566778899aabbccddeeff00112233445566778899aabb' +
+      '581caabbccddeeff00112233445566778899aabbccddeeff001122334455' +
+      '1a000557301b000000012a05f2001a05f5e1001b0000018bcfe568001b0000018bf3f1ec00' +
+      '581c886dcb2363e160c944e63cf544ce6f6265b22ef7c4e2478dd975078e' +
+      '581cc08edc7fd1b082e92c97a9aebcf63a647688ec8092581646d6ff667f' +
+      '581c9a649b75a85f0088eb68c1b72c3529b41f874fcdc603031a1444abb3' +
+      'd87b80d87a8000d87980' +
+      'd8799fd8799fd87a9f581cdadadadadadadadadadadadadadadadadadadadadadadadadadadadaffd87a80ffff' +
+      'd87a80ff';
+    const datum: PolicyDatum = {
+      policyId: hexToBytes('00112233445566778899aabbccddeeff00112233445566778899aabb'),
+      insured: hexToBytes('aabbccddeeff00112233445566778899aabbccddeeff001122334455'),
+      strikePrice: 350_000n,
+      coverageAmount: 5_000_000_000n,
+      premiumPaid: 100_000_000n,
+      startTime: 1_700_000_000_000n,
+      expiryTime: 1_700_604_800_000n,
+      oracleNft: hexToBytes('886dcb2363e160c944e63cf544ce6f6265b22ef7c4e2478dd975078e'),
+      poolScriptHash: hexToBytes('c08edc7fd1b082e92c97a9aebcf63a647688ec8092581646d6ff667f'),
+      poolNft: hexToBytes('9a649b75a85f0088eb68c1b72c3529b41f874fcdc603031a1444abb3'),
+      oracleProvider: 'AegisSelf',
+      partnerAddress: null,
+      partnerShareBps: 0n,
+      riskClass: 'Barrier',
+      payoutAddress: scriptPayoutTarget('da'.repeat(28)),
+      receiptCommitment: null,
+    };
+    expect(bytesToHex(encodePolicyDatum(datum))).toBe(CROSS_STACK_PAYOUT_HEX);
   });
 });

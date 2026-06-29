@@ -34,6 +34,29 @@ export interface PlutusAddress {
   stakeVkh: Uint8Array | null;
 }
 
+/**
+ * A Plutus credential — a verification-key hash (`'key'`) or a script hash
+ * (`'script'`). Used by {@link PlutusFullAddress}, which (unlike the key-only
+ * {@link PlutusAddress}) may carry a script payment credential.
+ */
+export interface PlutusCredential {
+  kind: 'key' | 'script';
+  /** 28-byte blake2b-224 hash. */
+  hash: Uint8Array;
+}
+
+/**
+ * A full Plutus Data address with arbitrary payment + optional inline stake
+ * credentials, each a key or a script. Mirrors the on-chain Aiken `Address`
+ * record in full, so a script payment credential (e.g. a contract-controlled
+ * beneficiary) round-trips byte-for-byte.
+ */
+export interface PlutusFullAddress {
+  payment: PlutusCredential;
+  /** Inline stake credential, or `null` for an enterprise address. */
+  stake: PlutusCredential | null;
+}
+
 // ---------------------------------------------------------------------------
 // OracleProvider sum type
 // ---------------------------------------------------------------------------
@@ -99,6 +122,35 @@ export interface PolicyDatum {
    * decoder, so this field is mandatory.
    */
   riskClass: RiskClass;
+  /**
+   * Optional address-typed payout target for the Claim coverage (extended
+   * 15th positional field).
+   *
+   * - **Omitted** (`undefined`) — the datum encodes to the V4 14-field wire form
+   *   the deployed validator expects. This is the default; existing callers are
+   *   unaffected.
+   * - **Present** (an address, or explicit `null` to pay the insured's own key)
+   *   — the datum encodes the extended 15-field form: the coverage is paid to
+   *   this exact address, which may be a **script** address, so a
+   *   contract-controlled beneficiary can receive the payout. Only valid against
+   *   a validator that expects the field.
+   */
+  payoutAddress?: PlutusFullAddress | null;
+  /**
+   * Optional `receipt_commitment: Option<ByteArray>` — the 16th positional
+   * field of the unified V5+P1 PolicyDatum (contracts/lib/aegis/types.ak,
+   * AFTER payoutAddress).
+   *
+   * - **Omitted** (`undefined`) — the datum keeps the 14- or 15-field form
+   *   (V4 / V5-payout). Existing callers are unaffected.
+   * - **Present** — the datum encodes the full 16-field unified form (Aiken's
+   *   record `expect` is STRICT on field count, so this is what the deployed
+   *   V5+P1 pool/policy validators decode). `null` → `None` (Constr 1), keeping
+   *   the policy on the plain-Claim path; a 32-byte commitment → `Some` (Constr
+   *   0), binding it to ClaimWithReceipt (AI-cover / Materios). When set,
+   *   `payoutAddress` (field 15) is emitted too (defaulting to `None`).
+   */
+  receiptCommitment?: Uint8Array | null;
 }
 
 // ---------------------------------------------------------------------------
