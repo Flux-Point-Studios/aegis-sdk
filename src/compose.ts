@@ -538,6 +538,13 @@ export interface BuildAddLiquidityPartsParams {
   depositLovelace: bigint;
   /** Optional stake key hash (56 hex) for the provider receipt base address. */
   providerStakePkh?: string;
+  /**
+   * [L4VA] Optional script hash (56 hex / 28 bytes). When set, the minted aLP is
+   * delivered to this SCRIPT enterprise address instead of `providerPkh`'s key
+   * address — so a fractionalization / underwriter vault can custody the
+   * position. `providerPkh` is then unused for the recipient.
+   */
+  providerScriptHash?: string;
   /** Optional trace hook — called with (event, data) at each step. */
   onTrace?: (event: string, data?: unknown) => void;
 }
@@ -651,11 +658,16 @@ export function buildAddLiquidityParts(params: BuildAddLiquidityPartsParams): Ad
       inlineDatumCbor: bytesToHex(encodePoolDatum(newPoolDatum)),
     },
     providerOutput: {
-      address: keyAddress(
-        hexToBytes(providerPkh),
-        params.providerStakePkh !== undefined ? hexToBytes(params.providerStakePkh) : null,
-        bindings.network,
-      ),
+      // [L4VA] Deliver the aLP to a SCRIPT (vault) address when providerScriptHash
+      // is set, so a fractionalization vault can custody the underwriting position;
+      // otherwise the depositor's own key address (the default).
+      address: params.providerScriptHash !== undefined
+        ? scriptEnterpriseAddress(params.providerScriptHash, bindings.network)
+        : keyAddress(
+            hexToBytes(providerPkh),
+            params.providerStakePkh !== undefined ? hexToBytes(params.providerStakePkh) : null,
+            bindings.network,
+          ),
       lovelace: MIN_UTXO_LOVELACE,
       lpToken: { policyId: lpPolicyId, assetNameHex: LP_ASSET_NAME_HEX, quantity: lpMinted },
     },
