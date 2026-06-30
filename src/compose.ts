@@ -89,6 +89,12 @@ export interface AegisBindings {
   markerPolicyId: string;
   /** Team/treasury fee recipient bech32 address. */
   teamAddress: string;
+  /** Optional inline datum (hex CBOR) to attach to the team_cut output. Set to
+   *  the accrual TreasuryDatum{-1,""} (hex `d8799f2040ff`) ONLY when
+   *  `teamAddress` is the cMATRA staking_treasury SCRIPT address, so team_cut
+   *  accrues directly to the conservation-protected treasury. Leave undefined
+   *  for a normal key-address team wallet. */
+  teamOutputInlineDatumCbor?: string;
   /** Pool validator reference-script UTxO (to attach as a read-only ref). */
   poolRefUtxo?: RefUtxo;
   /** Marker mint-policy reference-script UTxO. */
@@ -203,6 +209,12 @@ export interface PoolOutputPart {
 export interface FeeOutputPart {
   address: string;
   lovelace: bigint;
+  /** Optional inline datum (hex CBOR) attached to this fee output. Used to make
+   *  team_cut accrue DIRECTLY to the cMATRA staking treasury: when the deployed
+   *  pool `team_address` is the staking_treasury SCRIPT address, the team output
+   *  MUST carry the accrual TreasuryDatum{epoch_index:-1, alloc_root:#""}
+   *  (hex `d8799f2040ff`) so the keeper can sweep it. Omitted → no datum. */
+  inlineDatumCbor?: string;
 }
 
 export interface MintPart {
@@ -411,13 +423,22 @@ export function buildUnderwriteParts(params: BuildUnderwritePartsParams): Underw
       inlineDatumCbor: bytesToHex(encodePoolDatum(updatedPoolDatum)),
     },
     // `teamAddress` is the pool validator's compile-time `team_address`
-    // parameter — the pool enforces team_cut lands here (a `list.any` with `>=`),
-    // so this destination is NOT freely redirectable off-chain. To fund cMATRA
-    // real-yield staking, deploy the pool with `team_address` set to the staking
-    // fee-collector address; the keeper folds the collector into the
-    // StakingTreasury ahead of each epoch Sweep. See
+    // parameter — the pool enforces team_cut lands here (a `list.any` with `>=`
+    // that never inspects the datum), so the destination is set at DEPLOY (a pool
+    // param), not redirected off-chain. To fund cMATRA real-yield staking, deploy
+    // the pool with `team_address` = the staking_treasury SCRIPT address and set
+    // `teamOutputInlineDatumCbor` to the accrual TreasuryDatum{-1,""}
+    // (d8799f2040ff): team_cut then accrues DIRECTLY to the conservation-
+    // protected treasury, swept each epoch. The datum is REQUIRED in that case
+    // (a script output with no datum is unspendable). See
     // aegis incentives/CMATRA_STAKING_V0_SPEC.md §3.
-    teamOutput: { address: bindings.teamAddress, lovelace: teamCut },
+    teamOutput: bindings.teamOutputInlineDatumCbor
+      ? {
+          address: bindings.teamAddress,
+          lovelace: teamCut,
+          inlineDatumCbor: bindings.teamOutputInlineDatumCbor,
+        }
+      : { address: bindings.teamAddress, lovelace: teamCut },
     partnerOutput:
       partner && partnerCut > 0n
         ? {
