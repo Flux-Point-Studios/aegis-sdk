@@ -307,3 +307,22 @@ describe('buildUnderwriteParts — partner fee + depeg routing', () => {
     expect(parts.policyDatum.riskClass).toBe('Depeg');
   });
 });
+
+// ── cMATRA staking: accrual datum on the team_cut output ────────────────────
+describe('buildUnderwriteParts — staking accrual datum on team output', () => {
+  // TreasuryDatum{ epoch_index: -1, alloc_root: #"" } (the accrual sentinel),
+  // attached so team_cut accrues directly to the staking_treasury script.
+  const ACCRUAL_DATUM = 'd8799f2040ff';
+
+  it('attaches teamOutputInlineDatumCbor to teamOutput when set', () => {
+    const bindings = { ...mainnetBindings(), teamOutputInlineDatumCbor: ACCRUAL_DATUM };
+    const parts = buildUnderwriteParts({ bindings, pool: freshPool(), ...BARRIER, nowMs: 1_750_000_000_000, startMarginMs: 120_000 });
+    expect(parts.teamOutput.address).toBe(TEAM_ADDR);
+    expect(parts.teamOutput.inlineDatumCbor).toBe(ACCRUAL_DATUM);
+  });
+
+  it('omits the datum by default (key-address team wallet)', () => {
+    const parts = buildUnderwriteParts({ bindings: mainnetBindings(), pool: freshPool(), ...BARRIER, nowMs: 1_750_000_000_000, startMarginMs: 120_000 });
+    expect(parts.teamOutput.inlineDatumCbor).toBeUndefined();
+  });
+});
