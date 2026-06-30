@@ -410,6 +410,13 @@ export function buildUnderwriteParts(params: BuildUnderwritePartsParams): Underw
       poolNft: { policyId: bindings.poolNftPolicyId, assetNameHex: bindings.poolNftAssetNameHex, quantity: 1n },
       inlineDatumCbor: bytesToHex(encodePoolDatum(updatedPoolDatum)),
     },
+    // `teamAddress` is the pool validator's compile-time `team_address`
+    // parameter — the pool enforces team_cut lands here (a `list.any` with `>=`),
+    // so this destination is NOT freely redirectable off-chain. To fund cMATRA
+    // real-yield staking, deploy the pool with `team_address` set to the staking
+    // fee-collector address; the keeper folds the collector into the
+    // StakingTreasury ahead of each epoch Sweep. See
+    // aegis incentives/CMATRA_STAKING_V0_SPEC.md §3.
     teamOutput: { address: bindings.teamAddress, lovelace: teamCut },
     partnerOutput:
       partner && partnerCut > 0n
