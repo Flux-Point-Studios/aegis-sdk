@@ -56,9 +56,25 @@ export {
   calculateProtocolFeeSplit,
   calculateTreasuryCut,
   TREASURY_SHARE_BPS,
+  TREASURY_SWEEP_SHARE_BPS,
 } from './fees';
 export { scriptEnterpriseAddress, keyAddress } from './address';
 export type { Network } from './address';
+
+// ---------------------------------------------------------------------------
+// Treasury-donation sweep (Phase 4 decouple) — the periodic key-witnessed tx
+// that batches the treasury's cut off the swap path (no PlutusV2 script).
+// ---------------------------------------------------------------------------
+export {
+  buildTreasurySweepParts,
+  reconcileTreasurySweep,
+  treasuryCutForAccrual,
+} from './treasury_sweep';
+export type {
+  TreasuryAccrual,
+  TreasurySweepParts,
+  BuildTreasurySweepPartsParams,
+} from './treasury_sweep';
 
 // ---------------------------------------------------------------------------
 // Pool-funded Underwrite composer — the one-click "add insurance" primitive

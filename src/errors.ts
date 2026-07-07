@@ -13,6 +13,9 @@ export type AegisErrorCode =
   // input
   | 'INVALID_INPUT'
   | 'MISSING_SPOT'
+  // treasury sweep (Phase 4 decouple)
+  | 'NOTHING_TO_SWEEP'
+  | 'INSUFFICIENT_FEES'
   // insurability gates
   | 'PREMIUM_BELOW_MIN'
   | 'COVERAGE_BELOW_MIN'

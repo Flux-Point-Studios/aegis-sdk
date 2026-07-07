@@ -14,7 +14,11 @@
 //   * team output = team_cut (floored, absorbs a sub-min-utxo partner cut)
 //   * partner output only when partner_cut ≥ min-utxo
 //   * marker mint = +1 AEGIS_POLICY with MintMarkers{count:1}
-//   * Conway treasury_donation = two-stage cut of premium
+//   * Conway treasury_donation = 0 (DECOUPLED, Option C Phase 4): the pool
+//     validator is rotated with treasury_share_bps = 0, so no per-underwrite
+//     donation is owed and the parts carry NO Conway key-22 field — a V2
+//     cardano-swaps fill can ride the same tx. The treasury's % is settled by
+//     a periodic key-witnessed sweep (see treasury_sweep.ts).
 //   * validity: start = now − margin, expiry = start + term
 //
 // Insurability + pool gates run first; an un-buildable policy THROWS a named
@@ -289,6 +293,9 @@ export function buildUnderwriteParts(params: BuildUnderwritePartsParams): Underw
     feeBps,
     partner ? partner.shareBps : 0n,
   );
+  // DECOUPLED (Phase 4): TREASURY_SHARE_BPS is rotated to 0, so this is 0n for
+  // every premium — the composed tx carries no Conway key-22 donation and stays
+  // V2-composable. The treasury cut is settled by the periodic sweep instead.
   const treasuryDonation = calculateTreasuryCut(premiumLovelace, feeBps);
 
   const newTotal = pool.datum.totalLiquidity + netGrowth;
