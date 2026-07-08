@@ -18,15 +18,15 @@ describe('constants.ts shim', () => {
   });
 
   it('exposes the live mainnet manifest constants', async () => {
-    // Pinned to the live V4 pool-funded mainnet pool (AEGIS_POOL_V4,
-    // release/mainnet.json frozen 2026-06-15) — the deployment partners
-    // integrate against. A change here means a mainnet redeploy + re-sync.
+    // Pinned to the live V7 general pool (AEGIS_POOL_V7, conditional donation,
+    // release/mainnet-v7.json) — the pool partners (incl. SaturnSwap insured
+    // swaps) integrate against. A change here means a mainnet redeploy + re-sync.
     const mn = await import('../constants.mainnet');
     expect(mn.AEGIS_POOL_NFT_POLICY_ID).toBe(
-      '9a649b75a85f0088eb68c1b72c3529b41f874fcdc603031a1444abb3',
+      'a48f89cf5a52226a2f8226b1af033507594ded136031575a3b028154',
     );
     expect(mn.AEGIS_POOL_ADDRESS).toBe(
-      'addr1w8qgahrl6xcg96fvj756a08k8fj8dz8vszf9s9jx6mlkvlclvfgtr',
+      'addr1w9926sf0nqczu6494fwz00cq8jlzqds6kfm0h2geh7kd2qs70dmj2',
     );
     expect(mn.AEGIS_MIN_PREMIUM).toBe(20_000_000n);
   });
