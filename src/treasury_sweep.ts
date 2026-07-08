@@ -1,7 +1,8 @@
 // treasury_sweep.ts — the periodic, key-witnessed treasury-donation sweep
-// (Option C Phase 4). The per-underwrite path no longer carves the treasury's
-// cut (TREASURY_SHARE_BPS rotated to 0 → no Conway key-22 on the swap tx, so a
-// PlutusV2 cardano-swaps fill can ride the same tx). The treasury's % is instead
+// (V7 conditional donation). The COMPOSED underwrite path omits the Conway
+// key-22 (treasury_share_bps stays 2500 on-chain and a PRESENT donation is
+// still enforced ≥ the cut, but an ABSENT one is accepted — so a PlutusV2
+// cardano-swaps fill can ride the same tx). The treasury's % is instead
 // BATCHED here: one tx that spends N accumulated team-fee UTxOs and sets the
 // Conway `treasury_donation` body field (CDDL key 22) to the reconciled cut.
 //
