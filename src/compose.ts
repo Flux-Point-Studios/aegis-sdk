@@ -14,7 +14,11 @@
 //   * team output = team_cut (floored, absorbs a sub-min-utxo partner cut)
 //   * partner output only when partner_cut ≥ min-utxo
 //   * marker mint = +1 AEGIS_POLICY with MintMarkers{count:1}
-//   * Conway treasury_donation = two-stage cut of premium
+//   * Conway treasury_donation = 0 (DECOUPLED, Option C Phase 4): the pool
+//     validator is rotated with treasury_share_bps = 0, so no per-underwrite
+//     donation is owed and the parts carry NO Conway key-22 field — a V2
+//     cardano-swaps fill can ride the same tx. The treasury's % is settled by
+//     a periodic key-witnessed sweep (see treasury_sweep.ts).
 //   * validity: start = now − margin, expiry = start + term
 //
 // Insurability + pool gates run first; an un-buildable policy THROWS a named
@@ -36,7 +40,6 @@ import {
   calculateFeeTotal,
   calculateNetPoolGrowth,
   calculateProtocolFeeSplit,
-  calculateTreasuryCut,
 } from './fees';
 import { quoteForPosition, type QuoteVerdict } from './quote';
 import { InputError, InsurabilityError, PoolError, ChainError } from './errors';
@@ -318,7 +321,13 @@ export function buildUnderwriteParts(params: BuildUnderwritePartsParams): Underw
     feeBps,
     partner ? partner.shareBps : 0n,
   );
-  const treasuryDonation = calculateTreasuryCut(premiumLovelace, feeBps);
+  // CONDITIONAL DONATION (Option C): the composer is the V2-composable path, so
+  // it OMITS the Conway key-22 donation (0n) — a key-22 in the body poisons a
+  // same-tx PlutusV2 cardano-swaps fill and fails phase-2. treasury_share_bps is
+  // still 2500 on-chain (the standalone API path donates + is enforced); the
+  // composer's omitted cut is reconciled by the periodic key-witnessed sweep
+  // (see treasury_sweep.ts).
+  const treasuryDonation = 0n;
 
   const newTotal = pool.datum.totalLiquidity + netGrowth;
   const newActive = pool.datum.activeCoverage + coverageLovelace;

@@ -120,6 +120,14 @@ export const MAINNET_FEEDS: readonly OracleFeed[] = [
     riskClass: 'Barrier',
     description: 'Event-coverage slot — binary alive/liquidated value for one integrated market (provisioned per integration).',
   },
+  {
+    symbol: 'USDM_USD',
+    policyId: 'b99998ba0353f47137fb9499da624b63a855d60719d4902777312439',
+    assetName: 'AEGIS_PRICE_FEED_USDM_USD_V1',
+    kind: 'depeg',
+    riskClass: 'Depeg',
+    description: 'USDM/USD — Mehen USDM depeg coverage feed (DEX-derived, no CEX market).',
+  },
 ] as const;
 
 /** Ergonomic lookup by symbol: `FEEDS.ADA_USD.policyId`. */

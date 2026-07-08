@@ -113,8 +113,10 @@ describe('buildUnderwriteParts — pool-funded value flow', () => {
     });
   });
 
-  it('treasury donation = two-stage cut of premium (Conway body field)', () => {
-    expect(parts.treasuryDonationLovelace).toBe(400_983n);
+  it('treasury donation = 0 — DECOUPLED (Phase 4): no Conway key-22 on the composed tx', () => {
+    // treasury_share_bps rotated to 0 → per-underwrite donation is inert, so a
+    // V2 cardano-swaps fill can share this tx. The cut is settled by the sweep.
+    expect(parts.treasuryDonationLovelace).toBe(0n);
   });
 
   it('validity: start = now − margin, expiry = start + days*86.4M', () => {

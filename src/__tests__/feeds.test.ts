@@ -49,10 +49,10 @@ describe('mainnet feed registry', () => {
 
   it('GENERIC_FEEDS excludes the bespoke event slots', () => {
     expect(GENERIC_FEEDS.every((f) => f.kind !== 'event')).toBe(true);
-    expect(GENERIC_FEEDS).toHaveLength(6);
+    expect(GENERIC_FEEDS).toHaveLength(7);
     expect(feedsByKind('event')).toHaveLength(4);
     expect(feedsByKind('spot')).toHaveLength(3);
-    expect(feedsByKind('depeg')).toHaveLength(2);
+    expect(feedsByKind('depeg')).toHaveLength(3);
   });
 
   it('reverse-lookup by policy id resolves to the right feed', () => {

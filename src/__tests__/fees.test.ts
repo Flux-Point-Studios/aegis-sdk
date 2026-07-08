@@ -14,6 +14,7 @@ import {
   calculateNetPoolGrowth,
   calculateProtocolFeeSplit,
   calculateTreasuryCut,
+  TREASURY_SWEEP_SHARE_BPS,
 } from '../fees';
 
 // [premium, feeBps, shareBps] -> {feeTotal, netGrowth, team, partner, treasury}
@@ -43,12 +44,25 @@ describe('fee + treasury math (bigint mirror of pricing.ak / _treasury.py)', () 
       expect(split.teamCut + split.partnerCut).toBe(g.feeTotal);
       // conservation: fee_total + net_growth == premium
       expect(g.feeTotal + g.netGrowth).toBe(g.premium);
+      // Conditional donation: treasury_share_bps is unchanged (2500), so the
+      // default two-stage cut is the golden value. The composer omits key-22
+      // on-tx (compose.ts); the standalone path + the sweep both use this cut.
       expect(calculateTreasuryCut(g.premium, g.feeBps)).toBe(g.treasury);
+      expect(calculateTreasuryCut(g.premium, g.feeBps, TREASURY_SWEEP_SHARE_BPS)).toBe(g.treasury);
     });
   }
 
   it('two-stage treasury division floors at each step (not collapsed)', () => {
     // 80_196_647*200//10000 = 1_603_932 ; *2500//10000 = 400_983 (not 400_983.x)
+    expect(calculateTreasuryCut(80_196_647n, 200n, TREASURY_SWEEP_SHARE_BPS)).toBe(400_983n);
+  });
+
+  it('default per-underwrite cut equals the sweep cut (composer omits it, sweep reconciles it)', () => {
+    // treasury_share_bps unchanged (2500) → the default cut IS the sweep cut; the
+    // composer emits 0n on-tx (compose.ts) and the sweep collects this amount.
+    expect(calculateTreasuryCut(80_196_647n, 200n)).toBe(
+      calculateTreasuryCut(80_196_647n, 200n, TREASURY_SWEEP_SHARE_BPS),
+    );
     expect(calculateTreasuryCut(80_196_647n, 200n)).toBe(400_983n);
   });
 

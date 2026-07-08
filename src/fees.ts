@@ -11,9 +11,25 @@
 
 import { MIN_UTXO_LOVELACE } from './constants';
 
-/** Default treasury share (bps of the protocol fee). Compile-time const on the
- *  Aiken side (types.ak); a change there is a pool-validator hash rotation. */
+/** Treasury share (bps of the protocol fee). Mirrors the compile-time const on
+ *  the Aiken side (types.ak::treasury_share_bps = 2500) — UNCHANGED.
+ *
+ *  CONDITIONAL DONATION (Option C). The on-chain Conway `treasury_donation`
+ *  (CDDL key 22) is OPTIONAL: the pool validator accepts an ABSENT field but
+ *  still enforces a PRESENT one to be >= this cut. A standalone underwrite (the
+ *  API `DonatingTxBuilder` path) donates per-tx and is enforced on-chain; the
+ *  SDK composer (`buildUnderwriteParts`) is the V2-composable path and OMITS key
+ *  22 (key 22 in the body poisons a same-tx PlutusV2 cardano-swaps fill and
+ *  fails phase-2), so its omitted cut is reconciled by the periodic
+ *  key-witnessed sweep — see `treasury_sweep.ts`. */
 export const TREASURY_SHARE_BPS = 2_500n;
+
+/** Treasury share (bps of the protocol fee) settled by the periodic, key-witnessed
+ *  treasury-sweep tx rather than per-underwrite. This is the value the on-chain
+ *  const held BEFORE the Phase-4 rotation (25% of the 2% fee = 0.5% of premium);
+ *  it now lives only on the sweep path, which sets Conway key 22 legally because
+ *  the sweep carries no PlutusV2 script. */
+export const TREASURY_SWEEP_SHARE_BPS = 2_500n;
 
 function assertNonNeg(...xs: bigint[]): void {
   for (const x of xs) if (x < 0n) throw new Error('fee inputs must be non-negative');
