@@ -44,10 +44,10 @@ describe('fee + treasury math (bigint mirror of pricing.ak / _treasury.py)', () 
       expect(split.teamCut + split.partnerCut).toBe(g.feeTotal);
       // conservation: fee_total + net_growth == premium
       expect(g.feeTotal + g.netGrowth).toBe(g.premium);
-      // Phase-4 decouple: the per-underwrite default share is 0, so the composed
-      // Underwrite tx carries no Conway donation. The batched sweep share (the
-      // pre-rotation value) still reproduces the golden two-stage cut.
-      expect(calculateTreasuryCut(g.premium, g.feeBps)).toBe(0n);
+      // Conditional donation: treasury_share_bps is unchanged (2500), so the
+      // default two-stage cut is the golden value. The composer omits key-22
+      // on-tx (compose.ts); the standalone path + the sweep both use this cut.
+      expect(calculateTreasuryCut(g.premium, g.feeBps)).toBe(g.treasury);
       expect(calculateTreasuryCut(g.premium, g.feeBps, TREASURY_SWEEP_SHARE_BPS)).toBe(g.treasury);
     });
   }
@@ -57,9 +57,13 @@ describe('fee + treasury math (bigint mirror of pricing.ak / _treasury.py)', () 
     expect(calculateTreasuryCut(80_196_647n, 200n, TREASURY_SWEEP_SHARE_BPS)).toBe(400_983n);
   });
 
-  it('per-underwrite share rotated to 0 → default treasury cut is inert (no key 22)', () => {
-    expect(calculateTreasuryCut(80_196_647n, 200n)).toBe(0n);
-    expect(calculateTreasuryCut(100_000_000n, 200n)).toBe(0n);
+  it('default per-underwrite cut equals the sweep cut (composer omits it, sweep reconciles it)', () => {
+    // treasury_share_bps unchanged (2500) → the default cut IS the sweep cut; the
+    // composer emits 0n on-tx (compose.ts) and the sweep collects this amount.
+    expect(calculateTreasuryCut(80_196_647n, 200n)).toBe(
+      calculateTreasuryCut(80_196_647n, 200n, TREASURY_SWEEP_SHARE_BPS),
+    );
+    expect(calculateTreasuryCut(80_196_647n, 200n)).toBe(400_983n);
   });
 
   it('rejects negative inputs', () => {

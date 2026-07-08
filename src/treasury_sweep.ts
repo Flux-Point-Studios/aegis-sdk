@@ -47,6 +47,17 @@ export function treasuryCutForAccrual(a: TreasuryAccrual): bigint {
  * the last sweep. This is the lovelace the sweep tx donates via Conway key 22.
  * For inputs whose raw fee is divisible this equals 25% of the accumulated raw
  * protocol fees (the "25% of accumulated fees" headline).
+ *
+ * CALLER CONTRACT (load-bearing — see the conditional-donation red-team): because
+ * a covered-swap underwrite omits the on-chain donation and NO on-chain field
+ * records paid-vs-owed, `accruals` MUST be the FULL history of donation-omitted
+ * policies reconstructed from spent-output `premium_paid` (and `cancellation_fee`
+ * for cancels) — NOT a live-UTxO snapshot. A snapshot silently under-collects:
+ * closed and short-lived policies (opened and cancelled/claimed/expired between
+ * two scans) have burned their marker + spent their UTxO and are invisible to a
+ * snapshot, and there is no on-chain way to tell an already-donated policy from
+ * one still owing. Feed a stateful full-history indexer, and count the cancel's
+ * SECOND (cancellation-fee-derived) cut.
  */
 export function reconcileTreasurySweep(accruals: readonly TreasuryAccrual[]): bigint {
   let total = 0n;

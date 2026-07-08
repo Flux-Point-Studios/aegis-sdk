@@ -39,7 +39,6 @@ import {
   calculateFeeTotal,
   calculateNetPoolGrowth,
   calculateProtocolFeeSplit,
-  calculateTreasuryCut,
 } from './fees';
 import { quoteForPosition, type QuoteVerdict } from './quote';
 import { InputError, InsurabilityError, PoolError, ChainError } from './errors';
@@ -293,10 +292,13 @@ export function buildUnderwriteParts(params: BuildUnderwritePartsParams): Underw
     feeBps,
     partner ? partner.shareBps : 0n,
   );
-  // DECOUPLED (Phase 4): TREASURY_SHARE_BPS is rotated to 0, so this is 0n for
-  // every premium — the composed tx carries no Conway key-22 donation and stays
-  // V2-composable. The treasury cut is settled by the periodic sweep instead.
-  const treasuryDonation = calculateTreasuryCut(premiumLovelace, feeBps);
+  // CONDITIONAL DONATION (Option C): the composer is the V2-composable path, so
+  // it OMITS the Conway key-22 donation (0n) — a key-22 in the body poisons a
+  // same-tx PlutusV2 cardano-swaps fill and fails phase-2. treasury_share_bps is
+  // still 2500 on-chain (the standalone API path donates + is enforced); the
+  // composer's omitted cut is reconciled by the periodic key-witnessed sweep
+  // (see treasury_sweep.ts).
+  const treasuryDonation = 0n;
 
   const newTotal = pool.datum.totalLiquidity + netGrowth;
   const newActive = pool.datum.activeCoverage + coverageLovelace;

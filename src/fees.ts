@@ -11,16 +11,18 @@
 
 import { MIN_UTXO_LOVELACE } from './constants';
 
-/** Per-underwrite treasury share (bps of the protocol fee). Mirrors the
- *  compile-time const on the Aiken side (types.ak::treasury_share_bps).
+/** Treasury share (bps of the protocol fee). Mirrors the compile-time const on
+ *  the Aiken side (types.ak::treasury_share_bps = 2500) — UNCHANGED.
  *
- *  ROTATED TO 0 (Option C Phase 4 — treasury-donation decouple). With the share
- *  at zero, `calculateTreasuryCut` returns 0 for every premium, so the Underwrite
- *  tx carries NO Conway `treasury_donation` (CDDL key 22) and a V2 cardano-swaps
- *  fill can share the same tx (key 22 in the body poisons the V2 script context
- *  and fails phase-2). The treasury's % is settled OFF the swap path by a periodic
- *  key-witnessed sweep tx — see `TREASURY_SWEEP_SHARE_BPS` / `treasury_sweep.ts`. */
-export const TREASURY_SHARE_BPS = 0n;
+ *  CONDITIONAL DONATION (Option C). The on-chain Conway `treasury_donation`
+ *  (CDDL key 22) is OPTIONAL: the pool validator accepts an ABSENT field but
+ *  still enforces a PRESENT one to be >= this cut. A standalone underwrite (the
+ *  API `DonatingTxBuilder` path) donates per-tx and is enforced on-chain; the
+ *  SDK composer (`buildUnderwriteParts`) is the V2-composable path and OMITS key
+ *  22 (key 22 in the body poisons a same-tx PlutusV2 cardano-swaps fill and
+ *  fails phase-2), so its omitted cut is reconciled by the periodic
+ *  key-witnessed sweep — see `treasury_sweep.ts`. */
+export const TREASURY_SHARE_BPS = 2_500n;
 
 /** Treasury share (bps of the protocol fee) settled by the periodic, key-witnessed
  *  treasury-sweep tx rather than per-underwrite. This is the value the on-chain
