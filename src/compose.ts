@@ -14,11 +14,12 @@
 //   * team output = team_cut (floored, absorbs a sub-min-utxo partner cut)
 //   * partner output only when partner_cut ≥ min-utxo
 //   * marker mint = +1 AEGIS_POLICY with MintMarkers{count:1}
-//   * Conway treasury_donation = 0 (DECOUPLED, Option C Phase 4): the pool
-//     validator is rotated with treasury_share_bps = 0, so no per-underwrite
-//     donation is owed and the parts carry NO Conway key-22 field — a V2
-//     cardano-swaps fill can ride the same tx. The treasury's % is settled by
-//     a periodic key-witnessed sweep (see treasury_sweep.ts).
+//   * Conway treasury_donation = 0 on THIS composed path (V7 conditional
+//     donation): treasury_share_bps stays 2500 on-chain and a PRESENT key-22
+//     is still enforced ≥ the cut — but the validator ACCEPTS an ABSENT one,
+//     so the composer omits key-22 (a V2 cardano-swaps fill can ride the same
+//     tx). The treasury's % is reconciled by a periodic key-witnessed sweep
+//     (see treasury_sweep.ts) that draws it from the accrued team fees.
 //   * validity: start = now − margin, expiry = start + term
 //
 // Insurability + pool gates run first; an un-buildable policy THROWS a named
