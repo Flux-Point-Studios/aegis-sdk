@@ -23,10 +23,10 @@ describe('constants.ts shim', () => {
     // swaps) integrate against. A change here means a mainnet redeploy + re-sync.
     const mn = await import('../constants.mainnet');
     expect(mn.AEGIS_POOL_NFT_POLICY_ID).toBe(
-      'a48f89cf5a52226a2f8226b1af033507594ded136031575a3b028154',
+      '9cf48b68374e539babe1bd583151868d031c37a83443ee58b8b2571a',
     );
     expect(mn.AEGIS_POOL_ADDRESS).toBe(
-      'addr1w9926sf0nqczu6494fwz00cq8jlzqds6kfm0h2geh7kd2qs70dmj2',
+      'addr1w8x2ts0jccv4ellphq44x9qhheprkz3ljxm7ws0q8j7xelcj85sg4',
     );
     expect(mn.AEGIS_MIN_PREMIUM).toBe(20_000_000n);
   });
