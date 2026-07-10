@@ -186,6 +186,8 @@ export interface AgentVaultDatum {
   epochSpent: bigint;
   policyScript: Uint8Array;
   maxFeeLeak: bigint;
+  /** Oracle-observer script hash the on-chain premium ceiling reads spot from. */
+  observerScriptHash: Uint8Array;
 }
 
 /** Aiken declaration order: Spend=0, Sweep=1. */

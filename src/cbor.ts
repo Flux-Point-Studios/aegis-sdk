@@ -423,7 +423,7 @@ export function decodePoolDatum(bytes: Uint8Array): PoolDatum {
 // AgentVaultDatum encode/decode (agent_vault.ak)
 // ---------------------------------------------------------------------------
 
-/** Encode an AgentVaultDatum as Constr 0 with 9 positional fields. */
+/** Encode an AgentVaultDatum as Constr 0 with 10 positional fields. */
 export function encodeAgentVaultDatum(d: AgentVaultDatum): Uint8Array {
   return encodeConstr(0, [
     encodeBytes(d.owner),
@@ -435,6 +435,7 @@ export function encodeAgentVaultDatum(d: AgentVaultDatum): Uint8Array {
     encodeInt(d.epochSpent),
     encodeBytes(d.policyScript),
     encodeInt(d.maxFeeLeak),
+    encodeBytes(d.observerScriptHash),
   ]);
 }
 
@@ -453,10 +454,11 @@ export function decodeAgentVaultDatum(bytes: Uint8Array): AgentVaultDatum {
   const epochSpent = decodeInt(r);
   const policyScript = decodeBytes(r);
   const maxFeeLeak = decodeInt(r);
+  const observerScriptHash = decodeBytes(r);
   if (len === -1) {
     if (readByte(r) !== 0xff) throw new Error('AgentVaultDatum: expected indefinite-array break');
-  } else if (len !== 9) {
-    throw new Error(`AgentVaultDatum expects 9 fields, got ${len}`);
+  } else if (len !== 10) {
+    throw new Error(`AgentVaultDatum expects 10 fields, got ${len}`);
   }
   return {
     owner,
@@ -468,6 +470,7 @@ export function decodeAgentVaultDatum(bytes: Uint8Array): AgentVaultDatum {
     epochSpent,
     policyScript,
     maxFeeLeak,
+    observerScriptHash,
   };
 }
 
