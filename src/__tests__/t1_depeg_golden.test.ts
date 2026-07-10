@@ -103,8 +103,11 @@ describe('T1 depeg (iUSD / Indigo / partner) — buildUnderwriteParts golden', (
     expect(parts.teamOutput.lovelace + parts.partnerOutput!.lovelace).toBe(parts.feeTotal);
   });
 
-  it('routes the two-stage Conway treasury donation', () => {
-    expect(parts.treasuryDonationLovelace).toBe(9_999_999n);
+  it('omits the Conway key-22 donation on the composed path (Option C)', () => {
+    // V7 conditional donation: a present key-22 poisons V2 composability, so
+    // the composer emits 0n and the treasury share settles via the batched
+    // sweep instead (see compose.ts "CONDITIONAL DONATION (Option C)").
+    expect(parts.treasuryDonationLovelace).toBe(0n);
   });
 
   it('the aegisBindings(mainnet) ergonomic path agrees on the IUSD feed wiring', () => {
