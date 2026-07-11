@@ -174,7 +174,7 @@ export interface PoolDatum {
  * Datum for the Agent Vault spend-bound escrow. Positional field order MUST
  * match the on-chain Aiken `AgentVaultDatum`:
  *   owner, agent, per_tx_cap, epoch_cap, epoch_len, epoch_start, epoch_spent,
- *   policy_script, max_fee_leak.
+ *   policy_script, max_fee_leak, observer_script_hash, marker_policy.
  */
 export interface AgentVaultDatum {
   owner: Uint8Array;
@@ -188,6 +188,8 @@ export interface AgentVaultDatum {
   maxFeeLeak: bigint;
   /** Oracle-observer script hash the on-chain premium ceiling reads spot from. */
   observerScriptHash: Uint8Array;
+  /** Marker minting-policy id (28-byte) the on-chain spend pins for marker authority. */
+  markerPolicy: Uint8Array;
 }
 
 /** Aiken declaration order: Spend=0, Sweep=1. */

@@ -22,9 +22,10 @@ import {
 
 // Golden emitted by pycardano AgentVaultDatum(owner=aa*28, agent=bb*28,
 // per_tx_cap=20e6, epoch_cap=50e6, epoch_len=604_800_000, epoch_start=1.7e12,
-// epoch_spent=5e6, policy_script=cc*28, max_fee_leak=2e6, observer=dd*28).
+// epoch_spent=5e6, policy_script=cc*28, max_fee_leak=2e6, observer=dd*28,
+// marker_policy=ee*28).
 const GOLDEN =
-  'd8799f581caaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1a01312d001a02faf0801a240c84001b0000018bcfe568001a004c4b40581ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc1a001e8480581cddddddddddddddddddddddddddddddddddddddddddddddddddddddddff';
+  'd8799f581caaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb1a01312d001a02faf0801a240c84001b0000018bcfe568001a004c4b40581ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc1a001e8480581cdddddddddddddddddddddddddddddddddddddddddddddddddddddddd581ceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeff';
 
 function sampleDatum(): AgentVaultDatum {
   return {
@@ -38,6 +39,7 @@ function sampleDatum(): AgentVaultDatum {
     policyScript: hexToBytes('cc'.repeat(28)),
     maxFeeLeak: 2_000_000n,
     observerScriptHash: hexToBytes('dd'.repeat(28)),
+    markerPolicy: hexToBytes('ee'.repeat(28)),
   };
 }
 
@@ -58,6 +60,7 @@ describe('AgentVaultDatum codec', () => {
     expect(bytesToHex(d.policyScript)).toBe('cc'.repeat(28));
     expect(d.maxFeeLeak).toBe(2_000_000n);
     expect(bytesToHex(d.observerScriptHash)).toBe('dd'.repeat(28));
+    expect(bytesToHex(d.markerPolicy)).toBe('ee'.repeat(28));
   });
 
   it('rejects a datum with the wrong constr id', () => {
