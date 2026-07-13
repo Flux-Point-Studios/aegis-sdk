@@ -134,6 +134,56 @@ export function keyAddress(
 }
 
 /**
+ * Bech32 base address with a KEY payment credential and a SCRIPT stake
+ * credential — the zero-premium-cover enrollment shape: the principal stays
+ * spendable by the payment key alone (the stake script is never invoked for
+ * spending), while delegation + reward withdrawal are governed by the
+ * per-enrollee premium_stake script. CIP-19 header 0b0010_<network>.
+ *
+ * @param paymentVkh 28-byte payment key hash (the enrollee).
+ * @param stakeScriptHashHex 56-char hex per-enrollee premium_stake hash
+ *   (take `summary.premium_stake_hash` from the enroll build response — param
+ *   application needs the backend's UPLC applicator).
+ */
+export function hybridStakeAddress(
+  paymentVkh: Uint8Array,
+  stakeScriptHashHex: string,
+  network: Network,
+): string {
+  if (paymentVkh.length !== 28) {
+    throw new Error(`payment vkh must be 28 bytes (got ${paymentVkh.length})`);
+  }
+  const stakeHash = hexToBytes(stakeScriptHashHex);
+  if (stakeHash.length !== 28) {
+    throw new Error(`stake script hash must be 28 bytes (got ${stakeHash.length})`);
+  }
+  // header high nibble 0b0010 = base + key payment cred + script stake cred.
+  const payload = new Uint8Array(57);
+  payload[0] = 0x20 | networkBit(network);
+  payload.set(paymentVkh, 1);
+  payload.set(stakeHash, 29);
+  return encodeAddr(network, payload);
+}
+
+/**
+ * Bech32 reward-account (stake) address for a SCRIPT stake credential — where
+ * an enrollee's staking rewards accrue between harvests. CIP-19 header
+ * 0b1111_<network>, HRP "stake"/"stake_test". Feed it to account-state reads
+ * (withdrawable balance, delegation, registered flag).
+ */
+export function scriptStakeAddress(stakeScriptHashHex: string, network: Network): string {
+  const stakeHash = hexToBytes(stakeScriptHashHex);
+  if (stakeHash.length !== 28) {
+    throw new Error(`stake script hash must be 28 bytes (got ${stakeHash.length})`);
+  }
+  const payload = new Uint8Array(29);
+  payload[0] = 0xf0 | networkBit(network);
+  payload.set(stakeHash, 1);
+  const hrp = network === 'mainnet' ? 'stake' : 'stake_test';
+  return bech32Encode(hrp, convertBits8to5(payload));
+}
+
+/**
  * Build a full Plutus address with a SCRIPT payment credential and no stake
  * credential (an enterprise script address). This is the typical shape for a
  * contract-controlled payout target — e.g. a governance/treasury or

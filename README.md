@@ -155,6 +155,12 @@ is a documented re-export of `quoteBarrier`, not a separate model.
 - `calculateFeeTotal` / `calculateProtocolFeeSplit` / `calculateTreasuryCut` —
   the fee/treasury math the validator enforces to the lovelace.
 - `scriptEnterpriseAddress` / `keyAddress` — CIP-19 bech32 address encoders.
+- `hybridStakeAddress` / `scriptStakeAddress` — the zero-premium-cover
+  enrollment shapes: key-payment + script-stake base address (principal stays
+  spendable by the payment key; the per-enrollee premium_stake script governs
+  delegation and rewards) and the script reward account for account-state
+  reads. Take the script hash from the enroll build response's
+  `summary.premium_stake_hash`.
 - `decodeFearDatum` / `classifyFear` — read the on-chain AEGIS/FEAR index datum
   (T7) and map a 0-100 score to its qualitative band.
 - `buildEventUnderwriteParts` / `decodeEventDatum` / `isTriggered` /

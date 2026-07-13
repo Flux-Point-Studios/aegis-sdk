@@ -30,3 +30,50 @@ describe('scriptEnterpriseAddress — golden vs deployed manifest addresses', ()
     expect(() => scriptEnterpriseAddress('abcd', 'mainnet')).toThrow();
   });
 });
+
+// Zero-premium-cover enrollment shapes: key payment + SCRIPT stake base
+// address (CIP-19 type 2) and the script reward account (type 15). Goldens
+// generated with pycardano 0.13.1 (the backend's encoder) so the SDK and the
+// enroll build response can never disagree on where the principal lives.
+import { hybridStakeAddress, scriptStakeAddress } from '../address';
+import { hexToBytes } from '../cbor';
+
+const ENROLLEE_VKH = hexToBytes('00112233445566778899aabbccddeeff00112233445566778899aabb');
+const PS_HASH = 'e5c60e5c60e5c60e5c60e5c60e5c60e5c60e5c60e5c60e5c60e5c60e';
+
+describe('hybridStakeAddress — key payment + script stake (enrollment address)', () => {
+  it('mainnet golden (pycardano)', () => {
+    expect(hybridStakeAddress(ENROLLEE_VKH, PS_HASH, 'mainnet')).toBe(
+      'addr1yyqpzg3ng32kvaugnx4thnxaamlsqyfzxdz92enh3zv64wl9cc89cc89cc89cc89cc89cc89cc89cc89cc89cc89cc8qn2uuk2',
+    );
+  });
+
+  it('preprod golden (pycardano)', () => {
+    expect(hybridStakeAddress(ENROLLEE_VKH, PS_HASH, 'preprod')).toBe(
+      'addr_test1yqqpzg3ng32kvaugnx4thnxaamlsqyfzxdz92enh3zv64wl9cc89cc89cc89cc89cc89cc89cc89cc89cc89cc89cc8qsupu64',
+    );
+  });
+
+  it('rejects malformed credentials', () => {
+    expect(() => hybridStakeAddress(new Uint8Array(27), PS_HASH, 'mainnet')).toThrow();
+    expect(() => hybridStakeAddress(ENROLLEE_VKH, 'abcd', 'mainnet')).toThrow();
+  });
+});
+
+describe('scriptStakeAddress — the per-enrollee reward account', () => {
+  it('mainnet golden (pycardano)', () => {
+    expect(scriptStakeAddress(PS_HASH, 'mainnet')).toBe(
+      'stake178juvrjuvrjuvrjuvrjuvrjuvrjuvrjuvrjuvrjuvrjuvrsjtyzx0',
+    );
+  });
+
+  it('preprod golden (pycardano)', () => {
+    expect(scriptStakeAddress(PS_HASH, 'preprod')).toBe(
+      'stake_test17rjuvrjuvrjuvrjuvrjuvrjuvrjuvrjuvrjuvrjuvrjuvrs4pwqzj',
+    );
+  });
+
+  it('rejects a non-28-byte hash', () => {
+    expect(() => scriptStakeAddress('abcd', 'preprod')).toThrow();
+  });
+});

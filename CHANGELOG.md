@@ -4,6 +4,14 @@
 
 Additive (no breaking changes):
 
+- **Zero-premium-cover enrollment addresses** — `hybridStakeAddress(paymentVkh,
+  stakeScriptHashHex, network)` encodes the CIP-19 type-2 base address
+  (key payment + SCRIPT stake) the enrollment places principal at, and
+  `scriptStakeAddress(stakeScriptHashHex, network)` encodes the per-enrollee
+  script reward account (type 15, `stake`/`stake_test` HRP). Goldens are
+  pycardano 0.13.1 output so the SDK and the backend enroll build response
+  can never disagree on where the principal lives.
+
 - **N2 Event-class cover** — no new composer and **no new risk class**: event
   cover is a `Barrier` underwrite bound to an `EVENT_SLOT` feed (`feeds.ts`,
   `kind:'event'`). `buildUnderwriteParts` already composes it; `event_golden.test.ts`

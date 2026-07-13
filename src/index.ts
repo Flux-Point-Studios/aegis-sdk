@@ -58,7 +58,13 @@ export {
   TREASURY_SHARE_BPS,
   TREASURY_SWEEP_SHARE_BPS,
 } from './fees';
-export { scriptEnterpriseAddress, keyAddress, scriptPayoutTarget } from './address';
+export {
+  scriptEnterpriseAddress,
+  keyAddress,
+  scriptPayoutTarget,
+  hybridStakeAddress,
+  scriptStakeAddress,
+} from './address';
 export type { Network } from './address';
 
 // ---------------------------------------------------------------------------
