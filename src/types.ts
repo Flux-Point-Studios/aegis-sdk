@@ -167,6 +167,35 @@ export interface PoolDatum {
 }
 
 // ---------------------------------------------------------------------------
+// AgentVaultDatum (DeFAI Phase 3 — agent_vault.ak)
+// ---------------------------------------------------------------------------
+
+/**
+ * Datum for the Agent Vault spend-bound escrow. Positional field order MUST
+ * match the on-chain Aiken `AgentVaultDatum`:
+ *   owner, agent, per_tx_cap, epoch_cap, epoch_len, epoch_start, epoch_spent,
+ *   policy_script, max_fee_leak, observer_script_hash, marker_policy.
+ */
+export interface AgentVaultDatum {
+  owner: Uint8Array;
+  agent: Uint8Array;
+  perTxCap: bigint;
+  epochCap: bigint;
+  epochLen: bigint;
+  epochStart: bigint;
+  epochSpent: bigint;
+  policyScript: Uint8Array;
+  maxFeeLeak: bigint;
+  /** Oracle-observer script hash the on-chain premium ceiling reads spot from. */
+  observerScriptHash: Uint8Array;
+  /** Marker minting-policy id (28-byte) the on-chain spend pins for marker authority. */
+  markerPolicy: Uint8Array;
+}
+
+/** Aiken declaration order: Spend=0, Sweep=1. */
+export type AgentVaultRedeemerKind = 'Spend' | 'Sweep';
+
+// ---------------------------------------------------------------------------
 // PolicyRedeemer  (R17: 5 zero-field variants)
 // ---------------------------------------------------------------------------
 

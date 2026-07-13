@@ -18,6 +18,8 @@
 // `script_data_hash`, and silently invalidate every witness on the tx.
 
 import type {
+  AgentVaultDatum,
+  AgentVaultRedeemerKind,
   LPTokenRedeemer,
   MarkerRedeemer,
   PlutusAddress,
@@ -415,6 +417,69 @@ export function decodePoolDatum(bytes: Uint8Array): PoolDatum {
     throw new Error(`PoolDatum expects 6 fields, got ${len}`);
   }
   return { totalLiquidity, activeCoverage, lpTokenPolicy, protocolFeeBps, poolNft, lpSupply };
+}
+
+// ---------------------------------------------------------------------------
+// AgentVaultDatum encode/decode (agent_vault.ak)
+// ---------------------------------------------------------------------------
+
+/** Encode an AgentVaultDatum as Constr 0 with 11 positional fields. */
+export function encodeAgentVaultDatum(d: AgentVaultDatum): Uint8Array {
+  return encodeConstr(0, [
+    encodeBytes(d.owner),
+    encodeBytes(d.agent),
+    encodeInt(d.perTxCap),
+    encodeInt(d.epochCap),
+    encodeInt(d.epochLen),
+    encodeInt(d.epochStart),
+    encodeInt(d.epochSpent),
+    encodeBytes(d.policyScript),
+    encodeInt(d.maxFeeLeak),
+    encodeBytes(d.observerScriptHash),
+    encodeBytes(d.markerPolicy),
+  ]);
+}
+
+/** Decode an inline AgentVaultDatum read from a live vault UTxO. */
+export function decodeAgentVaultDatum(bytes: Uint8Array): AgentVaultDatum {
+  const r: Reader = { buf: bytes, off: 0 };
+  const id = readConstrTag(r);
+  if (id !== 0) throw new Error(`AgentVaultDatum expects Constr 0, got ${id}`);
+  const len = readArrayHeader(r);
+  const owner = decodeBytes(r);
+  const agent = decodeBytes(r);
+  const perTxCap = decodeInt(r);
+  const epochCap = decodeInt(r);
+  const epochLen = decodeInt(r);
+  const epochStart = decodeInt(r);
+  const epochSpent = decodeInt(r);
+  const policyScript = decodeBytes(r);
+  const maxFeeLeak = decodeInt(r);
+  const observerScriptHash = decodeBytes(r);
+  const markerPolicy = decodeBytes(r);
+  if (len === -1) {
+    if (readByte(r) !== 0xff) throw new Error('AgentVaultDatum: expected indefinite-array break');
+  } else if (len !== 11) {
+    throw new Error(`AgentVaultDatum expects 11 fields, got ${len}`);
+  }
+  return {
+    owner,
+    agent,
+    perTxCap,
+    epochCap,
+    epochLen,
+    epochStart,
+    epochSpent,
+    policyScript,
+    maxFeeLeak,
+    observerScriptHash,
+    markerPolicy,
+  };
+}
+
+/** Encode an AgentVaultRedeemer: Spend=Constr 0, Sweep=Constr 1. */
+export function encodeAgentVaultRedeemer(kind: AgentVaultRedeemerKind): Uint8Array {
+  return encodeConstr(kind === 'Spend' ? 0 : 1, []);
 }
 
 // ---------------------------------------------------------------------------

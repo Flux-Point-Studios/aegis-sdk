@@ -118,6 +118,19 @@ export type {
   LpMintPart,
   VaultReferences,
 } from './compose';
+export {
+  buildFundVaultParts,
+  buildOwnerSweepParts,
+  nextVaultDatumForSpend,
+} from './vault';
+export type {
+  FundVaultPartsParams,
+  FundVaultParts,
+  VaultOutputPart,
+  OwnerSweepPartsParams,
+  OwnerSweepParts,
+} from './vault';
+export type { AgentVaultDatum, AgentVaultRedeemerKind } from './types';
 
 // ---------------------------------------------------------------------------
 // Canonical policy_id derivation (BLAKE2b-224) — matches the Aegis claim
@@ -193,6 +206,9 @@ export {
   encodePolicyDatum,
   encodePoolDatum,
   decodePoolDatum,
+  encodeAgentVaultDatum,
+  decodeAgentVaultDatum,
+  encodeAgentVaultRedeemer,
   encodeFullAddress,
   // Redeemers
   encodePolicyRedeemer,
