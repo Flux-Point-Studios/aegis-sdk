@@ -1,0 +1,17 @@
+when:
+  - event: push
+    branch: main
+  - event: [pull_request, manual]
+
+matrix:
+  NODE_VERSION: [18, 20, 22]
+
+steps:
+  - name: build-test
+    image: node:${NODE_VERSION}-bookworm
+    commands:
+      # lockfile-pinned install; no package lifecycle scripts run in CI
+      - npm ci --ignore-scripts
+      - npm run typecheck
+      - npm test
+      - npm run build
