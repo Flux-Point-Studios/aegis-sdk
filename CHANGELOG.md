@@ -4,11 +4,10 @@
 
 Additive (no breaking changes):
 
-- **Preview** — `Network` takes `'preview'`. `CHAIN_FACTS` records each network's
-  magic (preview 2), address network id, Shelley slot origin (preview 1666656000 s)
-  and public Koios; `slotToPosixMs` / `posixMsToSlot` convert a slot and the POSIX
-  milliseconds a script reads its validity bound as. `aegisBindings` refuses a
-  network with no Aegis deployment instead of returning preprod's.
+- **Chain facts per network** — `CHAIN_FACTS` records each network's magic
+  (preview 2), address network id, Shelley slot origin (preview 1666656000 s)
+  and public Koios; `slotToPosixMs` / `posixMsToSlot` convert a slot and the
+  POSIX milliseconds a script reads its validity bound as.
 - **`bech32Address` / `decodeBech32Address`** — the CIP-19 base and enterprise
   address codec for any key or script payment and stake credential.
 - **`decodePlutusData`** — reads any Plutus Data another protocol writes:
@@ -78,6 +77,15 @@ Additive (no breaking changes):
 
 Changed:
 
+- **`Network` takes `'preview'`.** The public `Network` union is
+  `'mainnet' | 'preprod' | 'preview'`. Code that switches exhaustively on a
+  `Network` fails to typecheck until it handles `'preview'`, as does a
+  `Record<Network, T>` it fills without a `preview` entry. `aegisBindings`
+  takes `'mainnet' | 'preprod'`, so a value typed `Network` no longer passes
+  to it; called from untyped code with any other network, it throws
+  `InputError` with code `INVALID_INPUT` and message
+  `there is no Aegis deployment on <network>` instead of returning preprod's
+  bindings.
 - **Hex input must be hex digits.** Given a hex string holding a character
   that is not a hex digit, `readGenericData` (so `decodeFearDatum` and
   `decodeEventDatum`) and `decodePlutusData` (so `decodeFluidSuite` and
