@@ -26,6 +26,21 @@ Additive (no breaking changes):
   gen-3 Book sale on the RH1 row is built from. A loan that can be claimed for
   lateness, owes a token other than ADA, or has no liquidation line is refused
   with `LOAN_NOT_COVERABLE`.
+- **FluidTokens V4 pools and borrows** — the Plutus Data of an open-pool and a
+  borrow from it, as the protocol's validators rebuild them: `fluidPoolDatum`
+  (a permissionless pool lending ADA against ADA at `FluidPoolTerms`;
+  `FLUID_PREVIEW_ADA_TERMS` are FluidTokens' own preview terms),
+  `fluidPoolNftName`, `fluidLoanDatum` (the LoanDatum a borrow from that pool
+  locks), `fluidLoanId`, the pool mint, pool withdraw, loan mint, bond and
+  borrow-action redeemers, `fluidRedeemerPosition` (where the ledger orders the
+  redeemer the loan mint points at) and `fluidDraftUnits`. Choosing inputs,
+  balancing and signing stay the caller's, as do a borrow's whole-transaction
+  checks: a validity range of at most `FLUID_MAX_VALIDITY_MS`, collateral at
+  the pool's ratio, and a pool left at its min-UTxO.
+- **`encodePlutusData`** — writes Plutus Data with definite lengths, a bignum
+  past a machine word, and a constructor under tags 121-127, 1280-1400 or 102;
+  `decodePlutusData` reads back every value it writes, and now refuses a hex
+  digit that is not one instead of reading it as zero.
 - **Zero-premium-cover enrollment addresses** — `hybridStakeAddress(paymentVkh,
   stakeScriptHashHex, network)` encodes the CIP-19 type-2 base address
   (key payment + SCRIPT stake) the enrollment places principal at, and

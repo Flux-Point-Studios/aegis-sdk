@@ -166,7 +166,7 @@ function refuse(message: string): never {
   throw new InputError('INVALID_INPUT', message);
 }
 
-function constrOf(node: PlutusData, what: string): PlutusConstr {
+export function constrOf(node: PlutusData, what: string): PlutusConstr {
   if (typeof node !== 'object' || node instanceof Uint8Array || Array.isArray(node) || !('fields' in node)) {
     refuse(`${what} is no constructor`);
   }
@@ -282,7 +282,7 @@ function ceilDiv(n: bigint, d: bigint): bigint {
   return n > 0n ? (n + d - 1n) / d : n / d;
 }
 
-function floorDiv(n: bigint, d: bigint): bigint {
+export function floorDiv(n: bigint, d: bigint): bigint {
   return n >= 0n ? n / d : -((-n + d - 1n) / d);
 }
 

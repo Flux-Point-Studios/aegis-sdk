@@ -1,0 +1,2638 @@
+{
+  "source": "api/lending/fluid_v4_borrow.py",
+  "generator": "scripts/fluid_v4_borrow_vectors.py",
+  "generatedFrom": "0cd7b9b8b49e6ec2315d2b1f3fd01915d7f92829",
+  "assemblers": [
+    "borrow_view",
+    "open_pool_view"
+  ],
+  "types": {
+    "PoolTerms": [
+      "interest_rate",
+      "liquidation",
+      "perpetual",
+      "collateral_oracle",
+      "min_collateral"
+    ]
+  },
+  "constants": {
+    "NO_PERMISSIONED_CONDITION": "4e4f4e45",
+    "NO_ORACLE": [
+      "4e4f4e45",
+      "4e4f4e45"
+    ],
+    "MAX_VALIDITY_MS": "3600000",
+    "POOL_SPEND_REDEEMER": "d87980",
+    "LENDER_BOND_DATUM": "d87980",
+    "PREVIEW_ADA_TERMS": {
+      "interest_rate": "459",
+      "liquidation": [
+        "100",
+        "125",
+        "100",
+        false
+      ],
+      "perpetual": [
+        "28",
+        "5"
+      ],
+      "collateral_oracle": [
+        "",
+        ""
+      ],
+      "min_collateral": [
+        "2",
+        "1"
+      ]
+    }
+  },
+  "functions": {
+    "loan_id": [
+      {
+        "name": "FluidTokens' tFLDT borrow names its loan after the pool input it spends",
+        "args": {
+          "pool_input": "e6be0265475750dd51718f91bc4b47a4d50c2f2b57217daa93705616ea8033d2#0"
+        },
+        "out": "6b5f4637a9f6780a1ee1e5b7924f984354df275abe6593ed6a68c802",
+        "tx": "2cb300eaef3e83011b7c8c433d092a5d674d748f6c53e1be048e35a96dad1760",
+        "onChain": {
+          "assetName": "6b5f4637a9f6780a1ee1e5b7924f984354df275abe6593ed6a68c802"
+        }
+      },
+      {
+        "name": "the ADA borrow 93492f0e's loan",
+        "args": {
+          "pool_input": "6ca799bb84b7d8a07255fce9ab80326cba7b1938bd0c3185f0b2c584f6479e64#0"
+        },
+        "out": "17a5d13b074d7bbd4c0003563ade227760325ca836e7b80839c9bab2",
+        "tx": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+        "onChain": {
+          "assetName": "17a5d13b074d7bbd4c0003563ade227760325ca836e7b80839c9bab2"
+        }
+      },
+      {
+        "name": "output index 0",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#0"
+        },
+        "out": "7050f417a64d267242e3414f6dbfa3e3297b74ca74017286f2755231"
+      },
+      {
+        "name": "output index 23",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#23"
+        },
+        "out": "b78aa46067a88a1330915128ee9f996e02e8dd8f94c2ce6f0027ae46"
+      },
+      {
+        "name": "output index 24",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#24"
+        },
+        "out": "bf5e2322cdbe891b78f6bead82e55407e0bb38add7316415001de4df"
+      },
+      {
+        "name": "output index 255",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#255"
+        },
+        "out": "20d82801ff925ade8b95516a2a26fdd7f797facdebaf1bfd0df466aa"
+      },
+      {
+        "name": "output index 256",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#256"
+        },
+        "out": "8a61952a11d62b979a65979cea28a833d0e2961134670e927b56d4f9"
+      },
+      {
+        "name": "output index 65535",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#65535"
+        },
+        "out": "44b1cd6a306f4e91e312b0186ddefb26dfc989b4682e7de0b3894969"
+      },
+      {
+        "name": "output index 65536",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#65536"
+        },
+        "out": "7769ed2270653781cba0c80e2dffbafe76faeced640fb9c770057bf4"
+      },
+      {
+        "name": "output index 4294967295",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#4294967295"
+        },
+        "out": "02ed44696f5a81ed567b3f00994ab7fb3236c9131d83d46f6ec9852a"
+      },
+      {
+        "name": "output index 4294967296",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#4294967296"
+        },
+        "out": "5e9d920e41babcac15f8a2f02f26e0598dede9cf598ff590447c3ca1"
+      },
+      {
+        "name": "output index 18446744073709551615",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#18446744073709551615"
+        },
+        "out": "bdddb6e30a6bb383c28bde13b1e10d34ee480aa8cb2806b1dcee6190"
+      },
+      {
+        "name": "output index 18446744073709551616",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#18446744073709551616"
+        },
+        "out": "c2cfbf26e0f52e71c4b02779f4899045bc5b1b7669a1ecfa36b21d3e"
+      },
+      {
+        "name": "an upper-case tx id hashes as its bytes",
+        "args": {
+          "pool_input": "ABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABABAB#1"
+        },
+        "out": "542ec953b22cd4ab07bfb19876f5ad756ef5c8ab9ea00a8a7e4d9d6b"
+      },
+      {
+        "name": "an empty tx id",
+        "args": {
+          "pool_input": "#0"
+        },
+        "out": "8111dfe542b1dc0b65f9779346d19cbfd451102c2493ac28cd2594e7"
+      },
+      {
+        "name": "a negative index, which int() reads",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#-1"
+        },
+        "out": "5da2145eeed26d5961f513bdb196987279258849f0cdbc7eacc02519"
+      },
+      {
+        "name": "no index",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "not enough values to unpack (expected 2, got 1)",
+          "module": false
+        }
+      },
+      {
+        "name": "two separators",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#1#2"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "too many values to unpack (expected 2)",
+          "module": false
+        }
+      },
+      {
+        "name": "a non-hex tx id",
+        "args": {
+          "pool_input": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz#0"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "non-hexadecimal number found in fromhex() arg at position 0",
+          "module": false
+        }
+      },
+      {
+        "name": "an odd-length tx id",
+        "args": {
+          "pool_input": "abc#0"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "non-hexadecimal number found in fromhex() arg at position 3",
+          "module": false
+        }
+      },
+      {
+        "name": "an index that is no integer",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#x"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "invalid literal for int() with base 10: 'x'",
+          "module": false
+        }
+      },
+      {
+        "name": "an empty index",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "invalid literal for int() with base 10: ''",
+          "module": false
+        }
+      }
+    ],
+    "loan_datum": [
+      {
+        "name": "FluidTokens' tFLDT borrow writes its loan from its pool's datum",
+        "args": {
+          "pool": "d8799f444e4f4e45d87980d8799fd8799f4040ffd8799f4040ff1901cb000000d87b9f1864187d1864d87980ffd87b9f181c05ff0000d8798040ffd87b9f581c45ce890c9bcf70f6eed629b5db7c0622e44ca1003e001a2cf951518fffd8799fd87a9f581cdd2d7f3fdd0ca7ea68e94912c3d332f18299b6ec8854577492d006ebffd8799fd8799fd8799f581c0bc475635494ae42927bc22092489bddcf0de17d79aa30db497c1c96ffffffff582000eb26c457074e5fc9d623647dfff45573606aacbf6314fc440892768ed866809fd8799f581c0b77d150c275bd0a600633e4be7d09f83c4b9f00981e22ac9c9d3f62d8799f490014df1074464c4454ffd8799f581c9a2ec5c92daccbb269611a9eae7a40f9788d3f9c0229661b6234286f49000de1406f766f3633ffffff9f1864ff9f1832ffd87a80ff",
+          "collateral_index": "0",
+          "principal": "20000000",
+          "valid_to_ms": "1789290234000",
+          "pool_id": "00507a512704319e88ed15734b152d3759ef3a5069f1e9aca1e0a99ca8"
+        },
+        "out": "d87991001a01312d001b000001a09a024090001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00507a512704319e88ed15734b152d3759ef3a5069f1e9aca1e0a99ca8d87983581c0b77d150c275bd0a600633e4be7d09f83c4b9f00981e22ac9c9d3f62d87981490014df1074464c4454d87982581c9a2ec5c92daccbb269611a9eae7a40f9788d3f9c0229661b6234286f49000de1406f766f3633",
+        "tx": "2cb300eaef3e83011b7c8c433d092a5d674d748f6c53e1be048e35a96dad1760",
+        "onChain": {
+          "data": "d8799f001a01312d001b000001a09a024090001901cb00d8799f4040ffd8799f4040ff0000d87b9f1864187d1864d87980ffd87b9f181c05ff0000d879805821504f4f4c00507a512704319e88ed15734b152d3759ef3a5069f1e9aca1e0a99ca8d8799f581c0b77d150c275bd0a600633e4be7d09f83c4b9f00981e22ac9c9d3f62d8799f490014df1074464c4454ffd8799f581c9a2ec5c92daccbb269611a9eae7a40f9788d3f9c0229661b6234286f49000de1406f766f3633ffffff"
+        }
+      },
+      {
+        "name": "the ADA borrow 93492f0e's loan datum",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "1794355013000",
+          "pool_id": "0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc239"
+        },
+        "out": "d87991001a05f5e1001b000001a1c7e4a588001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc239d8798340d8798140d879824040",
+        "tx": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+        "onChain": {
+          "bytes": "d87991001a05f5e1001b000001a1c7e4a588001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc239d8798340d8798140d879824040"
+        }
+      },
+      {
+        "name": "principal 0",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "0",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d8799100001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 23",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "23",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d8799100171b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 24",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "24",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d879910018181b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 255",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "255",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d879910018ff1b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 256",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "256",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001901001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 65535",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "65535",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d879910019ffff1b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 65536",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "65536",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a000100001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 4294967295",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "4294967295",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001affffffff1b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 4294967296",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "4294967296",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001b00000001000000001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 18446744073709551615",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "18446744073709551615",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001bffffffffffffffff1b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "principal 18446744073709551616",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "18446744073709551616",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d8799100c2490100000000000000001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "FluidTokens' f25e1378 pool, read in its own CBOR form",
+        "args": {
+          "pool": "d8799f444e4f4e45d87980d8799fd8799f4040ffd8799f4040ff1901cb000000d87b9f1864187d1864d87980ffd87b9f181c05ff0000d8798040ffd87b9f581c45ce890c9bcf70f6eed629b5db7c0622e44ca1003e001a2cf951518fffd8799fd87a9f581cdd2d7f3fdd0ca7ea68e94912c3d332f18299b6ec8854577492d006ebffd8799fd8799fd8799f581cec531e73ded920f262108982988eb4839277c5cb379f65c41a4dce2bffffffff5820a7c7769f5ca0bb807bcfc37c1e674b644b971e1c2a0facbe0be26420a59b2ffa9fd8799f581c0b77d150c275bd0a600633e4be7d09f83c4b9f00981e22ac9c9d3f62d8799f490014df1074464c4454ffd8799f581c9a2ec5c92daccbb269611a9eae7a40f9788d3f9c0229661b6234286f49000de1406f766f3633ffffff9f1864ff9f1832ffd87a80ff",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a05f5e1001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd87983581c0b77d150c275bd0a600633e4be7d09f83c4b9f00981e22ac9c9d3f62d87981490014df1074464c4454d87982581c9a2ec5c92daccbb269611a9eae7a40f9788d3f9c0229661b6234286f49000de1406f766f3633"
+      },
+      {
+        "name": "the last of three collateral options",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec83d8798340d8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416fd87983581cccccccccccccccccccccccccccccccccccccccccccccccccccccccccd8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416fd87983581cddddddddddddddddddddddddddddddddddddddddddddddddddddddddd879815820eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeed87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416f81028101d87980",
+          "collateral_index": "2",
+          "principal": "100000000",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a05f5e1001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd87983581cddddddddddddddddddddddddddddddddddddddddddddddddddddddddd879815820eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeed87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416f"
+      },
+      {
+        "name": "the first of three collateral options",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec83d8798340d8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416fd87983581cccccccccccccccccccccccccccccccccccccccccccccccccccccccccd8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416fd87983581cddddddddddddddddddddddddddddddddddddddddddddddddddddddddd879815820eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeed87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416f81028101d87980",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a05f5e1001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416f"
+      },
+      {
+        "name": "lendDate zero",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "0",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a05f5e10000001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "lendDate past a word",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "18446744073709551616",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a05f5e100c249010000000000000000001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "a negative principal is written as given",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "-18446744073709551617",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d8799100c3490100000000000000001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "an empty pool id",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "1794000000000",
+          "pool_id": ""
+        },
+        "out": "d87991001a05f5e1001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d8798044504f4f4cd8798340d8798140d879824040"
+      },
+      {
+        "name": "a 32-byte pool id, the longest asset name",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "abababababababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a05f5e1001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805824504f4f4cababababababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "a pool under another constructor index is read the same",
+        "args": {
+          "pool": "d905028a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a05f5e1001b000001a1b2bb9400001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "every commonData field distinct lands where LoanDatum reads it",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd8798241014102d87982410341040b0c0d0ed87b84151617d87a80d87b82181f18200f10d87a804105d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "100000000",
+          "valid_to_ms": "1794000000000",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "out": "d87991001a05f5e1001b000001a1b2bb9400000b0dd8798241014102d87982410341040c0ed87b84151617d87a80d87b82181f18200f10d87a805821504f4f4c00ababababababababababababababababababababababababababababd8798340d8798140d879824040"
+      },
+      {
+        "name": "a collateral option past the pool's",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "1",
+          "principal": "1",
+          "valid_to_ms": "0",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the pool offers no collateral option 1",
+          "module": true
+        }
+      },
+      {
+        "name": "a negative collateral option",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "-1",
+          "principal": "1",
+          "valid_to_ms": "0",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the pool offers no collateral option -1",
+          "module": true
+        }
+      },
+      {
+        "name": "a pool datum that is no constructor",
+        "args": {
+          "pool": "05",
+          "collateral_index": "0",
+          "principal": "1",
+          "valid_to_ms": "0",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "not a constructor",
+          "module": false
+        }
+      },
+      {
+        "name": "commonData of eleven fields",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798bd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d87980d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "1",
+          "valid_to_ms": "0",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "not enough values to unpack (expected 12, got 11)",
+          "module": false
+        }
+      },
+      {
+        "name": "a pool datum of six fields",
+        "args": {
+          "pool": "d87986444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec",
+          "collateral_index": "0",
+          "principal": "1",
+          "valid_to_ms": "0",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "raises": {
+          "type": "IndexError",
+          "message": "list index out of range",
+          "module": false
+        }
+      },
+      {
+        "name": "collateral options that are no list",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec4361626381028101d87980",
+          "collateral_index": "0",
+          "principal": "1",
+          "valid_to_ms": "0",
+          "pool_id": "00abababababababababababababababababababababababababababab"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the pool offers no collateral option 0",
+          "module": true
+        }
+      },
+      {
+        "name": "a non-hex pool id",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "collateral_index": "0",
+          "principal": "1",
+          "valid_to_ms": "0",
+          "pool_id": "zz"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "non-hexadecimal number found in fromhex() arg at position 0",
+          "module": false
+        }
+      }
+    ],
+    "borrow_redeemer": [
+      {
+        "name": "FluidTokens' tFLDT borrow, its oracle-priced collateral at oracle 7",
+        "args": {
+          "config_index": "4",
+          "borrower": {
+            "payment": {
+              "key": "ea1bb1ccd33aeb9e02516c2eb50adbaa63d7b7538b03c96908bfc934"
+            },
+            "stake": {
+              "key": "1c5621a0d3f7ee5041ece1c8f41a9f611ab4bca268923c21b6ca8dc3"
+            }
+          },
+          "lender_bond_output": "3",
+          "borrower_bond_output": "2",
+          "principal_oracle_index": "0",
+          "collateral_index": "0",
+          "collateral_oracle_index": "7",
+          "principal": "20000000",
+          "pool_id": "00507a512704319e88ed15734b152d3759ef3a5069f1e9aca1e0a99ca8",
+          "permission_index": "1"
+        },
+        "out": "d879820481d87989d87982d87981581cea1bb1ccd33aeb9e02516c2eb50adbaa63d7b7538b03c96908bfc934d87981d87981d87981581c1c5621a0d3f7ee5041ece1c8f41a9f611ab4bca268923c21b6ca8dc303020000071a01312d00581d00507a512704319e88ed15734b152d3759ef3a5069f1e9aca1e0a99ca801",
+        "tx": "2cb300eaef3e83011b7c8c433d092a5d674d748f6c53e1be048e35a96dad1760",
+        "onChain": {
+          "value": {
+            "constructor": "0",
+            "fields": [
+              {
+                "int": "4"
+              },
+              {
+                "list": [
+                  {
+                    "constructor": "0",
+                    "fields": [
+                      {
+                        "constructor": "0",
+                        "fields": [
+                          {
+                            "constructor": "0",
+                            "fields": [
+                              {
+                                "bytes": "ea1bb1ccd33aeb9e02516c2eb50adbaa63d7b7538b03c96908bfc934"
+                              }
+                            ]
+                          },
+                          {
+                            "constructor": "0",
+                            "fields": [
+                              {
+                                "constructor": "0",
+                                "fields": [
+                                  {
+                                    "constructor": "0",
+                                    "fields": [
+                                      {
+                                        "bytes": "1c5621a0d3f7ee5041ece1c8f41a9f611ab4bca268923c21b6ca8dc3"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "int": "3"
+                      },
+                      {
+                        "int": "2"
+                      },
+                      {
+                        "int": "0"
+                      },
+                      {
+                        "int": "0"
+                      },
+                      {
+                        "int": "7"
+                      },
+                      {
+                        "int": "20000000"
+                      },
+                      {
+                        "bytes": "00507a512704319e88ed15734b152d3759ef3a5069f1e9aca1e0a99ca8"
+                      },
+                      {
+                        "int": "1"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "the ADA borrow 93492f0e, priced by no oracle",
+        "args": {
+          "config_index": "1",
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": {
+              "key": "d2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de"
+            }
+          },
+          "lender_bond_output": "3",
+          "borrower_bond_output": "2",
+          "principal_oracle_index": "-1",
+          "collateral_index": "0",
+          "collateral_oracle_index": "-1",
+          "principal": "100000000",
+          "pool_id": "0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc239",
+          "permission_index": "0"
+        },
+        "out": "d879820181d87989d87982d87981581cde118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fed87981d87981d87981581cd2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de03022000201a05f5e100581d0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc23900",
+        "tx": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+        "onChain": {
+          "redeemerHash": "a4847ab4698921c1a2dc4a08aa301957aa66d0fcedd1fdecf8bcf838e2037d3f"
+        }
+      },
+      {
+        "name": "an enterprise borrower",
+        "args": {
+          "config_index": "1",
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": null
+          },
+          "lender_bond_output": "3",
+          "borrower_bond_output": "2",
+          "principal_oracle_index": "-1",
+          "collateral_index": "0",
+          "collateral_oracle_index": "-1",
+          "principal": "100000000",
+          "pool_id": "00abababababababababababababababababababababababababababab",
+          "permission_index": "0"
+        },
+        "out": "d879820181d87989d87982d87981581cde118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fed87a8003022000201a05f5e100581d00abababababababababababababababababababababababababababab00"
+      },
+      {
+        "name": "a script borrower under a script stake",
+        "args": {
+          "config_index": "1",
+          "borrower": {
+            "payment": {
+              "script": "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+            },
+            "stake": {
+              "script": "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+            }
+          },
+          "lender_bond_output": "3",
+          "borrower_bond_output": "2",
+          "principal_oracle_index": "-1",
+          "collateral_index": "0",
+          "collateral_oracle_index": "-1",
+          "principal": "100000000",
+          "pool_id": "00abababababababababababababababababababababababababababab",
+          "permission_index": "0"
+        },
+        "out": "d879820181d87989d87982d87a81581c7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7ad87981d87981d87a81581c7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a03022000201a05f5e100581d00abababababababababababababababababababababababababababab00"
+      },
+      {
+        "name": "a key borrower under a script stake",
+        "args": {
+          "config_index": "1",
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": {
+              "script": "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+            }
+          },
+          "lender_bond_output": "3",
+          "borrower_bond_output": "2",
+          "principal_oracle_index": "-1",
+          "collateral_index": "0",
+          "collateral_oracle_index": "-1",
+          "principal": "100000000",
+          "pool_id": "00abababababababababababababababababababababababababababab",
+          "permission_index": "0"
+        },
+        "out": "d879820181d87989d87982d87981581cde118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fed87981d87981d87a81581c7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a03022000201a05f5e100581d00abababababababababababababababababababababababababababab00"
+      },
+      {
+        "name": "every index at -1",
+        "args": {
+          "config_index": "-1",
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": {
+              "key": "d2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de"
+            }
+          },
+          "lender_bond_output": "-1",
+          "borrower_bond_output": "-1",
+          "principal_oracle_index": "-1",
+          "collateral_index": "-1",
+          "collateral_oracle_index": "-1",
+          "principal": "100000000",
+          "pool_id": "00abababababababababababababababababababababababababababab",
+          "permission_index": "-1"
+        },
+        "out": "d879822081d87989d87982d87981581cde118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fed87981d87981d87981581cd2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de20202020201a05f5e100581d00abababababababababababababababababababababababababababab20"
+      },
+      {
+        "name": "amounts at a word and past it",
+        "args": {
+          "config_index": "18446744073709551616",
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": {
+              "key": "d2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de"
+            }
+          },
+          "lender_bond_output": "65535",
+          "borrower_bond_output": "65536",
+          "principal_oracle_index": "-1",
+          "collateral_index": "0",
+          "collateral_oracle_index": "-1",
+          "principal": "18446744073709551615",
+          "pool_id": "00abababababababababababababababababababababababababababab",
+          "permission_index": "-18446744073709551617"
+        },
+        "out": "d87982c24901000000000000000081d87989d87982d87981581cde118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fed87981d87981d87981581cd2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de19ffff1a000100002000201bffffffffffffffff581d00ababababababababababababababababababababababababababababc349010000000000000000"
+      },
+      {
+        "name": "zero principal",
+        "args": {
+          "config_index": "1",
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": {
+              "key": "d2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de"
+            }
+          },
+          "lender_bond_output": "3",
+          "borrower_bond_output": "2",
+          "principal_oracle_index": "-1",
+          "collateral_index": "0",
+          "collateral_oracle_index": "-1",
+          "principal": "0",
+          "pool_id": "00abababababababababababababababababababababababababababab",
+          "permission_index": "0"
+        },
+        "out": "d879820181d87989d87982d87981581cde118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fed87981d87981d87981581cd2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de030220002000581d00abababababababababababababababababababababababababababab00"
+      },
+      {
+        "name": "an empty pool id",
+        "args": {
+          "config_index": "1",
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": {
+              "key": "d2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de"
+            }
+          },
+          "lender_bond_output": "3",
+          "borrower_bond_output": "2",
+          "principal_oracle_index": "-1",
+          "collateral_index": "0",
+          "collateral_oracle_index": "-1",
+          "principal": "100000000",
+          "pool_id": "",
+          "permission_index": "0"
+        },
+        "out": "d879820181d87989d87982d87981581cde118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fed87981d87981d87981581cd2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de03022000201a05f5e1004000"
+      },
+      {
+        "name": "a pool id past 64 bytes is one definite bytestring, as cbor2 writes it",
+        "args": {
+          "config_index": "1",
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": {
+              "key": "d2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de"
+            }
+          },
+          "lender_bond_output": "3",
+          "borrower_bond_output": "2",
+          "principal_oracle_index": "-1",
+          "collateral_index": "0",
+          "collateral_oracle_index": "-1",
+          "principal": "100000000",
+          "pool_id": "ababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+          "permission_index": "0"
+        },
+        "out": "d879820181d87989d87982d87981581cde118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fed87981d87981d87981581cd2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de03022000201a05f5e1005841ababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab00"
+      },
+      {
+        "name": "a non-hex pool id",
+        "args": {
+          "borrower": {
+            "payment": {
+              "key": "de118571ecf7e7e4956f7752054cf4b7a41dd0189d93b2cc1abc50fe"
+            },
+            "stake": {
+              "key": "d2f8242ef8584a910d1362435d8b17abad26b20d9dd1e571a64126de"
+            }
+          },
+          "pool_id": "0g",
+          "config_index": "0",
+          "lender_bond_output": "0",
+          "borrower_bond_output": "0",
+          "principal_oracle_index": "0",
+          "collateral_index": "0",
+          "collateral_oracle_index": "0",
+          "principal": "0",
+          "permission_index": "0"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "non-hexadecimal number found in fromhex() arg at position 1",
+          "module": false
+        }
+      }
+    ],
+    "pool_withdraw_redeemer": [
+      {
+        "name": "FluidTokens' tFLDT borrow withdraws from the pool policy",
+        "args": {
+          "config_index": "4"
+        },
+        "out": "d8798204d87a80",
+        "tx": "2cb300eaef3e83011b7c8c433d092a5d674d748f6c53e1be048e35a96dad1760",
+        "onChain": {
+          "value": {
+            "constructor": "0",
+            "fields": [
+              {
+                "int": "4"
+              },
+              {
+                "constructor": "1",
+                "fields": []
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "the ADA borrow 93492f0e's pool withdrawal",
+        "args": {
+          "config_index": "1"
+        },
+        "out": "d8798201d87a80",
+        "tx": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+        "onChain": {
+          "redeemerHash": "c37ac85624d6d57bf619b66af9e02e9b293a8921e20e2ac095fbd25e4f366cd5"
+        }
+      },
+      {
+        "name": "config index 0",
+        "args": {
+          "config_index": "0"
+        },
+        "out": "d8798200d87a80"
+      },
+      {
+        "name": "config index 23",
+        "args": {
+          "config_index": "23"
+        },
+        "out": "d8798217d87a80"
+      },
+      {
+        "name": "config index 24",
+        "args": {
+          "config_index": "24"
+        },
+        "out": "d879821818d87a80"
+      },
+      {
+        "name": "config index 255",
+        "args": {
+          "config_index": "255"
+        },
+        "out": "d8798218ffd87a80"
+      },
+      {
+        "name": "config index 256",
+        "args": {
+          "config_index": "256"
+        },
+        "out": "d87982190100d87a80"
+      },
+      {
+        "name": "config index 65535",
+        "args": {
+          "config_index": "65535"
+        },
+        "out": "d8798219ffffd87a80"
+      },
+      {
+        "name": "config index 65536",
+        "args": {
+          "config_index": "65536"
+        },
+        "out": "d879821a00010000d87a80"
+      },
+      {
+        "name": "config index 4294967295",
+        "args": {
+          "config_index": "4294967295"
+        },
+        "out": "d879821affffffffd87a80"
+      },
+      {
+        "name": "config index 4294967296",
+        "args": {
+          "config_index": "4294967296"
+        },
+        "out": "d879821b0000000100000000d87a80"
+      },
+      {
+        "name": "config index 18446744073709551615",
+        "args": {
+          "config_index": "18446744073709551615"
+        },
+        "out": "d879821bffffffffffffffffd87a80"
+      },
+      {
+        "name": "config index 18446744073709551616",
+        "args": {
+          "config_index": "18446744073709551616"
+        },
+        "out": "d87982c249010000000000000000d87a80"
+      },
+      {
+        "name": "config index -1",
+        "args": {
+          "config_index": "-1"
+        },
+        "out": "d8798220d87a80"
+      },
+      {
+        "name": "config index -24",
+        "args": {
+          "config_index": "-24"
+        },
+        "out": "d8798237d87a80"
+      },
+      {
+        "name": "config index -25",
+        "args": {
+          "config_index": "-25"
+        },
+        "out": "d879823818d87a80"
+      },
+      {
+        "name": "config index -18446744073709551616",
+        "args": {
+          "config_index": "-18446744073709551616"
+        },
+        "out": "d879823bffffffffffffffffd87a80"
+      },
+      {
+        "name": "config index -18446744073709551617",
+        "args": {
+          "config_index": "-18446744073709551617"
+        },
+        "out": "d87982c349010000000000000000d87a80"
+      }
+    ],
+    "loan_mint_redeemer": [
+      {
+        "name": "FluidTokens' tFLDT borrow points its loan mint at the pool withdrawal",
+        "args": {
+          "config_index": "4",
+          "origin": "6"
+        },
+        "out": "d8798304d87a8006",
+        "tx": "2cb300eaef3e83011b7c8c433d092a5d674d748f6c53e1be048e35a96dad1760",
+        "onChain": {
+          "value": {
+            "constructor": "0",
+            "fields": [
+              {
+                "int": "4"
+              },
+              {
+                "constructor": "1",
+                "fields": []
+              },
+              {
+                "int": "6"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "the ADA borrow 93492f0e's loan mint",
+        "args": {
+          "config_index": "1",
+          "origin": "5"
+        },
+        "out": "d8798301d87a8005",
+        "tx": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+        "onChain": {
+          "redeemerHash": "95a7fd888677628fe8ceeb242bbc1cdb5a721a80aaae93cf87fe4413e0ffe636"
+        }
+      },
+      {
+        "name": "config index 0, origin 0",
+        "args": {
+          "config_index": "0",
+          "origin": "0"
+        },
+        "out": "d8798300d87a8000"
+      },
+      {
+        "name": "config index -1, origin -1",
+        "args": {
+          "config_index": "-1",
+          "origin": "-1"
+        },
+        "out": "d8798320d87a8020"
+      },
+      {
+        "name": "config index 18446744073709551616, origin 18446744073709551615",
+        "args": {
+          "config_index": "18446744073709551616",
+          "origin": "18446744073709551615"
+        },
+        "out": "d87983c249010000000000000000d87a801bffffffffffffffff"
+      },
+      {
+        "name": "config index -18446744073709551617, origin 3432398830065304857490950399540696608634717650071652704697231729592771591698828026061279820330727277488648155695740429018560993999858321906287014145557528575",
+        "args": {
+          "config_index": "-18446744073709551617",
+          "origin": "3432398830065304857490950399540696608634717650071652704697231729592771591698828026061279820330727277488648155695740429018560993999858321906287014145557528575"
+        },
+        "out": "d87983c349010000000000000000d87a80c25841ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      }
+    ],
+    "bond_redeemer": [
+      {
+        "name": "FluidTokens' tFLDT borrow names its bonds after the pool input",
+        "args": {
+          "pool_input": "e6be0265475750dd51718f91bc4b47a4d50c2f2b57217daa93705616ea8033d2#0"
+        },
+        "out": "d8798181d879825820e6be0265475750dd51718f91bc4b47a4d50c2f2b57217daa93705616ea8033d200",
+        "tx": "2cb300eaef3e83011b7c8c433d092a5d674d748f6c53e1be048e35a96dad1760",
+        "onChain": {
+          "value": {
+            "constructor": "0",
+            "fields": [
+              {
+                "list": [
+                  {
+                    "constructor": "0",
+                    "fields": [
+                      {
+                        "bytes": "e6be0265475750dd51718f91bc4b47a4d50c2f2b57217daa93705616ea8033d2"
+                      },
+                      {
+                        "int": "0"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "the ADA borrow 93492f0e's bonds",
+        "args": {
+          "pool_input": "6ca799bb84b7d8a07255fce9ab80326cba7b1938bd0c3185f0b2c584f6479e64#0"
+        },
+        "out": "d8798181d8798258206ca799bb84b7d8a07255fce9ab80326cba7b1938bd0c3185f0b2c584f6479e6400",
+        "tx": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+        "onChain": {
+          "redeemerHash": "618abcfd622ec2f5ccdfe6429733dcc154f7d2e23697bfaa1c0dc556236b3728"
+        }
+      },
+      {
+        "name": "a pool input at output 0",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#0"
+        },
+        "out": "d8798181d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa00"
+      },
+      {
+        "name": "a pool input at output 255",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#255"
+        },
+        "out": "d8798181d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18ff"
+      },
+      {
+        "name": "a pool input at output 256",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#256"
+        },
+        "out": "d8798181d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa190100"
+      },
+      {
+        "name": "a pool input at output 18446744073709551616",
+        "args": {
+          "pool_input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#18446744073709551616"
+        },
+        "out": "d8798181d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac249010000000000000000"
+      },
+      {
+        "name": "a pool input that is no output reference",
+        "args": {
+          "pool_input": "aa#bb"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "invalid literal for int() with base 10: 'bb'",
+          "module": false
+        }
+      }
+    ],
+    "redeemer_position": [
+      {
+        "name": "FluidTokens' tFLDT borrow: the pool withdrawal among seven redeemers",
+        "args": {
+          "keys": [
+            {
+              "purpose": "spend",
+              "index": "2"
+            },
+            {
+              "purpose": "mint",
+              "index": "0"
+            },
+            {
+              "purpose": "mint",
+              "index": "1"
+            },
+            {
+              "purpose": "mint",
+              "index": "2"
+            },
+            {
+              "purpose": "withdraw",
+              "index": "0"
+            },
+            {
+              "purpose": "withdraw",
+              "index": "1"
+            },
+            {
+              "purpose": "withdraw",
+              "index": "2"
+            }
+          ],
+          "key": {
+            "purpose": "withdraw",
+            "index": "2"
+          }
+        },
+        "out": "6",
+        "tx": "2cb300eaef3e83011b7c8c433d092a5d674d748f6c53e1be048e35a96dad1760",
+        "onChain": {
+          "position": "6"
+        }
+      },
+      {
+        "name": "the ADA borrow 93492f0e: the pool withdrawal among six redeemers",
+        "args": {
+          "keys": [
+            {
+              "purpose": "spend",
+              "index": "1"
+            },
+            {
+              "purpose": "mint",
+              "index": "0"
+            },
+            {
+              "purpose": "mint",
+              "index": "1"
+            },
+            {
+              "purpose": "mint",
+              "index": "2"
+            },
+            {
+              "purpose": "withdraw",
+              "index": "0"
+            },
+            {
+              "purpose": "withdraw",
+              "index": "1"
+            }
+          ],
+          "key": {
+            "purpose": "withdraw",
+            "index": "1"
+          }
+        },
+        "out": "5",
+        "tx": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+        "onChain": {
+          "position": "5"
+        }
+      },
+      {
+        "name": "the ledger orders spend, mint, cert and withdraw before indexes",
+        "args": {
+          "keys": [
+            {
+              "purpose": "withdraw",
+              "index": "0"
+            },
+            {
+              "purpose": "cert",
+              "index": "1"
+            },
+            {
+              "purpose": "mint",
+              "index": "2"
+            },
+            {
+              "purpose": "spend",
+              "index": "3"
+            },
+            {
+              "purpose": "mint",
+              "index": "0"
+            }
+          ],
+          "key": {
+            "purpose": "cert",
+            "index": "1"
+          }
+        },
+        "out": "3"
+      },
+      {
+        "name": "the first spend",
+        "args": {
+          "keys": [
+            {
+              "purpose": "withdraw",
+              "index": "0"
+            },
+            {
+              "purpose": "cert",
+              "index": "1"
+            },
+            {
+              "purpose": "mint",
+              "index": "2"
+            },
+            {
+              "purpose": "spend",
+              "index": "3"
+            },
+            {
+              "purpose": "mint",
+              "index": "0"
+            }
+          ],
+          "key": {
+            "purpose": "spend",
+            "index": "3"
+          }
+        },
+        "out": "0"
+      },
+      {
+        "name": "the last withdrawal",
+        "args": {
+          "keys": [
+            {
+              "purpose": "withdraw",
+              "index": "0"
+            },
+            {
+              "purpose": "cert",
+              "index": "1"
+            },
+            {
+              "purpose": "mint",
+              "index": "2"
+            },
+            {
+              "purpose": "spend",
+              "index": "3"
+            },
+            {
+              "purpose": "mint",
+              "index": "0"
+            }
+          ],
+          "key": {
+            "purpose": "withdraw",
+            "index": "0"
+          }
+        },
+        "out": "4"
+      },
+      {
+        "name": "a lone key",
+        "args": {
+          "keys": [
+            {
+              "purpose": "mint",
+              "index": "0"
+            }
+          ],
+          "key": {
+            "purpose": "mint",
+            "index": "0"
+          }
+        },
+        "out": "0"
+      },
+      {
+        "name": "indexes order as numbers, 2 before 10",
+        "args": {
+          "keys": [
+            {
+              "purpose": "spend",
+              "index": "10"
+            },
+            {
+              "purpose": "spend",
+              "index": "2"
+            }
+          ],
+          "key": {
+            "purpose": "spend",
+            "index": "10"
+          }
+        },
+        "out": "1"
+      },
+      {
+        "name": "a key listed twice stands at its first place",
+        "args": {
+          "keys": [
+            {
+              "purpose": "mint",
+              "index": "1"
+            },
+            {
+              "purpose": "mint",
+              "index": "1"
+            },
+            {
+              "purpose": "spend",
+              "index": "0"
+            }
+          ],
+          "key": {
+            "purpose": "mint",
+            "index": "1"
+          }
+        },
+        "out": "1"
+      },
+      {
+        "name": "a key the list does not hold",
+        "args": {
+          "keys": [
+            {
+              "purpose": "withdraw",
+              "index": "0"
+            },
+            {
+              "purpose": "cert",
+              "index": "1"
+            },
+            {
+              "purpose": "mint",
+              "index": "2"
+            },
+            {
+              "purpose": "spend",
+              "index": "3"
+            },
+            {
+              "purpose": "mint",
+              "index": "0"
+            }
+          ],
+          "key": {
+            "purpose": "mint",
+            "index": "1"
+          }
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "('mint', 1) is not in list",
+          "module": false
+        }
+      },
+      {
+        "name": "a purpose the ledger does not order here",
+        "args": {
+          "keys": [
+            {
+              "purpose": "vote",
+              "index": "0"
+            }
+          ],
+          "key": {
+            "purpose": "vote",
+            "index": "0"
+          }
+        },
+        "raises": {
+          "type": "KeyError",
+          "message": "'vote'",
+          "module": false
+        }
+      }
+    ],
+    "pool_nft_name": [
+      {
+        "name": "FluidTokens' pool open names its NFT after the input it spends",
+        "args": {
+          "seed": "d81d7567014d9e934122c1f962cd9f4b23bbc77cd5d70c0e93aa2ec38f528875#2",
+          "index": "0"
+        },
+        "out": "006a15becc1bd4f15045bb5f1dd00cacb403d31e81f9220fd0910f6e34",
+        "tx": "f25e1378b4387324e29264398bcac85711c9f3057ae7a989414333e944978828",
+        "onChain": {
+          "assetName": "006a15becc1bd4f15045bb5f1dd00cacb403d31e81f9220fd0910f6e34"
+        }
+      },
+      {
+        "name": "the ADA pool 6ca799bb's NFT",
+        "args": {
+          "seed": "5a0a6980b6766b52c025554eb9ffb6cfb430dfee911750a7ddf17756938be87f#9",
+          "index": "0"
+        },
+        "out": "0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc239",
+        "tx": "6ca799bb84b7d8a07255fce9ab80326cba7b1938bd0c3185f0b2c584f6479e64",
+        "onChain": {
+          "assetName": "0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc239"
+        }
+      },
+      {
+        "name": "index 0",
+        "args": {
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#3",
+          "index": "0"
+        },
+        "out": "00933525ce28ac65222e7454eef844ac5705acdfad4c3774c9bb9146c6"
+      },
+      {
+        "name": "index 1",
+        "args": {
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#3",
+          "index": "1"
+        },
+        "out": "01933525ce28ac65222e7454eef844ac5705acdfad4c3774c9bb9146c6"
+      },
+      {
+        "name": "index 15",
+        "args": {
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#3",
+          "index": "15"
+        },
+        "out": "0f933525ce28ac65222e7454eef844ac5705acdfad4c3774c9bb9146c6"
+      },
+      {
+        "name": "index 16",
+        "args": {
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#3",
+          "index": "16"
+        },
+        "out": "10933525ce28ac65222e7454eef844ac5705acdfad4c3774c9bb9146c6"
+      },
+      {
+        "name": "index 254",
+        "args": {
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#3",
+          "index": "254"
+        },
+        "out": "fe933525ce28ac65222e7454eef844ac5705acdfad4c3774c9bb9146c6"
+      },
+      {
+        "name": "index 255",
+        "args": {
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#3",
+          "index": "255"
+        },
+        "out": "ff933525ce28ac65222e7454eef844ac5705acdfad4c3774c9bb9146c6"
+      },
+      {
+        "name": "index 256 is past one byte",
+        "args": {
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#3",
+          "index": "256"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a pool NFT name starts with its index as one byte, and 256 is not one",
+          "module": true
+        }
+      },
+      {
+        "name": "a negative index",
+        "args": {
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#3",
+          "index": "-1"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a pool NFT name starts with its index as one byte, and -1 is not one",
+          "module": true
+        }
+      },
+      {
+        "name": "a seed that is no output reference",
+        "args": {
+          "seed": "zz#0",
+          "index": "0"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "non-hexadecimal number found in fromhex() arg at position 0",
+          "module": false
+        }
+      }
+    ],
+    "pool_mint_redeemer": [
+      {
+        "name": "FluidTokens' pool open",
+        "args": {
+          "config_index": "1",
+          "seed": "d81d7567014d9e934122c1f962cd9f4b23bbc77cd5d70c0e93aa2ec38f528875#2"
+        },
+        "out": "d8798201d879825820d81d7567014d9e934122c1f962cd9f4b23bbc77cd5d70c0e93aa2ec38f52887502",
+        "tx": "f25e1378b4387324e29264398bcac85711c9f3057ae7a989414333e944978828",
+        "onChain": {
+          "value": {
+            "constructor": "0",
+            "fields": [
+              {
+                "int": "1"
+              },
+              {
+                "constructor": "0",
+                "fields": [
+                  {
+                    "bytes": "d81d7567014d9e934122c1f962cd9f4b23bbc77cd5d70c0e93aa2ec38f528875"
+                  },
+                  {
+                    "int": "2"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "name": "the ADA pool 6ca799bb's mint",
+        "args": {
+          "config_index": "0",
+          "seed": "5a0a6980b6766b52c025554eb9ffb6cfb430dfee911750a7ddf17756938be87f#9"
+        },
+        "out": "d8798200d8798258205a0a6980b6766b52c025554eb9ffb6cfb430dfee911750a7ddf17756938be87f09",
+        "tx": "6ca799bb84b7d8a07255fce9ab80326cba7b1938bd0c3185f0b2c584f6479e64",
+        "onChain": {
+          "redeemerHash": "56d3745bd2f0bda817cfa759564252275451584540afc8f19f0c9a4dcd1f9dd9"
+        }
+      },
+      {
+        "name": "config index 0",
+        "args": {
+          "config_index": "0",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d8798200d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 23",
+        "args": {
+          "config_index": "23",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d8798217d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 24",
+        "args": {
+          "config_index": "24",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d879821818d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 255",
+        "args": {
+          "config_index": "255",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d8798218ffd879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 256",
+        "args": {
+          "config_index": "256",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d87982190100d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 65535",
+        "args": {
+          "config_index": "65535",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d8798219ffffd879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 65536",
+        "args": {
+          "config_index": "65536",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d879821a00010000d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 4294967295",
+        "args": {
+          "config_index": "4294967295",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d879821affffffffd879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 4294967296",
+        "args": {
+          "config_index": "4294967296",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d879821b0000000100000000d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 18446744073709551615",
+        "args": {
+          "config_index": "18446744073709551615",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d879821bffffffffffffffffd879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index 18446744073709551616",
+        "args": {
+          "config_index": "18446744073709551616",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d87982c249010000000000000000d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index -1",
+        "args": {
+          "config_index": "-1",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d8798220d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index -24",
+        "args": {
+          "config_index": "-24",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d8798237d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index -25",
+        "args": {
+          "config_index": "-25",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d879823818d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index -18446744073709551616",
+        "args": {
+          "config_index": "-18446744073709551616",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d879823bffffffffffffffffd879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "config index -18446744073709551617",
+        "args": {
+          "config_index": "-18446744073709551617",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#7"
+        },
+        "out": "d87982c349010000000000000000d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa07"
+      },
+      {
+        "name": "a seed at output 65536",
+        "args": {
+          "config_index": "0",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#65536"
+        },
+        "out": "d8798200d879825820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1a00010000"
+      },
+      {
+        "name": "a seed that is no output reference",
+        "args": {
+          "config_index": "0",
+          "seed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa#x"
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "invalid literal for int() with base 10: 'x'",
+          "module": false
+        }
+      }
+    ],
+    "pool_datum": [
+      {
+        "name": "the ADA pool 6ca799bb opened at PREVIEW_ADA_TERMS",
+        "args": {
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "",
+              ""
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          },
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+        "tx": "6ca799bb84b7d8a07255fce9ab80326cba7b1938bd0c3185f0b2c584f6479e64",
+        "onChain": {
+          "bytes": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980"
+        }
+      },
+      {
+        "name": "PREVIEW_ADA_TERMS under a script stake credential",
+        "args": {
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "",
+              ""
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          },
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "script": "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+            }
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87a81581c7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a5820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980"
+      },
+      {
+        "name": "an enterprise lender",
+        "args": {
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "",
+              ""
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          },
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": null
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87a805820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980"
+      },
+      {
+        "name": "equity in the principal currency",
+        "args": {
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              true
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "",
+              ""
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          },
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87a80d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980"
+      },
+      {
+        "name": "zero rates and ratios",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "0",
+            "liquidation": [
+              "0",
+              "0",
+              "0",
+              false
+            ],
+            "perpetual": [
+              "0",
+              "0"
+            ],
+            "collateral_oracle": [
+              "",
+              ""
+            ],
+            "min_collateral": [
+              "0",
+              "0"
+            ]
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d87982404000000000d87b84000000d87980d87b8200000000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081008100d87980"
+      },
+      {
+        "name": "terms at a word and past it",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "18446744073709551615",
+            "liquidation": [
+              "18446744073709551616",
+              "18446744073709551617",
+              "4294967296",
+              false
+            ],
+            "perpetual": [
+              "3432398830065304857490950399540696608634717650071652704697231729592771591698828026061279820330727277488648155695740429018560993999858321906287014145557528575",
+              "18446744073709551615"
+            ],
+            "collateral_oracle": [
+              "",
+              ""
+            ],
+            "min_collateral": [
+              "18446744073709551616",
+              "4294967295"
+            ]
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d8798240401bffffffffffffffff000000d87b84c249010000000000000000c2490100000000000000011b0000000100000000d87980d87b82c25841ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1bffffffffffffffff0000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081c249010000000000000000811affffffffd87980"
+      },
+      {
+        "name": "negative terms are written as given",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "-1",
+            "liquidation": [
+              "-24",
+              "-25",
+              "-18446744073709551616",
+              false
+            ],
+            "perpetual": [
+              "-18446744073709551617",
+              "-3432398830065304857490950399540696608634717650071652704697231729592771591698828026061279820330727277488648155695740429018560993999858321906287014145557528576"
+            ],
+            "collateral_oracle": [
+              "",
+              ""
+            ],
+            "min_collateral": [
+              "-1",
+              "1"
+            ]
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d87982404020000000d87b843738183bffffffffffffffffd87980d87b82c349010000000000000000c35841ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081208101d87980"
+      },
+      {
+        "name": "an oracle asset with a 32-byte name",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "cccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982581ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc5820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd81028101d87980"
+      },
+      {
+        "name": "only the oracle policy is NONE",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "4e4f4e45",
+              ""
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982444e4f4e454081028101d87980"
+      },
+      {
+        "name": "only the oracle name is NONE",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "",
+              "4e4f4e45"
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          }
+        },
+        "out": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d8798240444e4f4e4581028101d87980"
+      },
+      {
+        "name": "the validator's NONE/NONE oracle",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "4e4f4e45",
+              "4e4f4e45"
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          }
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a Liquidation pool's collateral oracle asset may not be NONE/NONE: pool_borrow_action.ak refuses every borrow from it",
+          "module": true
+        }
+      },
+      {
+        "name": "NONE/NONE in upper case",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "4E4F4E45",
+              "4E4F4E45"
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          }
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a Liquidation pool's collateral oracle asset may not be NONE/NONE: pool_borrow_action.ak refuses every borrow from it",
+          "module": true
+        }
+      },
+      {
+        "name": "a script lender holds no payment key to cancel with",
+        "args": {
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "",
+              ""
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          },
+          "lender": {
+            "payment": {
+              "script": "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          }
+        },
+        "raises": {
+          "type": "KeyError",
+          "message": "'key'",
+          "module": false
+        }
+      },
+      {
+        "name": "a non-hex oracle policy",
+        "args": {
+          "lender": {
+            "payment": {
+              "key": "45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821"
+            },
+            "stake": {
+              "key": "7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba9"
+            }
+          },
+          "terms": {
+            "interest_rate": "459",
+            "liquidation": [
+              "100",
+              "125",
+              "100",
+              false
+            ],
+            "perpetual": [
+              "28",
+              "5"
+            ],
+            "collateral_oracle": [
+              "zz",
+              ""
+            ],
+            "min_collateral": [
+              "2",
+              "1"
+            ]
+          }
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "non-hexadecimal number found in fromhex() arg at position 0",
+          "module": false
+        }
+      }
+    ],
+    "draft_units": [
+      {
+        "name": "the six redeemers of 93492f0e at preview's transaction budget",
+        "args": {
+          "view": {
+            "redeemers": [
+              {
+                "purpose": "spend",
+                "index": "1"
+              },
+              {
+                "purpose": "mint",
+                "index": "0"
+              },
+              {
+                "purpose": "mint",
+                "index": "1"
+              },
+              {
+                "purpose": "mint",
+                "index": "2"
+              },
+              {
+                "purpose": "withdraw",
+                "index": "0"
+              },
+              {
+                "purpose": "withdraw",
+                "index": "1"
+              }
+            ]
+          },
+          "params": {
+            "max_tx_mem": "17500000",
+            "max_tx_steps": "10000000000"
+          }
+        },
+        "out": [
+          {
+            "purpose": "spend",
+            "index": "1",
+            "mem": "2916666",
+            "steps": "1666666666"
+          },
+          {
+            "purpose": "mint",
+            "index": "0",
+            "mem": "2916666",
+            "steps": "1666666666"
+          },
+          {
+            "purpose": "mint",
+            "index": "1",
+            "mem": "2916666",
+            "steps": "1666666666"
+          },
+          {
+            "purpose": "mint",
+            "index": "2",
+            "mem": "2916666",
+            "steps": "1666666666"
+          },
+          {
+            "purpose": "withdraw",
+            "index": "0",
+            "mem": "2916666",
+            "steps": "1666666666"
+          },
+          {
+            "purpose": "withdraw",
+            "index": "1",
+            "mem": "2916666",
+            "steps": "1666666666"
+          }
+        ]
+      },
+      {
+        "name": "one redeemer takes the whole budget",
+        "args": {
+          "view": {
+            "redeemers": [
+              {
+                "purpose": "mint",
+                "index": "0"
+              }
+            ]
+          },
+          "params": {
+            "max_tx_mem": "14000000",
+            "max_tx_steps": "10000000000"
+          }
+        },
+        "out": [
+          {
+            "purpose": "mint",
+            "index": "0",
+            "mem": "14000000",
+            "steps": "10000000000"
+          }
+        ]
+      },
+      {
+        "name": "a budget that does not divide floors each share",
+        "args": {
+          "view": {
+            "redeemers": [
+              {
+                "purpose": "withdraw",
+                "index": "0"
+              },
+              {
+                "purpose": "cert",
+                "index": "1"
+              },
+              {
+                "purpose": "mint",
+                "index": "2"
+              }
+            ]
+          },
+          "params": {
+            "max_tx_mem": "10",
+            "max_tx_steps": "7"
+          }
+        },
+        "out": [
+          {
+            "purpose": "withdraw",
+            "index": "0",
+            "mem": "3",
+            "steps": "2"
+          },
+          {
+            "purpose": "cert",
+            "index": "1",
+            "mem": "3",
+            "steps": "2"
+          },
+          {
+            "purpose": "mint",
+            "index": "2",
+            "mem": "3",
+            "steps": "2"
+          }
+        ]
+      },
+      {
+        "name": "a key listed twice still counts in the divisor",
+        "args": {
+          "view": {
+            "redeemers": [
+              {
+                "purpose": "mint",
+                "index": "0"
+              },
+              {
+                "purpose": "mint",
+                "index": "0"
+              }
+            ]
+          },
+          "params": {
+            "max_tx_mem": "9",
+            "max_tx_steps": "9"
+          }
+        },
+        "out": [
+          {
+            "purpose": "mint",
+            "index": "0",
+            "mem": "4",
+            "steps": "4"
+          }
+        ]
+      },
+      {
+        "name": "a negative budget floors toward negative infinity",
+        "args": {
+          "view": {
+            "redeemers": [
+              {
+                "purpose": "spend",
+                "index": "0"
+              },
+              {
+                "purpose": "mint",
+                "index": "0"
+              }
+            ]
+          },
+          "params": {
+            "max_tx_mem": "-7",
+            "max_tx_steps": "-1"
+          }
+        },
+        "out": [
+          {
+            "purpose": "spend",
+            "index": "0",
+            "mem": "-4",
+            "steps": "-1"
+          },
+          {
+            "purpose": "mint",
+            "index": "0",
+            "mem": "-4",
+            "steps": "-1"
+          }
+        ]
+      },
+      {
+        "name": "a zero budget",
+        "args": {
+          "view": {
+            "redeemers": [
+              {
+                "purpose": "spend",
+                "index": "0"
+              }
+            ]
+          },
+          "params": {
+            "max_tx_mem": "0",
+            "max_tx_steps": "0"
+          }
+        },
+        "out": [
+          {
+            "purpose": "spend",
+            "index": "0",
+            "mem": "0",
+            "steps": "0"
+          }
+        ]
+      },
+      {
+        "name": "budgets past a word",
+        "args": {
+          "view": {
+            "redeemers": [
+              {
+                "purpose": "spend",
+                "index": "0"
+              },
+              {
+                "purpose": "withdraw",
+                "index": "4"
+              }
+            ]
+          },
+          "params": {
+            "max_tx_mem": "55340232221128654848",
+            "max_tx_steps": "3432398830065304857490950399540696608634717650071652704697231729592771591698828026061279820330727277488648155695740429018560993999858321906287014145557528575"
+          }
+        },
+        "out": [
+          {
+            "purpose": "spend",
+            "index": "0",
+            "mem": "27670116110564327424",
+            "steps": "1716199415032652428745475199770348304317358825035826352348615864796385795849414013030639910165363638744324077847870214509280496999929160953143507072778764287"
+          },
+          {
+            "purpose": "withdraw",
+            "index": "4",
+            "mem": "27670116110564327424",
+            "steps": "1716199415032652428745475199770348304317358825035826352348615864796385795849414013030639910165363638744324077847870214509280496999929160953143507072778764287"
+          }
+        ]
+      },
+      {
+        "name": "no redeemers declare no units and divide nothing",
+        "args": {
+          "view": {
+            "redeemers": []
+          },
+          "params": {
+            "max_tx_mem": "14000000",
+            "max_tx_steps": "10000000000"
+          }
+        },
+        "out": []
+      }
+    ]
+  }
+}

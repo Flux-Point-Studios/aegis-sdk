@@ -1,0 +1,3 @@
+# Vectors copied from the Python builders a TypeScript module ports: kept byte-identical to the
+# LF original, so `-text` means never translate, in either direction, on any platform.
+src/__tests__/fixtures/*_vectors.json -text

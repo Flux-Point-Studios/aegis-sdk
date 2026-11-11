@@ -167,7 +167,7 @@ export {
 export type { EventReading, BuildEventUnderwritePartsParams } from './event';
 export { readGenericData } from './generic_data';
 export type { GenericData } from './generic_data';
-export { decodePlutusData } from './plutus_data';
+export { decodePlutusData, encodePlutusData } from './plutus_data';
 export type { PlutusData, PlutusConstr, PlutusMap } from './plutus_data';
 
 // ---------------------------------------------------------------------------
@@ -202,6 +202,36 @@ export type {
   Rh1CoverParams,
   FluidCoverRequest,
 } from './fluid_v4';
+
+// ---------------------------------------------------------------------------
+// FluidTokens V4 pools and borrows: the datums and redeemers an open-pool and a
+// borrow carry, as the protocol's validators rebuild them.
+// ---------------------------------------------------------------------------
+export {
+  FLUID_NO_PERMISSIONED_CONDITION,
+  FLUID_NO_ORACLE,
+  FLUID_MAX_VALIDITY_MS,
+  FLUID_POOL_SPEND_REDEEMER,
+  FLUID_LENDER_BOND_DATUM,
+  FLUID_PREVIEW_ADA_TERMS,
+  fluidLoanId,
+  fluidPoolNftName,
+  fluidPoolDatum,
+  fluidLoanDatum,
+  fluidPoolMintRedeemer,
+  fluidPoolWithdrawRedeemer,
+  fluidLoanMintRedeemer,
+  fluidBondRedeemer,
+  fluidBorrowRedeemer,
+  fluidRedeemerPosition,
+  fluidDraftUnits,
+} from './fluid_v4_borrow';
+export type {
+  FluidPoolTerms,
+  FluidBorrowRedeemerParams,
+  FluidRedeemerKey,
+  FluidRedeemerUnits,
+} from './fluid_v4_borrow';
 
 // ---------------------------------------------------------------------------
 // Named oracle-feed registry (mainnet + preprod, network-aware lookup).

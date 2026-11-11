@@ -118,9 +118,10 @@ function readMapHeader(r: Reader): number {
   return Number(readUintArg(r, info));
 }
 
-/** Hex string → bytes, rejecting odd-length input. */
+/** Hex string → bytes, rejecting odd-length input and any character that is no hex digit. */
 export function hexToBytesStrict(raw: string): Uint8Array {
   if (raw.length % 2 !== 0) throw new InputError('INVALID_INPUT', 'GenericData hex must have even length');
+  if (!/^[0-9a-fA-F]*$/.test(raw)) throw new InputError('INVALID_INPUT', 'GenericData hex holds a character that is no hex digit');
   const out = new Uint8Array(raw.length / 2);
   for (let i = 0; i < raw.length; i += 2) out[i / 2] = parseInt(raw.substring(i, i + 2), 16);
   return out;

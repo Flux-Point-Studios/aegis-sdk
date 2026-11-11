@@ -3,7 +3,11 @@
 // tag 2 and 3 bignums), bytestrings (definite, or the chunked indefinite form
 // serialiseData writes past 64 bytes), lists and maps (definite or indefinite), and
 // constructors under tags 121-127, 1280-1400 and 102. Anything else is refused.
+//
+// The encoder writes one form of each, the definite form the cbor2 Python library writes,
+// so a builder ported from Python writes its bytes exactly.
 
+import { concat, encodeBytes, encodeHeader, encodeInt } from './cbor';
 import { InputError } from './errors';
 import { hexToBytesStrict } from './generic_data';
 
@@ -139,4 +143,49 @@ export function decodePlutusData(raw: Uint8Array | string): PlutusData {
   const out = data(r);
   if (r.off !== buf.length) refuse(`${buf.length - r.off} trailing bytes`);
   return out;
+}
+
+const WORD = 1n << 64n;
+
+/** A non-negative integer's minimal big-endian bytes: a bignum's content. */
+function magnitude(n: bigint): Uint8Array {
+  const out: number[] = [];
+  for (let v = n; v > 0n; v >>= 8n) out.unshift(Number(v & 0xffn));
+  return new Uint8Array(out);
+}
+
+function integer(n: bigint): Uint8Array {
+  if (n >= WORD) return concat([encodeHeader(0xc0, 2n), encodeBytes(magnitude(n))]);
+  if (n < -WORD) return concat([encodeHeader(0xc0, 3n), encodeBytes(magnitude(-1n - n))]);
+  return encodeInt(n);
+}
+
+function list(items: PlutusData[]): Uint8Array {
+  return concat([encodeHeader(0x80, BigInt(items.length)), ...items.map(encodePlutusData)]);
+}
+
+function constrTag(index: number): Uint8Array {
+  if (!Number.isSafeInteger(index) || index < 0) refuse(`constructor index ${index} has no tag`);
+  if (index < 7) return encodeHeader(0xc0, BigInt(121 + index));
+  if (index < 128) return encodeHeader(0xc0, BigInt(1280 + index - 7));
+  return concat([encodeHeader(0xc0, 102n), encodeHeader(0x80, 2n), integer(BigInt(index))]);
+}
+
+/**
+ * Write Plutus Data as cbor2 writes it: every list, map and bytestring definite, an integer
+ * past a machine word as a tag 2 or 3 bignum, and a constructor under tags 121-127, then
+ * 1280-1400, then tag 102. A bytestring past 64 bytes stays one string, which the ledger
+ * refuses in a datum; no field these builders write reaches that length.
+ */
+export function encodePlutusData(data: PlutusData): Uint8Array {
+  if (typeof data === 'bigint') return integer(data);
+  if (data instanceof Uint8Array) return encodeBytes(data);
+  if (Array.isArray(data)) return list(data);
+  if ('map' in data) {
+    return concat([
+      encodeHeader(0xa0, BigInt(data.map.length)),
+      ...data.map.flatMap(([k, v]) => [encodePlutusData(k), encodePlutusData(v)]),
+    ]);
+  }
+  return concat([constrTag(data.constructor), list(data.fields)]);
 }

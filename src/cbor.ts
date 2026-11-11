@@ -37,7 +37,7 @@ import type {
 // Encoder primitives
 // ---------------------------------------------------------------------------
 
-function concat(parts: Uint8Array[]): Uint8Array {
+export function concat(parts: Uint8Array[]): Uint8Array {
   const total = parts.reduce((s, p) => s + p.length, 0);
   const out = new Uint8Array(total);
   let off = 0;
@@ -49,7 +49,7 @@ function concat(parts: Uint8Array[]): Uint8Array {
 }
 
 /** Encode a CBOR unsigned-int "length/value" header for a given major type. */
-function encodeHeader(major: number, value: bigint): Uint8Array {
+export function encodeHeader(major: number, value: bigint): Uint8Array {
   if (value < 0n) throw new Error('encodeHeader: negative value');
   if (value < 24n) return new Uint8Array([major | Number(value)]);
   if (value < 256n) return new Uint8Array([major | 24, Number(value)]);
