@@ -2,8 +2,8 @@
   "source": "api/lending/fluid_v4_borrow.py",
   "generator": "scripts/fluid_v4_borrow_vectors.py",
   "generatedFrom": {
-    "api/lending/fluid_v4_borrow.py": "d538f5c1f7fc68bd6c949d5807435311394321df",
-    "scripts/fluid_v4_borrow_vectors.py": "99c59a589180920011cd3688f33b3c5a3600bfff"
+    "api/lending/fluid_v4_borrow.py": "5f6328a5d3d59a19c527d2c1f2e289d90d2640f6",
+    "scripts/fluid_v4_borrow_vectors.py": "aaf89300738585def09abdca9918a730baa1fe65"
   },
   "assemblers": [
     "borrow_view",
@@ -3002,8 +3002,8 @@
         },
         "raises": {
           "type": "ValueError",
-          "message": "not a constructor",
-          "module": false
+          "message": "the pool datum is no constructor",
+          "module": true
         }
       },
       {
@@ -3035,9 +3035,9 @@
           ]
         },
         "raises": {
-          "type": "IndexError",
-          "message": "list index out of range",
-          "module": false
+          "type": "ValueError",
+          "message": "the pool offers no collateral option",
+          "module": true
         }
       },
       {
@@ -3052,9 +3052,9 @@
           ]
         },
         "raises": {
-          "type": "IndexError",
-          "message": "list index out of range",
-          "module": false
+          "type": "ValueError",
+          "message": "minCollateral is no list that starts with an integer",
+          "module": true
         }
       },
       {
@@ -3072,6 +3072,176 @@
           "type": "ZeroDivisionError",
           "message": "integer division or modulo by zero",
           "module": false
+        }
+      },
+      {
+        "name": "a minCollateral that is a bytestring, whose first byte is no ratio",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404041028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "minCollateral is no list that starts with an integer",
+          "module": true
+        }
+      },
+      {
+        "name": "a minCollateral that is a map from 0",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d879824040a100028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "minCollateral is no list that starts with an integer",
+          "module": true
+        }
+      },
+      {
+        "name": "a minCollateral list that starts with a bytestring",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d8798240408141028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "minCollateral is no list that starts with an integer",
+          "module": true
+        }
+      },
+      {
+        "name": "a minCollateralDivider that is a bytestring",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081024101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "minCollateralDivider is no list that starts with an integer",
+          "module": true
+        }
+      },
+      {
+        "name": "a minCollateralDivider that is a map from 0",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d8798240408102a10001d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "minCollateralDivider is no list that starts with an integer",
+          "module": true
+        }
+      },
+      {
+        "name": "a minCollateralDivider list that starts with a constructor",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d879824040810281d87980d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "minCollateralDivider is no list that starts with an integer",
+          "module": true
+        }
+      },
+      {
+        "name": "collateral options that are a map from 0 to the ADA option",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44eca100d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the pool offers no collateral option",
+          "module": true
+        }
+      },
+      {
+        "name": "collateral options that are a bytestring",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec418081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the pool offers no collateral option",
+          "module": true
+        }
+      },
+      {
+        "name": "a first collateral option that is no constructor",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec814081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the collateral option is no constructor",
+          "module": true
+        }
+      },
+      {
+        "name": "commonData that is no constructor",
+        "args": {
+          "pool": "d8798a444e4f4e45d8798000d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "commonData is no constructor",
+          "module": true
         }
       }
     ]
