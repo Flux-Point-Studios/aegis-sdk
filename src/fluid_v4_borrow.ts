@@ -8,15 +8,17 @@
 // replay.
 //
 // The builders lend ADA against ADA at a static ratio. They build the parts of an open-pool or a
-// borrow transaction; choosing its inputs, balancing, pricing and signing it is the caller's, and
-// so are the checks only a whole borrow can make: a validity range of at most
-// FLUID_MAX_VALIDITY_MS, collateral at the pool's minCollateral ratio, and a pool left at or above
-// its min-UTxO.
+// borrow transaction; choosing its inputs, balancing, pricing and signing it is the caller's.
+// fluidBorrowGuards makes the checks of a whole borrow that size no output: a validity range of at
+// most FLUID_MAX_VALIDITY_MS, a pool lending ADA against ADA at a static ratio, and collateral at
+// the pool's minCollateral ratio. The reference builder's last check, a positive principal that
+// leaves the pool at or above its min-UTxO, sizes the pool's continuation output, which takes a
+// transaction output encoder this SDK does not have; that check stays the caller's.
 
 import { blake2b, blake2b224 } from './blake2b';
 import { bytesToHex, encodeConstr, encodeFullAddress } from './cbor';
 import { InputError } from './errors';
-import { constrOf, floorDiv } from './fluid_v4';
+import { ceilDiv, constrOf, floorDiv } from './fluid_v4';
 import type { FluidAsset, FluidLiquidation, Rational } from './fluid_v4';
 import { hexToBytesStrict } from './generic_data';
 import { decodePlutusData, encodePlutusData } from './plutus_data';
@@ -274,6 +276,56 @@ export function fluidBorrowRedeemer(p: FluidBorrowRedeemerParams): PlutusConstr 
       ]),
     ],
   ]);
+}
+
+function field(fields: PlutusData[], at: number, what: string): PlutusData {
+  if (at >= fields.length) refuse(`${what} has ${fields.length} fields and no field ${at}`);
+  return fields[at];
+}
+
+function sameData(a: PlutusData, b: PlutusData): boolean {
+  return bytesToHex(encodePlutusData(a)) === bytesToHex(encodePlutusData(b));
+}
+
+function firstInteger(node: PlutusData, what: string): bigint {
+  const first = Array.isArray(node) ? node[0] : undefined;
+  if (typeof first !== 'bigint') refuse(`${what} is no list that starts with an integer`);
+  return first;
+}
+
+/**
+ * The checks of a borrow from the pool datum `pool` that size no output, in the reference
+ * builder's order: a validity range of at most FLUID_MAX_VALIDITY_MS, a pool lending ADA against
+ * ADA at a static ratio, and collateral at or above its minCollateral ratio. Returns the lovelace
+ * of collateral the pool asks for `principal`.
+ */
+export function fluidBorrowGuards(
+  pool: PlutusData,
+  opts: { principal: bigint; collateral: bigint; validFromMs: bigint; validToMs: bigint },
+): bigint {
+  const width = opts.validToMs - opts.validFromMs;
+  if (width > FLUID_MAX_VALIDITY_MS) refuse(`a borrow's validity range must be within an hour; ${width} ms is not`);
+  const fields = constrOf(pool, 'the pool datum').fields;
+  const common = constrOf(field(fields, 2, 'the pool datum'), 'commonData').fields;
+  const options = field(fields, 6, 'the pool datum');
+  if (!Array.isArray(options) || options.length === 0) refuse('the pool offers no collateral option');
+  const option = constrOf(options[0], 'the collateral option').fields;
+  if (
+    !sameData(field(common, 0, 'commonData'), ada()) ||
+    !sameData(field(option, 0, 'the collateral option'), new Uint8Array()) ||
+    !sameData(field(option, 1, 'the collateral option'), constr(0, [new Uint8Array()])) ||
+    !sameData(field(fields, 9, 'the pool datum'), bool(false))
+  ) {
+    refuse('the builder lends only ADA against ADA at a static ratio, and this pool does not');
+  }
+  const numerator = firstInteger(field(fields, 7, 'the pool datum'), 'minCollateral');
+  const denominator = firstInteger(field(fields, 8, 'the pool datum'), 'minCollateralDivider');
+  if (denominator === 0n) refuse("the pool's minCollateralDivider is zero");
+  const need = ceilDiv(opts.principal * numerator, denominator);
+  if (opts.collateral < need) {
+    refuse(`the pool asks ${need} lovelace of collateral for ${opts.principal}; ${opts.collateral} is offered`);
+  }
+  return need;
 }
 
 function ledgerTag(purpose: string): number {

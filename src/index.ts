@@ -225,6 +225,7 @@ export {
   fluidBorrowRedeemer,
   fluidRedeemerPosition,
   fluidDraftUnits,
+  fluidBorrowGuards,
 } from './fluid_v4_borrow';
 export type {
   FluidPoolTerms,

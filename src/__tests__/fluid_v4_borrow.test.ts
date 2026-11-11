@@ -1,9 +1,9 @@
 // The FluidTokens V4 pool and borrow builders, replayed from the vectors the Python builders they
-// port wrote: every row's arguments in, the same bytes, name, position or units out, or the same
-// refusal. The recorded rows also answer to the preview transaction they rebuild: the bytes or
-// redeemer hash of the pool and borrow these builders landed (6ca799bb, 93492f0e), and the Data
-// of FluidTokens' own borrow and pool open (2cb300ea, f25e1378). The properties hold the datums
-// to decoders written apart from the builders.
+// port wrote: every row's arguments in, the same bytes, name, position, units or collateral out,
+// or the same refusal. The recorded rows also answer to the preview transaction they rebuild: the
+// bytes or redeemer hash of the pool and borrow these builders landed (6ca799bb, 93492f0e), the
+// collateral that borrow locked, and the Data of FluidTokens' own borrow and pool open (2cb300ea,
+// f25e1378). The properties hold the datums to decoders written apart from the builders.
 
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
@@ -15,6 +15,7 @@ import {
   FLUID_POOL_SPEND_REDEEMER,
   FLUID_PREVIEW_ADA_TERMS,
   fluidBondRedeemer,
+  fluidBorrowGuards,
   fluidBorrowRedeemer,
   fluidDraftUnits,
   fluidLoanDatum,
@@ -129,7 +130,7 @@ function key(j: Json | undefined): FluidRedeemerKey {
   return { purpose: str(k.purpose), index: num(k.index) };
 }
 
-type Built = PlutusConstr | string | number | FluidRedeemerUnits[];
+type Built = PlutusConstr | string | number | bigint | FluidRedeemerUnits[];
 
 /** Each Python function of the vectors, called through its port. */
 const REPLAYS: { [fn: string]: (a: Args) => Built } = {
@@ -166,11 +167,20 @@ const REPLAYS: { [fn: string]: (a: Args) => Built } = {
       { redeemers: arr(obj(a.view).redeemers).map(key) },
       { maxTxMem: big(obj(a.params).max_tx_mem), maxTxSteps: big(obj(a.params).max_tx_steps) },
     ),
+  borrow_guards: (a) => {
+    const [validFromMs, validToMs] = arr(a.validity).map(big);
+    return fluidBorrowGuards(decodePlutusData(str(a.pool)), {
+      principal: big(a.principal),
+      collateral: big(a.collateral),
+      validFromMs,
+      validToMs,
+    });
+  },
 };
 
 function wire(built: Built): Json {
   if (typeof built === 'string') return built;
-  if (typeof built === 'number') return String(built);
+  if (typeof built === 'number' || typeof built === 'bigint') return String(built);
   if (Array.isArray(built)) {
     return built.map((u) => ({ purpose: u.purpose, index: String(u.index), mem: String(u.mem), steps: String(u.steps) }));
   }
@@ -270,6 +280,7 @@ describe('the recorded rows', () => {
       expect(bytesToHex(encodePlutusData(decodePlutusData(str(fact))))).toBe(built);
     } else if (kind === 'redeemerHash') expect(bytesToHex(blake2b(hexToBytes(str(built)), 32))).toBe(fact);
     else if (kind === 'value') expect(decodePlutusData(str(built))).toEqual(koiosData(fact));
+    else if (kind === 'collateral') expect(big(built)).toBeLessThanOrEqual(big(fact));
     else {
       expect(['assetName', 'position']).toContain(kind);
       expect(built).toBe(fact);
@@ -402,6 +413,32 @@ describe('addresses', () => {
     expect(() => encodeFullAddress(short)).toThrow(message);
     expect(() => borrowRedeemerFor(short)).toThrow(message);
     expect(() => fluidPoolDatum(FLUID_PREVIEW_ADA_TERMS, { lender: short })).toThrow(message);
+  });
+});
+
+describe('borrow guards', () => {
+  const lender: PlutusFullAddress = { payment: { kind: 'key', hash: new Uint8Array(28).fill(0x45) }, stake: null };
+  const divider = fc.oneof(fc.bigInt({ min: -(2n ** 70n), max: -1n }), fc.bigInt({ min: 1n, max: 2n ** 70n }));
+
+  it('ask the ceiling of principal times minCollateral over its divider, of either sign, and refuse a lovelace less', () => {
+    fc.assert(
+      fc.property(anyInt, anyInt, divider, (principal, numerator, denominator) => {
+        const pool = fluidPoolDatum({ ...FLUID_PREVIEW_ADA_TERMS, minCollateral: { numerator, denominator } }, { lender });
+        const at = { principal, validFromMs: 0n, validToMs: FLUID_MAX_VALIDITY_MS };
+        const need = fluidBorrowGuards(pool, { ...at, collateral: 2n ** 200n });
+        const owed = principal * numerator;
+        if (denominator > 0n) {
+          expect(need * denominator >= owed && (need - 1n) * denominator < owed).toBe(true);
+        } else {
+          expect(need * denominator <= owed && (need - 1n) * denominator > owed).toBe(true);
+        }
+        expect(fluidBorrowGuards(pool, { ...at, collateral: need })).toBe(need);
+        expect(() => fluidBorrowGuards(pool, { ...at, collateral: need - 1n })).toThrow(
+          `the pool asks ${need} lovelace of collateral for ${principal}; ${need - 1n} is offered`,
+        );
+      }),
+      { numRuns: 500 },
+    );
   });
 });
 

@@ -5,12 +5,15 @@
 // loan validator asserted. Synthetic datums cover what preview holds no loan of.
 
 import { describe, it, expect } from 'vitest';
+import fc from 'fast-check';
 import {
   FLUID_V4_CONFIG_POLICY,
   RH1_MAX_TERM_DAYS,
+  ceilDiv,
   coverFluidLoan,
   decodeFluidLoanDatum,
   decodeFluidSuite,
+  floorDiv,
   readFluidLoans,
   remainingDebt,
   rh1CoverParams,
@@ -158,6 +161,21 @@ describe('remainingDebt', () => {
   it('refuses the installment modes, which no preview loan has run', () => {
     expect(() => remainingDebt(decodeFluidLoanDatum(loanDatum({ repayment: encodeConstr(1, []) })), LEND_DATE_MS)).toThrow(
       InputError,
+    );
+  });
+});
+
+describe('floorDiv and ceilDiv', () => {
+  it('round toward negative and positive infinity, for a divisor of either sign', () => {
+    const divisor = fc.oneof(fc.bigInt({ min: -(2n ** 70n), max: -1n }), fc.bigInt({ min: 1n, max: 2n ** 70n }));
+    fc.assert(
+      fc.property(fc.bigInt({ min: -(2n ** 70n), max: 2n ** 70n }), divisor, (n, d) => {
+        const floor = floorDiv(n, d);
+        const rest = n - floor * d;
+        expect(d > 0n ? rest >= 0n && rest < d : rest <= 0n && rest > d).toBe(true);
+        expect(ceilDiv(n, d)).toBe(rest === 0n ? floor : floor + 1n);
+      }),
+      { numRuns: 1000 },
     );
   });
 });

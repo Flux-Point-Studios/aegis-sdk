@@ -278,12 +278,15 @@ export function decodeFluidLoanDatum(raw: Uint8Array | string): FluidLoanDatum {
   };
 }
 
-function ceilDiv(n: bigint, d: bigint): bigint {
-  return n > 0n ? (n + d - 1n) / d : n / d;
+/** n / d rounded toward negative infinity, for a divisor of either sign. */
+export function floorDiv(n: bigint, d: bigint): bigint {
+  const q = n / d;
+  return q * d !== n && (n < 0n) !== (d < 0n) ? q - 1n : q;
 }
 
-export function floorDiv(n: bigint, d: bigint): bigint {
-  return n >= 0n ? n / d : -((-n + d - 1n) / d);
+/** n / d rounded toward positive infinity, for a divisor of either sign. */
+export function ceilDiv(n: bigint, d: bigint): bigint {
+  return -floorDiv(-n, d);
 }
 
 /**

@@ -2,8 +2,8 @@
   "source": "api/lending/fluid_v4_borrow.py",
   "generator": "scripts/fluid_v4_borrow_vectors.py",
   "generatedFrom": {
-    "api/lending/fluid_v4_borrow.py": "c10c19a9359c823538b756a0eb809d53065af508",
-    "scripts/fluid_v4_borrow_vectors.py": "6b296bceebd083861910fee5cc31a19e52af4f6f"
+    "api/lending/fluid_v4_borrow.py": "d538f5c1f7fc68bd6c949d5807435311394321df",
+    "scripts/fluid_v4_borrow_vectors.py": "99c59a589180920011cd3688f33b3c5a3600bfff"
   },
   "assemblers": [
     "borrow_view",
@@ -2635,6 +2635,444 @@
           }
         },
         "out": []
+      }
+    ],
+    "borrow_guards": [
+      {
+        "name": "the ADA borrow 93492f0e's pool, principal, collateral and validity",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794353213000",
+            "1794355013000"
+          ]
+        },
+        "out": "200000000",
+        "tx": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+        "onChain": {
+          "collateral": "200000000"
+        }
+      },
+      {
+        "name": "collateral at exactly the pool's ratio",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "collateral past the ratio",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "18446744073709551616",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "a validity range of exactly an hour",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794003600000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "a validity range of no width",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000000000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "a ratio that does not divide asks the collateral rounded up",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081058103d87980",
+          "principal": "100000001",
+          "collateral": "166666669",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "166666669"
+      },
+      {
+        "name": "principal and collateral past a word",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "18446744073709551616",
+          "collateral": "36893488147419103232",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "36893488147419103232"
+      },
+      {
+        "name": "a zero principal asks no collateral",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "0",
+          "collateral": "0",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "0"
+      },
+      {
+        "name": "a negative minCollateralDivider rounds as floor division does",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081038121d87980",
+          "principal": "5",
+          "collateral": "-7",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "-7"
+      },
+      {
+        "name": "only the first collateral option, the one the builder borrows against, is read",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec83d8798340d8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416fd87983581cccccccccccccccccccccccccccccccccccccccccccccccccccccccccd8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416fd87983581cddddddddddddddddddddddddddddddddddddddddddddddddddddddddd879815820eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeed87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416f81028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "a pool under another constructor index is read the same",
+        "args": {
+          "pool": "d905028a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "a validity range a millisecond past an hour",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794003600001"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a borrow's validity range must be within an hour; 3600001 ms is not",
+          "module": true
+        }
+      },
+      {
+        "name": "the validity range is checked before the pool is read",
+        "args": {
+          "pool": "05",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794003600001"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a borrow's validity range must be within an hour; 3600001 ms is not",
+          "module": true
+        }
+      },
+      {
+        "name": "collateral a lovelace short of the ratio",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "199999999",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the pool asks 200000000 lovelace of collateral for 100000000; 199999999 is offered",
+          "module": true
+        }
+      },
+      {
+        "name": "a lovelace short of the rounded-up ask",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081058103d87980",
+          "principal": "100000001",
+          "collateral": "166666668",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the pool asks 166666669 lovelace of collateral for 100000001; 166666668 is offered",
+          "module": true
+        }
+      },
+      {
+        "name": "a token principal",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd87982581ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc43746f6bd8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
+      },
+      {
+        "name": "the pool's assets are checked before its collateral",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd87982581ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc43746f6bd8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "0",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
+      },
+      {
+        "name": "a token collateral",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d87983581cccccccccccccccccccccccccccccccccccccccccccccccccccccccccd8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416f81028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
+      },
+      {
+        "name": "a token collateral first, ADA after it",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec82d87983581cccccccccccccccccccccccccccccccccccccccccccccccccccccccccd8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416fd8798340d8798140d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416f81028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
+      },
+      {
+        "name": "collateral under a named asset",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d879814178d87982581cbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb416f81028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
+      },
+      {
+        "name": "collateral of any asset name",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d87a80d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
+      },
+      {
+        "name": "a ratio an oracle prices",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87a80",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
+      },
+      {
+        "name": "FluidTokens' f25e1378 pool, lending ADA against oracle-priced tFLDT",
+        "args": {
+          "pool": "d8799f444e4f4e45d87980d8799fd8799f4040ffd8799f4040ff1901cb000000d87b9f1864187d1864d87980ffd87b9f181c05ff0000d8798040ffd87b9f581c45ce890c9bcf70f6eed629b5db7c0622e44ca1003e001a2cf951518fffd8799fd87a9f581cdd2d7f3fdd0ca7ea68e94912c3d332f18299b6ec8854577492d006ebffd8799fd8799fd8799f581cec531e73ded920f262108982988eb4839277c5cb379f65c41a4dce2bffffffff5820a7c7769f5ca0bb807bcfc37c1e674b644b971e1c2a0facbe0be26420a59b2ffa9fd8799f581c0b77d150c275bd0a600633e4be7d09f83c4b9f00981e22ac9c9d3f62d8799f490014df1074464c4454ffd8799f581c9a2ec5c92daccbb269611a9eae7a40f9788d3f9c0229661b6234286f49000de1406f766f3633ffffff9f1864ff9f1832ffd87a80ff",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
+      },
+      {
+        "name": "a pool datum that is no constructor",
+        "args": {
+          "pool": "05",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "not a constructor",
+          "module": false
+        }
+      },
+      {
+        "name": "a pool datum of six fields",
+        "args": {
+          "pool": "d87986444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "IndexError",
+          "message": "list index out of range",
+          "module": false
+        }
+      },
+      {
+        "name": "a pool that offers no collateral option",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec8081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "IndexError",
+          "message": "list index out of range",
+          "module": false
+        }
+      },
+      {
+        "name": "a minCollateral list with no entry",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d879824040808101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "IndexError",
+          "message": "list index out of range",
+          "module": false
+        }
+      },
+      {
+        "name": "a zero minCollateralDivider",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028100d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ZeroDivisionError",
+          "message": "integer division or modulo by zero",
+          "module": false
+        }
       }
     ]
   }
