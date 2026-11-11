@@ -39,8 +39,7 @@ Additive (no breaking changes):
   the pool's ratio, and a pool left at its min-UTxO.
 - **`encodePlutusData`** — writes Plutus Data with definite lengths, a bignum
   past a machine word, and a constructor under tags 121-127, 1280-1400 or 102;
-  `decodePlutusData` reads back every value it writes, and now refuses a hex
-  digit that is not one instead of reading it as zero.
+  `decodePlutusData` reads back every value it writes.
 - **Zero-premium-cover enrollment addresses** — `hybridStakeAddress(paymentVkh,
   stakeScriptHashHex, network)` encodes the CIP-19 type-2 base address
   (key payment + SCRIPT stake) the enrollment places principal at, and
@@ -72,6 +71,21 @@ Additive (no breaking changes):
   re-export of `quoteBarrier` (a binary liquidation event is a barrier struck at
   the liquidation level; the floor table is asset-independent) — **no separate
   `quoteEvent` model** to maintain.
+
+Changed:
+
+- **Hex input must be hex digits.** Given a hex string holding a character
+  that is not a hex digit, `readGenericData` (so `decodeFearDatum` and
+  `decodeEventDatum`) and `decodePlutusData` (so `decodeFluidSuite` and
+  `decodeFluidLoanDatum`) now throw `InputError` with code `INVALID_INPUT` and
+  message `GenericData hex holds a character that is no hex digit`, before any
+  CBOR is read. They used to turn each two-character pair into the byte
+  `parseInt(pair, 16)` gave and decode that: a pair opening with a non-hex
+  character became `00`, a digit then a non-hex character became that digit
+  alone (`1g` became `01`), and a sign or a space was honoured (`-1` became
+  `ff`, ` 1` became `01`). A corrupted datum could so decode to another value,
+  or fail later with a CBOR error. A `Uint8Array`, and hex of digits alone in
+  either case, read as before.
 
 ## 1.0.5-v4.0 — crashShieldFeedFor underlying-ticker helper (2026-06-24)
 

@@ -10,6 +10,7 @@ import { decodePlutusData, encodePlutusData } from '../plutus_data';
 import type { PlutusData } from '../plutus_data';
 import { bytesToHex } from '../cbor';
 import { InputError } from '../errors';
+import { readGenericData } from '../generic_data';
 
 const WORD = 2n ** 64n;
 
@@ -103,10 +104,34 @@ describe('encodePlutusData', () => {
   });
 });
 
-describe('decodePlutusData hex', () => {
-  it('refuses a digit that is not hex rather than reading it as zero', () => {
-    expect(() => decodePlutusData('zz')).toThrow(InputError);
-    expect(() => decodePlutusData('0g')).toThrow(InputError);
+function thrown(call: () => unknown): unknown {
+  try {
+    call();
+  } catch (error) {
+    return error;
+  }
+  throw new Error('nothing was thrown');
+}
+
+describe('hex input to decodePlutusData and readGenericData', () => {
+  // GenericData { 0: 1 }: an event feed reading alive, its value the last byte.
+  const alive = 'd87981d87b81a10001';
+
+  it('reads hex digits of either case', () => {
     expect(decodePlutusData('0A')).toBe(10n);
+    expect(readGenericData(alive).value).toBe(1n);
+    expect(readGenericData(alive.toUpperCase()).value).toBe(1n);
+  });
+
+  // parseInt(pair, 16) read each of these as a byte: 00, 00, 01, ff, 01, 01.
+  it.each(['zz', '0g', '1g', '-1', ' 1', '+1'])('refuses the pair %j as no hex before reading any CBOR', (pair) => {
+    for (const read of [decodePlutusData, readGenericData]) {
+      const error = thrown(() => read(alive.slice(0, -2) + pair));
+      expect(error).toBeInstanceOf(InputError);
+      if (error instanceof InputError) {
+        expect(error.code).toBe('INVALID_INPUT');
+        expect(error.message).toBe('GenericData hex holds a character that is no hex digit');
+      }
+    }
   });
 });
