@@ -12,7 +12,8 @@
 //   bech32 (NOT bech32m) over the 5-bit regrouped payload, HRP "addr"/"addr_test".
 
 import { hexToBytes } from './cbor';
-import type { PlutusFullAddress } from './types';
+import { InputError } from './errors';
+import type { PlutusCredential, PlutusFullAddress } from './types';
 
 const CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 
@@ -71,10 +72,10 @@ function convertBits8to5(data: Uint8Array): number[] {
   return out;
 }
 
-export type Network = 'mainnet' | 'preprod';
+export type Network = 'mainnet' | 'preprod' | 'preview';
 
 function networkBit(network: Network): number {
-  return network === 'mainnet' ? 1 : 0; // testnet/preprod id = 0
+  return network === 'mainnet' ? 1 : 0; // every testnet's id is 0
 }
 
 function encodeAddr(network: Network, payload: Uint8Array): string {
@@ -198,4 +199,92 @@ export function scriptPayoutTarget(scriptHashHex: string): PlutusFullAddress {
     throw new Error(`script hash must be 28 bytes (got ${hash.length})`);
   }
   return { payment: { kind: 'script', hash }, stake: null };
+}
+
+/** CIP-19 address type (the header's high nibble) of a base or enterprise address. */
+const ADDRESS_TYPE: Record<string, number> = {
+  'key/key': 0,
+  'script/key': 1,
+  'key/script': 2,
+  'script/script': 3,
+  'key/none': 6,
+  'script/none': 7,
+};
+
+function credentialBytes(c: PlutusCredential, role: string): Uint8Array {
+  if (c.hash.length !== 28) throw new InputError('INVALID_INPUT', `${role} credential must be 28 bytes (got ${c.hash.length})`);
+  return c.hash;
+}
+
+/**
+ * Bech32 base or enterprise address for any payment and optional stake credential, each a
+ * key or a script: the general form of {@link keyAddress}, {@link scriptEnterpriseAddress}
+ * and {@link hybridStakeAddress}.
+ */
+export function bech32Address(addr: PlutusFullAddress, network: Network): string {
+  const type = ADDRESS_TYPE[`${addr.payment.kind}/${addr.stake?.kind ?? 'none'}`];
+  const parts = [credentialBytes(addr.payment, 'payment')];
+  if (addr.stake !== null) parts.push(credentialBytes(addr.stake, 'stake'));
+  const payload = new Uint8Array(1 + 28 * parts.length);
+  payload[0] = (type << 4) | networkBit(network);
+  parts.forEach((p, i) => payload.set(p, 1 + 28 * i));
+  return encodeAddr(network, payload);
+}
+
+export interface DecodedAddress extends PlutusFullAddress {
+  /** 1 on mainnet, 0 on every testnet. */
+  networkId: 0 | 1;
+}
+
+/** Regroup 5-bit words into bytes, refusing padding that is more than zero bits under a byte. */
+function convertBits5to8(words: number[]): Uint8Array {
+  let acc = 0;
+  let bits = 0;
+  const out: number[] = [];
+  for (const w of words) {
+    acc = ((acc << 5) | w) & 0xfff;
+    bits += 5;
+    if (bits >= 8) {
+      bits -= 8;
+      out.push((acc >> bits) & 0xff);
+    }
+  }
+  if (bits >= 5 || (acc & ((1 << bits) - 1)) !== 0) throw new InputError('INVALID_INPUT', 'bech32 address has bad padding');
+  return new Uint8Array(out);
+}
+
+/**
+ * The credentials and network id of a bech32 base or enterprise address (CIP-19 types 0-3,
+ * 6, 7). A pointer, Byron or reward address carries no payment and inline stake pair this
+ * reads, and is refused.
+ */
+export function decodeBech32Address(address: string): DecodedAddress {
+  const lower = address.toLowerCase();
+  if (lower !== address && address.toUpperCase() !== address) {
+    throw new InputError('INVALID_INPUT', 'bech32 address mixes cases');
+  }
+  const sep = lower.lastIndexOf('1');
+  const hrp = lower.slice(0, sep);
+  if (hrp !== 'addr' && hrp !== 'addr_test') {
+    throw new InputError('INVALID_INPUT', `a ${hrp || 'headless'} bech32 string is no payment address`);
+  }
+  const words = Array.from(lower.slice(sep + 1), (ch) => CHARSET.indexOf(ch));
+  if (words.length < 6 || words.some((w) => w < 0)) throw new InputError('INVALID_INPUT', 'bech32 address has a bad character');
+  if (polymod(hrpExpand(hrp).concat(words)) !== 1) throw new InputError('INVALID_INPUT', 'bech32 address has a bad checksum');
+  const bytes = convertBits5to8(words.slice(0, -6));
+  const type = bytes[0] >> 4;
+  const networkId = bytes[0] & 0x0f;
+  if (networkId !== (hrp === 'addr' ? 1 : 0)) {
+    throw new InputError('INVALID_INPUT', `address network id ${networkId} does not match its prefix ${hrp}`);
+  }
+  const kinds = Object.keys(ADDRESS_TYPE).find((k) => ADDRESS_TYPE[k] === type);
+  const [payment, stake] = (kinds ?? '').split('/') as ['key' | 'script', 'key' | 'script' | 'none'];
+  if (kinds === undefined || bytes.length !== (stake === 'none' ? 29 : 57)) {
+    throw new InputError('INVALID_INPUT', `address type ${type} carries no payment and inline stake credentials this reads`);
+  }
+  return {
+    networkId: networkId as 0 | 1,
+    payment: { kind: payment, hash: bytes.slice(1, 29) },
+    stake: stake === 'none' ? null : { kind: stake, hash: bytes.slice(29, 57) },
+  };
 }

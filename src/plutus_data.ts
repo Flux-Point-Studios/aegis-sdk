@@ -1,0 +1,142 @@
+// A Plutus Data decoder for datums another protocol writes: every form the ledger's
+// Data holds, whichever lengths the writer chose. Integers (major 0 and 1, and the
+// tag 2 and 3 bignums), bytestrings (definite, or the chunked indefinite form
+// serialiseData writes past 64 bytes), lists and maps (definite or indefinite), and
+// constructors under tags 121-127, 1280-1400 and 102. Anything else is refused.
+
+import { InputError } from './errors';
+import { hexToBytesStrict } from './generic_data';
+
+export interface PlutusConstr {
+  constructor: number;
+  fields: PlutusData[];
+}
+
+export interface PlutusMap {
+  map: Array<[PlutusData, PlutusData]>;
+}
+
+export type PlutusData = bigint | Uint8Array | PlutusData[] | PlutusMap | PlutusConstr;
+
+interface Reader {
+  buf: Uint8Array;
+  off: number;
+}
+
+function refuse(message: string): never {
+  throw new InputError('INVALID_INPUT', `Plutus data: ${message}`);
+}
+
+function byte(r: Reader): number {
+  if (r.off >= r.buf.length) refuse('unexpected end of CBOR');
+  return r.buf[r.off++];
+}
+
+/** The head at the reader: its major type and argument, null for an indefinite length. */
+function head(r: Reader): { major: number; arg: bigint | null } {
+  const b = byte(r);
+  const info = b & 0x1f;
+  if (info < 24) return { major: b >> 5, arg: BigInt(info) };
+  if (info === 31) return { major: b >> 5, arg: null };
+  if (info > 27) refuse(`reserved additional information ${info}`);
+  let arg = 0n;
+  for (let i = 0; i < 2 ** (info - 24); i++) arg = (arg << 8n) | BigInt(byte(r));
+  return { major: b >> 5, arg };
+}
+
+function take(r: Reader, n: bigint): Uint8Array {
+  if (BigInt(r.off) + n > BigInt(r.buf.length)) refuse('unexpected end of CBOR');
+  const out = r.buf.slice(r.off, r.off + Number(n));
+  r.off += Number(n);
+  return out;
+}
+
+function atBreak(r: Reader): boolean {
+  if (r.buf[r.off] !== 0xff) return false;
+  r.off++;
+  return true;
+}
+
+function bytesOf(r: Reader, arg: bigint | null): Uint8Array {
+  if (arg !== null) return take(r, arg);
+  const chunks: Uint8Array[] = [];
+  while (!atBreak(r)) {
+    const chunk = head(r);
+    if (chunk.major !== 2 || chunk.arg === null) refuse('an indefinite bytestring holds a chunk that is no definite bytestring');
+    chunks.push(take(r, chunk.arg));
+  }
+  const out = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
+  let at = 0;
+  for (const c of chunks) {
+    out.set(c, at);
+    at += c.length;
+  }
+  return out;
+}
+
+function items<T>(r: Reader, arg: bigint | null, item: () => T): T[] {
+  const out: T[] = [];
+  if (arg === null) {
+    while (!atBreak(r)) out.push(item());
+  } else {
+    for (let i = 0n; i < arg; i++) out.push(item());
+  }
+  return out;
+}
+
+function bignum(bytes: Uint8Array): bigint {
+  return bytes.reduce((n, b) => (n << 8n) | BigInt(b), 0n);
+}
+
+function data(r: Reader): PlutusData {
+  const { major, arg } = head(r);
+  switch (major) {
+    case 0:
+      if (arg === null) refuse('an integer of indefinite length');
+      return arg;
+    case 1:
+      if (arg === null) refuse('an integer of indefinite length');
+      return -1n - arg;
+    case 2:
+      return bytesOf(r, arg);
+    case 4:
+      return items(r, arg, () => data(r));
+    case 5:
+      return { map: items(r, arg, () => [data(r), data(r)] as [PlutusData, PlutusData]) };
+    case 6: {
+      if (arg === 2n || arg === 3n) {
+        const inner = head(r);
+        if (inner.major !== 2) refuse('a bignum tag holds no bytestring');
+        const n = bignum(bytesOf(r, inner.arg));
+        return arg === 2n ? n : -1n - n;
+      }
+      if (arg !== null && arg >= 121n && arg <= 127n) return constr(r, Number(arg) - 121);
+      if (arg !== null && arg >= 1280n && arg <= 1400n) return constr(r, Number(arg) - 1280 + 7);
+      if (arg === 102n) {
+        const pair = data(r);
+        if (!Array.isArray(pair) || pair.length !== 2 || typeof pair[0] !== 'bigint' || !Array.isArray(pair[1])) {
+          refuse('a general constructor is [index, fields]');
+        }
+        return { constructor: Number(pair[0]), fields: pair[1] as PlutusData[] };
+      }
+      return refuse(`CBOR tag ${arg} is no Plutus data`);
+    }
+    default:
+      return refuse(`CBOR major type ${major} is no Plutus data`);
+  }
+}
+
+function constr(r: Reader, index: number): PlutusConstr {
+  const fields = data(r);
+  if (!Array.isArray(fields)) refuse(`constructor ${index} carries no field list`);
+  return { constructor: index, fields };
+}
+
+/** Decode one Plutus Data item, hex or bytes, refusing trailing bytes. */
+export function decodePlutusData(raw: Uint8Array | string): PlutusData {
+  const buf = typeof raw === 'string' ? hexToBytesStrict(raw) : raw;
+  const r: Reader = { buf, off: 0 };
+  const out = data(r);
+  if (r.off !== buf.length) refuse(`${buf.length - r.off} trailing bytes`);
+  return out;
+}

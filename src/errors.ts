@@ -26,6 +26,7 @@ export type AegisErrorCode =
   | 'BELOW_FLOOR'
   | 'PREMIUM_GE_COVERAGE'
   | 'DEPEG_STRIKE_OUT_OF_BAND'
+  | 'LOAN_NOT_COVERABLE'
   // pool state
   | 'POOL_CANNOT_COVER'
   | 'CONCENTRATION_CAP'

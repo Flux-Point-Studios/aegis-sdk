@@ -1,0 +1,163 @@
+{
+ "_source": {
+  "captured": "2026-11-10",
+  "endpoint": "https://preview.koios.rest/api/v1/address_utxos",
+  "network": "preview",
+  "params": {
+   "_addresses": [
+    "addr_test1zqc7phqaw5rkunmhjkeycnxyk4g40ydmfml54aukreqy70kjlqjza7zcf2gs6ymzgdwck9at45ntyrva68jhrfjpym0qm8mp57"
+   ],
+   "_extended": true
+  },
+  "trimmed": "none",
+  "what": "the loan script's outputs under the borrower's stake key"
+ },
+ "response": [
+  {
+   "address": "addr_test1zqc7phqaw5rkunmhjkeycnxyk4g40ydmfml54aukreqy70kjlqjza7zcf2gs6ymzgdwck9at45ntyrva68jhrfjpym0qm8mp57",
+   "asset_list": [
+    {
+     "asset_name": "17a5d13b074d7bbd4c0003563ade227760325ca836e7b80839c9bab2",
+     "decimals": 0,
+     "fingerprint": "asset1a47zy364cg7mr8gpxrcjkgsts43yg0gln8r4e2",
+     "policy_id": "2f1aa941f437e351e3870f7247d735b2bc2952f1c7977426e8960d17",
+     "quantity": "1"
+    }
+   ],
+   "block_height": 4844881,
+   "block_time": 1794353335,
+   "datum_hash": "8962c3a637632c7768b63f2b83b8857fd556e9c6c7256848dafc5e91ce8f8095",
+   "epoch_no": 1477,
+   "inline_datum": {
+    "bytes": "d87991001a05f5e1001b000001a1c7e4a588001901cb00d879824040d8798240400000d87b841864187d1864d87980d87b82181c050000d879805821504f4f4c0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc239d8798340d8798140d879824040",
+    "value": {
+     "constructor": 0,
+     "fields": [
+      {
+       "int": 0
+      },
+      {
+       "int": 100000000
+      },
+      {
+       "int": 1794355013000
+      },
+      {
+       "int": 0
+      },
+      {
+       "int": 459
+      },
+      {
+       "int": 0
+      },
+      {
+       "constructor": 0,
+       "fields": [
+        {
+         "bytes": ""
+        },
+        {
+         "bytes": ""
+        }
+       ]
+      },
+      {
+       "constructor": 0,
+       "fields": [
+        {
+         "bytes": ""
+        },
+        {
+         "bytes": ""
+        }
+       ]
+      },
+      {
+       "int": 0
+      },
+      {
+       "int": 0
+      },
+      {
+       "constructor": 2,
+       "fields": [
+        {
+         "int": 100
+        },
+        {
+         "int": 125
+        },
+        {
+         "int": 100
+        },
+        {
+         "constructor": 0,
+         "fields": []
+        }
+       ]
+      },
+      {
+       "constructor": 2,
+       "fields": [
+        {
+         "int": 28
+        },
+        {
+         "int": 5
+        }
+       ]
+      },
+      {
+       "int": 0
+      },
+      {
+       "int": 0
+      },
+      {
+       "constructor": 0,
+       "fields": []
+      },
+      {
+       "bytes": "504f4f4c0073e01cdff35b70de7df76006bc296949a3cbfcbb79919d9c537bc239"
+      },
+      {
+       "constructor": 0,
+       "fields": [
+        {
+         "bytes": ""
+        },
+        {
+         "constructor": 0,
+         "fields": [
+          {
+           "bytes": ""
+          }
+         ]
+        },
+        {
+         "constructor": 0,
+         "fields": [
+          {
+           "bytes": ""
+          },
+          {
+           "bytes": ""
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "is_spent": false,
+   "payment_cred": "31e0dc1d75076e4f7795b24c4cc4b5515791bb4eff4af7961e404f3e",
+   "reference_script": null,
+   "stake_address": "stake_test1urf0sfpwlpvy4ygdzd3yxhvtz7466f4jpkwaret35eqjdhs7r6spt",
+   "tx_hash": "93492f0ed239f3d3da55e095defdd347d5ee2d69d53edadeff1aeb7502b9b6eb",
+   "tx_index": 1,
+   "value": "200000000"
+  }
+ ]
+}

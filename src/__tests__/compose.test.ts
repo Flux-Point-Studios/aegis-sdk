@@ -328,3 +328,9 @@ describe('buildUnderwriteParts — staking accrual datum on team output', () => 
     expect(parts.teamOutput.inlineDatumCbor).toBeUndefined();
   });
 });
+
+describe('aegisBindings — a network Aegis is not deployed on', () => {
+  it('refuses preview rather than hand back the preprod deployment', () => {
+    expect(() => aegisBindings('preview' as never)).toThrow(/no Aegis deployment on preview/);
+  });
+});

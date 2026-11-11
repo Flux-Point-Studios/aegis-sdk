@@ -64,8 +64,12 @@ export {
   scriptPayoutTarget,
   hybridStakeAddress,
   scriptStakeAddress,
+  bech32Address,
+  decodeBech32Address,
 } from './address';
-export type { Network } from './address';
+export type { Network, DecodedAddress } from './address';
+export { CHAIN_FACTS, slotToPosixMs, posixMsToSlot } from './networks';
+export type { ChainFacts } from './networks';
 
 // ---------------------------------------------------------------------------
 // Treasury-donation sweep (Phase 4 decouple) — the periodic key-witnessed tx
@@ -163,6 +167,41 @@ export {
 export type { EventReading, BuildEventUnderwritePartsParams } from './event';
 export { readGenericData } from './generic_data';
 export type { GenericData } from './generic_data';
+export { decodePlutusData } from './plutus_data';
+export type { PlutusData, PlutusConstr, PlutusMap } from './plutus_data';
+
+// ---------------------------------------------------------------------------
+// FluidTokens V4 loans and the RH1 cover a loan asks for: liquidation cover of
+// its ADA debt, sold by the gen-3 Book's RH1 row.
+// ---------------------------------------------------------------------------
+export {
+  FLUID_V4_CONFIG_POLICY,
+  RH1_MIN_TERM_DAYS,
+  RH1_MAX_TERM_DAYS,
+  decodeFluidSuite,
+  decodeFluidLoanDatum,
+  remainingDebt,
+  readFluidSuite,
+  readFluidLoans,
+  readFluidLoan,
+  rh1CoverParams,
+  coverFluidLoan,
+} from './fluid_v4';
+export type {
+  FluidV4Suite,
+  FluidAsset,
+  FluidCollateral,
+  FluidLiquidation,
+  FluidRepayment,
+  FluidLoanDatum,
+  FluidLoan,
+  FluidReadOptions,
+  Rational,
+  Rh1CoverOptions,
+  Rh1Trigger,
+  Rh1CoverParams,
+  FluidCoverRequest,
+} from './fluid_v4';
 
 // ---------------------------------------------------------------------------
 // Named oracle-feed registry (mainnet + preprod, network-aware lookup).

@@ -4,6 +4,28 @@
 
 Additive (no breaking changes):
 
+- **Preview** — `Network` takes `'preview'`. `CHAIN_FACTS` records each network's
+  magic (preview 2), address network id, Shelley slot origin (preview 1666656000 s)
+  and public Koios; `slotToPosixMs` / `posixMsToSlot` convert a slot and the POSIX
+  milliseconds a script reads its validity bound as. `aegisBindings` refuses a
+  network with no Aegis deployment instead of returning preprod's.
+- **`bech32Address` / `decodeBech32Address`** — the CIP-19 base and enterprise
+  address codec for any key or script payment and stake credential.
+- **`decodePlutusData`** — reads any Plutus Data another protocol writes:
+  bignums, chunked bytestrings, maps, and constructors under every tag form.
+- **FluidTokens V4 loans** — `readFluidLoans(borrowerAddress, { network })` finds
+  a borrower's live loans at the pinned suite's loan script under their stake
+  credential; `decodeFluidLoanDatum` reads the 17-field LoanDatum (debt,
+  collateral, liquidation line, repayment mode, lendDate); `remainingDebt`
+  mirrors the protocol's perpetual-loan debt and reproduces the remainingDebt
+  preview's liquidations asserted on chain.
+- **RH1 cover of a loan** — `rh1CoverParams(loan, { startMs, termDays })` sizes
+  cover at the loan's debt, for a 1-180 day term, triggered by its liquidation,
+  and reports how far the loan stands from its line; `coverFluidLoan(loanRef,
+  opts)` reads the loan by its UTxO and returns the typed `FluidCoverRequest` a
+  gen-3 Book sale on the RH1 row is built from. A loan that can be claimed for
+  lateness, owes a token other than ADA, or has no liquidation line is refused
+  with `LOAN_NOT_COVERABLE`.
 - **Zero-premium-cover enrollment addresses** — `hybridStakeAddress(paymentVkh,
   stakeScriptHashHex, network)` encodes the CIP-19 type-2 base address
   (key payment + SCRIPT stake) the enrollment places principal at, and

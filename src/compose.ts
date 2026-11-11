@@ -111,7 +111,10 @@ export interface AegisBindings {
  * Assemble bindings for a network from the frozen-manifest constants. This is
  * the ergonomic entry point: `buildUnderwriteParts({ bindings: aegisBindings('mainnet'), … })`.
  */
-export function aegisBindings(network: Network): AegisBindings {
+export function aegisBindings(network: 'mainnet' | 'preprod'): AegisBindings {
+  if (network !== 'mainnet' && network !== 'preprod') {
+    throw new InputError('INVALID_INPUT', `there is no Aegis deployment on ${network}`);
+  }
   const c = network === 'mainnet' ? MAINNET_CONSTS : PREPROD_CONSTS;
   return {
     network,
