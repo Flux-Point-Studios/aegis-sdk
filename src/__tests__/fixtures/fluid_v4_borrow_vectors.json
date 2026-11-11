@@ -2,8 +2,8 @@
   "source": "api/lending/fluid_v4_borrow.py",
   "generator": "scripts/fluid_v4_borrow_vectors.py",
   "generatedFrom": {
-    "api/lending/fluid_v4_borrow.py": "5f6328a5d3d59a19c527d2c1f2e289d90d2640f6",
-    "scripts/fluid_v4_borrow_vectors.py": "aaf89300738585def09abdca9918a730baa1fe65"
+    "api/lending/fluid_v4_borrow.py": "7d60a37781b66cee91390fb920d1a5d6f3ea5329",
+    "scripts/fluid_v4_borrow_vectors.py": "1d2c621549b35a32c25d0e8b86dc24757be83444"
   },
   "assemblers": [
     "borrow_view",
@@ -2784,6 +2784,75 @@
           ]
         },
         "out": "200000000"
+      },
+      {
+        "name": "ADA as the principal asset in the general constructor form, tag 102 [0, fields]",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd8668200824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "the collateral's Some asset name in the general constructor form",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d86682008140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "the pool's False oracle-pricing flag in the general constructor form",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d866820080",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "every constructor the guards read in the general constructor form",
+        "args": {
+          "pool": "d86682008a444e4f4e45d87980d86682008cd8668200824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d86682008340d86682008140d87982404081028101d866820080",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "200000000"
+      },
+      {
+        "name": "a general constructor of index 1 is not ADA",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd8668201824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "100000000",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "the builder lends only ADA against ADA at a static ratio, and this pool does not",
+          "module": true
+        }
       },
       {
         "name": "a validity range a millisecond past an hour",
