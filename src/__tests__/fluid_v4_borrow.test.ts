@@ -32,7 +32,7 @@ import type { FluidLoanDatum } from '../fluid_v4';
 import { decodePlutusData, encodePlutusData } from '../plutus_data';
 import type { PlutusConstr, PlutusData } from '../plutus_data';
 import { blake2b, blake2b224 } from '../blake2b';
-import { bytesToHex, hexToBytes } from '../cbor';
+import { bytesToHex, encodeFullAddress, hexToBytes } from '../cbor';
 import { InputError } from '../errors';
 import type { PlutusCredential, PlutusFullAddress } from '../types';
 import * as port from '../fluid_v4_borrow';
@@ -348,6 +348,58 @@ describe('attack_datum_round_trip', () => {
       }),
       { numRuns: 300 },
     );
+  });
+});
+
+function fieldsOf(data: PlutusData): PlutusData[] {
+  if (typeof data === 'bigint' || data instanceof Uint8Array || Array.isArray(data) || 'map' in data) {
+    throw new Error('no constructor');
+  }
+  return data.fields;
+}
+
+function listOf(data: PlutusData): PlutusData[] {
+  if (!Array.isArray(data)) throw new Error('no list');
+  return data;
+}
+
+const addressArb: fc.Arbitrary<PlutusFullAddress> = fc.record({ payment: credentialArb, stake: fc.option(credentialArb, { nil: null }) });
+
+function borrowRedeemerFor(borrower: PlutusFullAddress): PlutusConstr {
+  return fluidBorrowRedeemer({
+    configIndex: 1n,
+    borrower,
+    lenderBondOutput: 3n,
+    borrowerBondOutput: 2n,
+    principalOracleIndex: -1n,
+    collateralIndex: 0n,
+    collateralOracleIndex: -1n,
+    principal: 100_000_000n,
+    poolId: '00',
+    permissionIndex: 0n,
+  });
+}
+
+describe('addresses', () => {
+  it("the pool datum's lender and the borrow redeemer's borrower are the Data encodeFullAddress writes", () => {
+    fc.assert(
+      fc.property(addressArb, (address) => {
+        const written = decodePlutusData(encodeFullAddress(address));
+        expect(fieldsOf(listOf(fieldsOf(borrowRedeemerFor(address))[1])[0])[0]).toEqual(written);
+        if (address.payment.kind === 'key') {
+          expect(fluidPoolDatum(FLUID_PREVIEW_ADA_TERMS, { lender: address }).fields[4]).toEqual(written);
+        }
+      }),
+      { numRuns: 300 },
+    );
+  });
+
+  it('refuse a credential hash encodeFullAddress refuses, with its message', () => {
+    const short: PlutusFullAddress = { payment: { kind: 'key', hash: new Uint8Array(28) }, stake: { kind: 'script', hash: new Uint8Array(27) } };
+    const message = 'credential hash must be 28 bytes (got 27).';
+    expect(() => encodeFullAddress(short)).toThrow(message);
+    expect(() => borrowRedeemerFor(short)).toThrow(message);
+    expect(() => fluidPoolDatum(FLUID_PREVIEW_ADA_TERMS, { lender: short })).toThrow(message);
   });
 });
 

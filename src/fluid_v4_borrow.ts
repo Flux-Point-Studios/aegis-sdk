@@ -14,14 +14,14 @@
 // its min-UTxO.
 
 import { blake2b, blake2b224 } from './blake2b';
-import { bytesToHex, encodeConstr } from './cbor';
+import { bytesToHex, encodeConstr, encodeFullAddress } from './cbor';
 import { InputError } from './errors';
 import { constrOf, floorDiv } from './fluid_v4';
 import type { FluidAsset, FluidLiquidation, Rational } from './fluid_v4';
 import { hexToBytesStrict } from './generic_data';
-import { encodePlutusData } from './plutus_data';
+import { decodePlutusData, encodePlutusData } from './plutus_data';
 import type { PlutusConstr, PlutusData } from './plutus_data';
-import type { PlutusCredential, PlutusFullAddress } from './types';
+import type { PlutusFullAddress } from './types';
 
 /** constants.ak's permissionless condition, "NONE": any borrower may borrow from the pool. */
 export const FLUID_NO_PERMISSIONED_CONDITION = '4e4f4e45';
@@ -109,13 +109,9 @@ function ada(): PlutusConstr {
   return constr(0, [new Uint8Array(), new Uint8Array()]);
 }
 
-function credentialData(c: PlutusCredential): PlutusConstr {
-  return constr(c.kind === 'key' ? 0 : 1, [c.hash.slice()]);
-}
-
+/** The address as Data: what encodeFullAddress writes, read back. */
 function addressData(a: PlutusFullAddress): PlutusConstr {
-  const stake = a.stake === null ? constr(1, []) : constr(0, [constr(0, [credentialData(a.stake)])]);
-  return constr(0, [credentialData(a.payment), stake]);
+  return constrOf(decodePlutusData(encodeFullAddress(a)), 'an address');
 }
 
 /** An output reference "<tx id>#<index>" as its tx id's bytes and its index. */
