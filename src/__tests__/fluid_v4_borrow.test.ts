@@ -419,10 +419,12 @@ describe('addresses', () => {
 describe('borrow guards', () => {
   const lender: PlutusFullAddress = { payment: { kind: 'key', hash: new Uint8Array(28).fill(0x45) }, stake: null };
   const divider = fc.oneof(fc.bigInt({ min: -(2n ** 70n), max: -1n }), fc.bigInt({ min: 1n, max: 2n ** 70n }));
+  const positive = fc.oneof(fc.bigInt({ min: 1n, max: 2n ** 70n }), fc.constantFrom(1n, 2n ** 64n - 1n, 2n ** 64n));
+  const notPositive = fc.oneof(fc.bigInt({ min: -(2n ** 70n), max: 0n }), fc.constantFrom(0n, -1n, -(2n ** 64n) - 1n));
 
   it('ask the ceiling of principal times minCollateral over its divider, of either sign, and refuse a lovelace less', () => {
     fc.assert(
-      fc.property(anyInt, anyInt, divider, (principal, numerator, denominator) => {
+      fc.property(positive, anyInt, divider, (principal, numerator, denominator) => {
         const pool = fluidPoolDatum({ ...FLUID_PREVIEW_ADA_TERMS, minCollateral: { numerator, denominator } }, { lender });
         const at = { principal, validFromMs: 0n, validToMs: FLUID_MAX_VALIDITY_MS };
         const need = fluidBorrowGuards(pool, { ...at, collateral: 2n ** 200n });
@@ -438,6 +440,20 @@ describe('borrow guards', () => {
         );
       }),
       { numRuns: 500 },
+    );
+  });
+
+  it('refuse a principal that is not positive before reading the pool, and after the validity range', () => {
+    const pool = fluidPoolDatum(FLUID_PREVIEW_ADA_TERMS, { lender });
+    fc.assert(
+      fc.property(notPositive, (principal) => {
+        const at = { principal, collateral: 2n ** 200n, validFromMs: 0n, validToMs: FLUID_MAX_VALIDITY_MS };
+        const message = `a borrow lends a positive principal; ${principal} lovelace is not`;
+        expect(() => fluidBorrowGuards(pool, at)).toThrow(message);
+        expect(() => fluidBorrowGuards(5n, at)).toThrow(message);
+        expect(() => fluidBorrowGuards(pool, { ...at, validToMs: FLUID_MAX_VALIDITY_MS + 1n })).toThrow('within an hour');
+      }),
+      { numRuns: 300 },
     );
   });
 });

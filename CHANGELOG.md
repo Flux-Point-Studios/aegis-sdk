@@ -36,11 +36,11 @@ Additive (no breaking changes):
   redeemer the loan mint points at) and `fluidDraftUnits`.
   `fluidBorrowGuards(pool, { principal, collateral, validFromMs, validToMs })`
   makes a borrow's whole-transaction checks that size no output: a validity
-  range of at most `FLUID_MAX_VALIDITY_MS`, a pool lending ADA against ADA at
-  a static ratio, and collateral at the pool's minCollateral ratio; it returns
-  the collateral the pool asks. Choosing inputs, balancing and signing stay
-  the caller's, as does leaving the pool at its min-UTxO, which sizes an
-  output this SDK does not encode.
+  range of at most `FLUID_MAX_VALIDITY_MS`, a positive principal, a pool
+  lending ADA against ADA at a static ratio, and collateral at the pool's
+  minCollateral ratio; it returns the collateral the pool asks. Choosing
+  inputs, balancing and signing stay the caller's, as does leaving the pool
+  at its min-UTxO, which sizes an output this SDK does not encode.
 - **`encodePlutusData`** — writes Plutus Data with definite lengths, a bignum
   past a machine word, and a constructor under tags 121-127, 1280-1400 or 102;
   `decodePlutusData` reads back every value it writes.

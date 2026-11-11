@@ -10,10 +10,10 @@
 // The builders lend ADA against ADA at a static ratio. They build the parts of an open-pool or a
 // borrow transaction; choosing its inputs, balancing, pricing and signing it is the caller's.
 // fluidBorrowGuards makes the checks of a whole borrow that size no output: a validity range of at
-// most FLUID_MAX_VALIDITY_MS, a pool lending ADA against ADA at a static ratio, and collateral at
-// the pool's minCollateral ratio. The reference builder's last check, a positive principal that
-// leaves the pool at or above its min-UTxO, sizes the pool's continuation output, which takes a
-// transaction output encoder this SDK does not have; that check stays the caller's.
+// most FLUID_MAX_VALIDITY_MS, a positive principal, a pool lending ADA against ADA at a static
+// ratio, and collateral at the pool's minCollateral ratio. The reference builder's last check, a
+// principal that leaves the pool at or above its min-UTxO, sizes the pool's continuation output,
+// which takes a transaction output encoder this SDK does not have; that check stays the caller's.
 
 import { blake2b, blake2b224 } from './blake2b';
 import { bytesToHex, encodeConstr, encodeFullAddress } from './cbor';
@@ -295,9 +295,9 @@ function firstInteger(node: PlutusData, what: string): bigint {
 
 /**
  * The checks of a borrow from the pool datum `pool` that size no output, in the reference
- * builder's order: a validity range of at most FLUID_MAX_VALIDITY_MS, a pool lending ADA against
- * ADA at a static ratio, and collateral at or above its minCollateral ratio. Returns the lovelace
- * of collateral the pool asks for `principal`.
+ * builder's order: a validity range of at most FLUID_MAX_VALIDITY_MS, a positive principal, a
+ * pool lending ADA against ADA at a static ratio, and collateral at or above its minCollateral
+ * ratio. Returns the lovelace of collateral the pool asks for `principal`.
  */
 export function fluidBorrowGuards(
   pool: PlutusData,
@@ -305,6 +305,7 @@ export function fluidBorrowGuards(
 ): bigint {
   const width = opts.validToMs - opts.validFromMs;
   if (width > FLUID_MAX_VALIDITY_MS) refuse(`a borrow's validity range must be within an hour; ${width} ms is not`);
+  if (opts.principal <= 0n) refuse(`a borrow lends a positive principal; ${opts.principal} lovelace is not`);
   const fields = constrOf(pool, 'the pool datum').fields;
   const common = constrOf(field(fields, 2, 'the pool datum'), 'commonData').fields;
   const options = field(fields, 6, 'the pool datum');

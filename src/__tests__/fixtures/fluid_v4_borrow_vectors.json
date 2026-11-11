@@ -2,8 +2,8 @@
   "source": "api/lending/fluid_v4_borrow.py",
   "generator": "scripts/fluid_v4_borrow_vectors.py",
   "generatedFrom": {
-    "api/lending/fluid_v4_borrow.py": "7d60a37781b66cee91390fb920d1a5d6f3ea5329",
-    "scripts/fluid_v4_borrow_vectors.py": "1d2c621549b35a32c25d0e8b86dc24757be83444"
+    "api/lending/fluid_v4_borrow.py": "4487a95b510e3fab5ea97da8a98d05a8d5325e41",
+    "scripts/fluid_v4_borrow_vectors.py": "1d077fb9017e921d5fc2cd2e07346b8ad253923a"
   },
   "assemblers": [
     "borrow_view",
@@ -2734,7 +2734,20 @@
         "out": "36893488147419103232"
       },
       {
-        "name": "a zero principal asks no collateral",
+        "name": "a principal of one lovelace asks the pool's ratio of it",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "1",
+          "collateral": "2",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "out": "2"
+      },
+      {
+        "name": "a zero principal",
         "args": {
           "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
           "principal": "0",
@@ -2744,7 +2757,79 @@
             "1794000900000"
           ]
         },
-        "out": "0"
+        "raises": {
+          "type": "ValueError",
+          "message": "a borrow lends a positive principal; 0 lovelace is not",
+          "module": true
+        }
+      },
+      {
+        "name": "a principal of -1",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "-1",
+          "collateral": "0",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a borrow lends a positive principal; -1 lovelace is not",
+          "module": true
+        }
+      },
+      {
+        "name": "a principal past minus a word",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "-18446744073709551617",
+          "collateral": "-18446744073709551616",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a borrow lends a positive principal; -18446744073709551617 lovelace is not",
+          "module": true
+        }
+      },
+      {
+        "name": "the principal is checked before the pool is read",
+        "args": {
+          "pool": "05",
+          "principal": "0",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794000900000"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a borrow lends a positive principal; 0 lovelace is not",
+          "module": true
+        }
+      },
+      {
+        "name": "the validity range is checked before the principal",
+        "args": {
+          "pool": "d8798a444e4f4e45d87980d8798cd879824040d8798240401901cb000000d87b841864187d1864d87980d87b82181c050000d8798040d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87982d87981581c45a29bff5ad4ff85597725ef2ba669a1591e610b1bf9c15e4f43e821d87981d87981d87981581c7c14ca9d3476d9e56fef38bda549164d40d4894e0e2f9cc41e5d4ba95820923918e403bf43c34b4ef6b48eb2ee04babed17320d8d1b9ff9ad086e86f44ec81d8798340d8798140d87982404081028101d87980",
+          "principal": "0",
+          "collateral": "200000000",
+          "validity": [
+            "1794000000000",
+            "1794003600001"
+          ]
+        },
+        "raises": {
+          "type": "ValueError",
+          "message": "a borrow's validity range must be within an hour; 3600001 ms is not",
+          "module": true
+        }
       },
       {
         "name": "a negative minCollateralDivider rounds as floor division does",
