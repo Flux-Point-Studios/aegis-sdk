@@ -10,6 +10,7 @@ import {
   FLUID_V4_CONFIG_POLICY,
   RH1_MAX_TERM_DAYS,
   ceilDiv,
+  constrOf,
   coverFluidLoan,
   decodeFluidLoanDatum,
   decodeFluidSuite,
@@ -18,6 +19,7 @@ import {
   remainingDebt,
   rh1CoverParams,
 } from '../fluid_v4';
+import { bech32Address, decodeBech32Address } from '../address';
 import { decodePlutusData } from '../plutus_data';
 import { encodeBytes, encodeConstr, encodeInt, hexToBytes } from '../cbor';
 import { InputError, InsurabilityError } from '../errors';
@@ -35,8 +37,18 @@ const DAY_MS = 86_400_000n;
 const TFLDT_LOAN_DATUM =
   'd8799f001a01312d001b000001a09a024090001901cb00d8799f4040ffd8799f4040ff0000d87b9f1864187d1864d87980ffd87b9f181c05ff0000d879805821504f4f4c00507a512704319e88ed15734b152d3759ef3a5069f1e9aca1e0a99ca8d8799f581c0b77d150c275bd0a600633e4be7d09f83c4b9f00981e22ac9c9d3f62d8799f490014df1074464c4454ffd8799f581c9a2ec5c92daccbb269611a9eae7a40f9788d3f9c0229661b6234286f49000de1406f766f3633ffffff';
 
+/** The message of the InputError `pending` rejects with. */
+async function refusal(pending: Promise<unknown>): Promise<string> {
+  const error = await pending.then(
+    () => new Error('the call was not refused'),
+    (thrown: unknown) => thrown,
+  );
+  if (!(error instanceof InputError)) throw error;
+  return error.message;
+}
+
 function koios(answers: Record<string, unknown>) {
-  const calls: Array<{ url: string; body: any }> = [];
+  const calls: Array<{ url: string; body: unknown }> = [];
   const fetchImpl = async (url: string, init?: { body?: string }) => {
     const body = init?.body ? JSON.parse(init.body) : undefined;
     calls.push({ url, body });
@@ -68,7 +80,7 @@ function loanDatum(overrides: { repayment?: Uint8Array; period?: bigint; liquida
 
 describe('decodePlutusData', () => {
   it('reads the indefinite-length config datum as a 29-field constructor', () => {
-    const data = decodePlutusData(config.response[0].inline_datum.bytes) as any;
+    const data = constrOf(decodePlutusData(config.response[0].inline_datum.bytes), 'the config datum');
     expect(data.constructor).toBe(0);
     expect(data.fields).toHaveLength(29);
   });
@@ -199,6 +211,35 @@ describe('readFluidLoans', () => {
     await expect(
       readFluidLoans(BORROWER, { network: 'preview', fetchImpl: koios({ ...LIVE, asset_utxos: moved }).fetchImpl }),
     ).rejects.toThrow(/own script address/);
+  });
+
+  it('refuses an address with no stake credential before reading the chain: every such borrower shares one loan address', async () => {
+    const { payment } = decodeBech32Address(BORROWER);
+    const { fetchImpl, calls } = koios(LIVE);
+    expect(await refusal(readFluidLoans(bech32Address({ payment, stake: null }, 'preview'), { network: 'preview', fetchImpl }))).toBe(
+      'an address with no stake credential shares its loan address with every such borrower',
+    );
+    expect(calls).toHaveLength(0);
+  });
+
+  it("refuses another network's address before reading the chain", async () => {
+    const mainnet = bech32Address(decodeBech32Address(BORROWER), 'mainnet');
+    const { fetchImpl, calls } = koios(LIVE);
+    expect(await refusal(readFluidLoans(mainnet, { network: 'preview', fetchImpl }))).toBe(`${mainnet} is no preview address`);
+    expect(calls).toHaveLength(0);
+  });
+
+  it('refuses a loan output holding several loan tokens, or its loan token at a quantity other than 1', async () => {
+    const [row] = loans.response;
+    const [token] = row.asset_list;
+    const several = { ...row, asset_list: [token, { ...token, asset_name: '00'.repeat(28) }] };
+    const doubled = { ...row, asset_list: [{ ...token, quantity: '2' }] };
+    for (const broken of [several, doubled]) {
+      const { fetchImpl } = koios({ ...LIVE, address_utxos: [broken] });
+      expect(await refusal(readFluidLoans(BORROWER, { network: 'preview', fetchImpl }))).toBe(
+        `${LOAN_REF} holds loan tokens no single loan id names`,
+      );
+    }
   });
 
   it('skips an output holding no loan token and refuses one whose loan token sits in no loan datum', async () => {
