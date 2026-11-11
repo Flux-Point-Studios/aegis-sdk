@@ -55,7 +55,8 @@ interface Row {
 interface Vectors {
   source: string;
   generator: string;
-  generatedFrom: string;
+  /** The git blob id of each file the vectors were rendered from, by its path. */
+  generatedFrom: { [path: string]: string };
   assemblers: string[];
   types: { [name: string]: string[] };
   constants: Args;
@@ -198,10 +199,11 @@ function koiosData(j: Json | undefined): PlutusData {
 const rows = Object.entries(vectors.functions).flatMap(([fn, list]) => list.map((row): [string, Row] => [fn, row]));
 
 describe('the vectors fluid_v4_borrow.py wrote', () => {
-  it('carry the commit they were generated from', () => {
-    expect(vectors.generatedFrom).toMatch(/^[0-9a-f]{40}$/);
+  it('pin the git blobs of the module and the generator that rendered them', () => {
     expect(vectors.source).toBe('api/lending/fluid_v4_borrow.py');
     expect(vectors.generator).toBe('scripts/fluid_v4_borrow_vectors.py');
+    expect(Object.keys(vectors.generatedFrom)).toEqual([vectors.source, vectors.generator]);
+    for (const blob of Object.values(vectors.generatedFrom)) expect(blob).toMatch(/^[0-9a-f]{40}$/);
   });
 
   it('name exactly the functions ported here, the two transaction assemblers aside', () => {

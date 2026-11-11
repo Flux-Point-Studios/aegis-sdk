@@ -1,7 +1,10 @@
 {
   "source": "api/lending/fluid_v4_borrow.py",
   "generator": "scripts/fluid_v4_borrow_vectors.py",
-  "generatedFrom": "0cd7b9b8b49e6ec2315d2b1f3fd01915d7f92829",
+  "generatedFrom": {
+    "api/lending/fluid_v4_borrow.py": "c10c19a9359c823538b756a0eb809d53065af508",
+    "scripts/fluid_v4_borrow_vectors.py": "6b296bceebd083861910fee5cc31a19e52af4f6f"
+  },
   "assemblers": [
     "borrow_view",
     "open_pool_view"
