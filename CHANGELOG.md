@@ -40,6 +40,18 @@ Additive (no breaking changes):
   minCollateral ratio; it returns the collateral the pool asks. Choosing
   inputs, balancing and signing stay the caller's, as does leaving the pool
   at its min-UTxO, which sizes an output this SDK does not encode.
+- **Conway transactions** — `decodeTransaction` reads a signed or unsigned
+  transaction (inputs, outputs with inline datums and script references,
+  withdrawals, mint, validity, collateral, required signers, reference inputs,
+  the key-22 treasury donation, redeemers and vkey witnesses) and names it by
+  the hash of its body's own bytes; `spliceVkeyWitnesses` adds a CIP-30
+  `signTx` answer without touching the body; `encodeTransaction` writes a
+  `TxDraft` back; `scriptDataHash`, `minFee` (Conway's size, execution and
+  tiered reference-script fees), `minUtxo` and `requiredCollateral` price it;
+  `protocolParamsFromCli` reads `cardano-cli` protocol-parameter JSON with
+  decimal prices as exact fractions. The first preview gen-3 Book sale
+  (cf447ae7) decodes, re-encodes byte for byte and prices at the fee and
+  min-UTxO it landed with.
 - **`encodePlutusData`** â€” writes Plutus Data with definite lengths, a bignum
   past a machine word, and a constructor under tags 121-127, 1280-1400 or 102;
   `decodePlutusData` reads back every value it writes.

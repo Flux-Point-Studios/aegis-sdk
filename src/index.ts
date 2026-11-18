@@ -235,6 +235,38 @@ export type {
 } from './fluid_v4_borrow';
 
 // ---------------------------------------------------------------------------
+// Conway transactions: decode, write, witness and price.
+// ---------------------------------------------------------------------------
+export {
+  decodeTransaction,
+  transactionId,
+  spliceVkeyWitnesses,
+  txViewOf,
+  encodeTransaction,
+  draftId,
+  scriptDataHash,
+  ledgerSize,
+  refScriptFee,
+  executionFee,
+  minFee,
+  minUtxo,
+  requiredCollateral,
+  protocolParamsFromCli,
+} from './tx';
+export type {
+  Assets,
+  TxDatum,
+  TxOutput,
+  StakeCredential,
+  Withdrawal,
+  RedeemerPurpose,
+  TxRedeemer,
+  TxDraft,
+  DecodedTransaction,
+  ProtocolParams,
+} from './tx';
+
+// ---------------------------------------------------------------------------
 // Named oracle-feed registry (mainnet + preprod, network-aware lookup).
 // ---------------------------------------------------------------------------
 export {
