@@ -1,6 +1,6 @@
 {
  "_why": "Vectors the TypeScript SDK's generation-3 wallet CLI replays byte for byte: the preview instances, cover requests and their reservation payloads, the printed quote, signData answers and signed bodies, the wallet's ranked listing and funding, and each offer an ask builds or the code it is refused with.",
- "commit": "152c8f614c961c3c2efb63e518bab9cff9cf05d7",
+ "commit": "df85434ddc2c0bd64247e007e37b08ea41c4b2bf",
  "sources": {
   "offchain/scripts/g3_client.py": "a9ed12ee0248759eba22b1b02583061fd59d6bb9",
   "offchain/scripts/buy_g3_cover.py": "984fea7cb28d6d5a40e4e66c3edfa8494d350911",
@@ -436,6 +436,53 @@
    "canonical": "{\"class\":0,\"collateral\":[\"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0\"],\"coverage\":15000000,\"deposit\":2590310,\"feed\":\"4bba53d510bf2af7d08e8edf57c3a49ccdb6b0406c8470eea03081ef\",\"funding\":[\"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0\",\"c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1#3\"],\"insured\":\"00b7847c89d5721592fc0cc8932f50a8f8258b39b93861140a1b99fb\",\"lane\":0,\"payout_address\":{\"payment\":{\"key\":\"00b7847c89d5721592fc0cc8932f50a8f8258b39b93861140a1b99fb\"},\"stake\":{\"key\":\"c2f45a16a6685616e566c00fc081fe59f8bd7ab679ee15e9ce203446\"}},\"pin\":{\"name\":\"\",\"policy\":\"4c7cebfb861d35028b3e592d40d7b8de4edc4f7ffe6998f1cf46f529\"},\"premium\":0,\"saturn_order\":null,\"strike\":300000,\"term_ms\":604800000,\"transport_cap\":null,\"ttl_ms\":90000}",
    "hash": "c334b1dc278e0d7838a31ba22e24670cf9b73207b5565e59ae5445fe99188ed9",
    "reservation": "{\"lane\":0,\"request\":\"0dbd95cb9d6b8d57e90752ff62374691823bdc3e2a273547b3147399bc5c7d05\",\"ttl_ms\":90000,\"utxos\":[\"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0\",\"c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1#3\"]}"
+  },
+  {
+   "instance": "usdcx",
+   "args": {
+    "feed": "ADA/USD",
+    "cls": "barrier",
+    "strike": 300000,
+    "coverage": 15,
+    "term_days": 7,
+    "pin": true
+   },
+   "insured": "00b7847c89d5721592fc0cc8932f50a8f8258b39b93861140a1b99fb",
+   "payout": null,
+   "funding": [
+    "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1#3",
+    "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0"
+   ],
+   "collateral": "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0",
+   "ok": {
+    "insured": "00b7847c89d5721592fc0cc8932f50a8f8258b39b93861140a1b99fb",
+    "feed": "4bba53d510bf2af7d08e8edf57c3a49ccdb6b0406c8470eea03081ef",
+    "class": 0,
+    "strike": 300000,
+    "coverage": 15000000,
+    "term_ms": 604800000,
+    "premium": 0,
+    "deposit": 2262750,
+    "funding": [
+     "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0",
+     "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1#3"
+    ],
+    "collateral": [
+     "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0"
+    ],
+    "lane": 0,
+    "ttl_ms": 90000,
+    "transport_cap": null,
+    "payout_address": null,
+    "saturn_order": null,
+    "pin": {
+     "policy": "4c7cebfb861d35028b3e592d40d7b8de4edc4f7ffe6998f1cf46f529",
+     "name": ""
+    }
+   },
+   "canonical": "{\"class\":0,\"collateral\":[\"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0\"],\"coverage\":15000000,\"deposit\":2262750,\"feed\":\"4bba53d510bf2af7d08e8edf57c3a49ccdb6b0406c8470eea03081ef\",\"funding\":[\"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0\",\"c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1#3\"],\"insured\":\"00b7847c89d5721592fc0cc8932f50a8f8258b39b93861140a1b99fb\",\"lane\":0,\"payout_address\":null,\"pin\":{\"name\":\"\",\"policy\":\"4c7cebfb861d35028b3e592d40d7b8de4edc4f7ffe6998f1cf46f529\"},\"premium\":0,\"saturn_order\":null,\"strike\":300000,\"term_ms\":604800000,\"transport_cap\":null,\"ttl_ms\":90000}",
+   "hash": "3e78630f61a7d87a5b4cfab27b9fd3e168a54d4a2af4df1262d5fdc400543587",
+   "reservation": "{\"lane\":0,\"request\":\"7ea34c0be335fba69fae5632142588c3498a6a1f0e27ea36313a0ae1d664eb9b\",\"ttl_ms\":90000,\"utxos\":[\"b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0#0\",\"c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1#3\"]}"
   },
   {
    "instance": "usdcx",

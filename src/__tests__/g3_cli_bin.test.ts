@@ -141,3 +141,21 @@ describe('aegis-book quote', () => {
     });
   });
 });
+
+describe('aegis-book quote --no-payout', () => {
+  const unpaid = V.requests.find((r: any) => r.instance === 'usdcx' && r.args.pin && r.payout === null);
+
+  it('asks for the request the Python tools write when the payout is the insured key alone', async () => {
+    const r = run(['quote', '--network', 'preview', '--wallet-dir', walletDir(), '--instance', 'usdcx', '--api', API,
+      '--feed', 'ADA/USD', '--strike', '300000', '--coverage', '15', '--term-days', '7', '--pin', '--no-payout'], {
+      ...GENESIS,
+      [`${KOIOS}/cli_protocol_params`]: () => ({ json: params.response }),
+      [`${KOIOS}/address_utxos`]: () => ({ json: [COLLATERAL] }),
+      [`${API}/api/book/g3/quote`]: () => ({ json: V.quote_lines[1].answer }),
+    });
+    expect(await r.done).toBe(0);
+    const quoted = r.asked.find((a) => a.url.startsWith(`${API}/api/book/g3/quote`))!.body;
+    expect(quoted.payout_address).toBeNull();
+    expect(canonicalJson({ ...quoted, funding: [...unpaid.funding].sort(), collateral: [unpaid.collateral] })).toBe(unpaid.canonical);
+  });
+});

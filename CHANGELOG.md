@@ -39,6 +39,7 @@ Additive:
   an environment name that looks like key material, when `AEGIS_NETWORK` names
   another network, or when Koios reports another network's magic; the Koios token
   is read from `AEGIS_KOIOS_API_TOKEN`. No transaction bytes are printed.
+  `--no-payout` commits no payout address, so the policy pays the insured key.
 - **`g3SaleFacts`, `decodeG3ReceiptPin`** — a sale's P-leg and legs as its outputs
   state them, and the receipt a pinned policy's extension names.
 - **`bookPost`** — the POST every Book route shares, exported for routes the SDK

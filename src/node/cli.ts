@@ -3,7 +3,7 @@
 //
 //   aegis-book whoami  --network preview --wallet-dir DIR
 //   aegis-book quote   --network preview --wallet-dir DIR --instance ada|usdcx --feed ADA/USD
-//                      [--class barrier|depeg] --strike N --coverage 50 --term-days 7 [--pin] --api URL
+//                      [--class barrier|depeg] --strike N --coverage 50 --term-days 7 [--pin] [--no-payout] --api URL
 //   aegis-book buy     ...the quote's arguments... [--submit]
 //   aegis-book post    --network preview --wallet-dir DIR --instance ada|usdcx --feed ADA/USD [--feed ...]
 //                      --size 500 [--class barrier|depeg] [--min-depth-bps N --max-depth-bps N]
@@ -13,7 +13,8 @@
 //
 // A wallet is a directory holding public.json and mnemonic.txt; the key never leaves this
 // process and no transaction bytes are printed. Every command prints one JSON line per result;
-// a refusal prints {"ok":false,"problems":[...]} and exits 2. Without --submit nothing is signed
+// A staked wallet's cover pays its own base address; --no-payout commits none, so the policy
+// pays the insured key. A refusal prints {"ok":false,"problems":[...]} and exits 2. Without --submit nothing is signed
 // but the reservation a dry-run buy asks the API for, which lapses on its own. The Koios token is
 // read from AEGIS_KOIOS_API_TOKEN, never from the command line. AEGIS_NETWORK, when set, must
 // name the network asked for, and Koios must report that network's magic before anything is read.
@@ -107,6 +108,7 @@ const COVER: Flag[] = [
   { name: 'coverage', kind: 'int', required: true },
   { name: 'term-days', kind: 'int', required: true },
   { name: 'pin', kind: 'bool' },
+  { name: 'no-payout', kind: 'bool' },
 ];
 const COMMANDS: Readonly<Record<string, Flag[]>> = {
   whoami: COMMON,
@@ -272,7 +274,7 @@ async function buy(ctx: Context, cmd: string, args: Args, inst: G3Instance): Pro
   let request: G3CoverRequest = g3CoverRequest(inst, {
     feed: args.feed as string, class: ((args.class as string | undefined) ?? 'barrier') as 'barrier' | 'depeg',
     strike: args.strike as bigint, coverage: args.coverage as bigint, termDays: args['term-days'] as bigint, pin: !!args.pin,
-  }, { insured: ctx.wallet.vkh, payout: g3PayoutOf(g3AddressView(ctx.wallet.address)), funding: [collateral], collateral }, params);
+  }, { insured: ctx.wallet.vkh, payout: args['no-payout'] ? null : g3PayoutOf(g3AddressView(ctx.wallet.address)), funding: [collateral], collateral }, params);
   const quote = await quoteG3Cover(api, inst, request);
   if (cmd === 'quote') {
     ctx.deps.out(g3QuoteLine(quote, request));
