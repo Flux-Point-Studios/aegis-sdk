@@ -320,7 +320,15 @@ export type {
   G3SaleProblem,
   VerifyG3SaleInput,
 } from './book';
+export { koiosUtxos } from './koios';
 export type { KoiosReadOptions, KoiosUtxo, KoiosAsset } from './koios';
+
+// ---------------------------------------------------------------------------
+// One transaction that borrows from a FluidTokens V4 pool and buys gen-3 Book
+// cover on the loan it creates.
+// ---------------------------------------------------------------------------
+export { composeFluidBorrowWithCover } from './fluid_cover';
+export type { FluidCoverPlan, FluidCoverTx, G3LegPlan } from './fluid_cover';
 
 // ---------------------------------------------------------------------------
 // Named oracle-feed registry (mainnet + preprod, network-aware lookup).

@@ -52,6 +52,21 @@ Additive (no breaking changes):
   decimal prices as exact fractions. The first preview gen-3 Book sale
   (cf447ae7) decodes, re-encodes byte for byte and prices at the fee and
   min-UTxO it landed with.
+- **Borrow and buy cover in one transaction** —
+  `composeFluidBorrowWithCover` writes one unsigned transaction that borrows
+  from a FluidTokens V4 pool and underwrites gen-3 Book cover in it, balanced
+  on one change output at the ledger's fee and collateral. The borrow's four
+  outputs stand first, where its scripts look for them, and every index the
+  Underwrite names follows them; the loan and both bonds are named by the
+  hash of the pool input; the Treasury's cut goes to the accrual script,
+  since the position validator counts the body's donation only when its pair
+  is the whole mint. Against recorded preview state, every FluidTokens
+  borrow script and the gen-3 Underwrite evaluate within budget under
+  `aiken tx simulate`.
+- **`examples/fluid-borrow-with-cover.ts`** — the composer end to end on
+  preview, dry run by default, with `examples/wallet-dir-signer.ts`, a
+  CIP-30-shaped signer over a wallet directory whose CIP-1852 keys and
+  `signData` answers match pycardano's.
 - **Gen-3 Book cover from the buyer's wallet** — `quoteG3Cover`,
   `prepareG3Cover` and `submitG3Sale` call the Aegis API's
   `/api/book/g3/{quote,prepare,submit}` routes, keeping each refusal's route

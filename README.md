@@ -142,6 +142,15 @@ GenericData reader), and `isTriggered(value, strike)` is the `value ≤ strike`
 settlement predicate. Event **pricing reuses the barrier quote** — `quoteEventCover`
 is a documented re-export of `quoteBarrier`, not a separate model.
 
+### Borrow and cover in one transaction
+
+`composeFluidBorrowWithCover` puts a FluidTokens V4 borrow and a gen-3 Book
+Underwrite on the loan it creates into one transaction, one signature, one fee.
+Before a buyer signs a sale the Aegis API presents, `verifyG3Sale` checks it
+against the buyer's own chain reads and names every departure.
+[`examples/fluid-borrow-with-cover.ts`](./examples/fluid-borrow-with-cover.ts)
+runs the borrow and the cover on preview as a dry run.
+
 **See [`PARTNERS.md`](./PARTNERS.md) for the full integration guide** and
 [`examples/`](./examples/) for MeshJS and Lucid walkthroughs.
 
