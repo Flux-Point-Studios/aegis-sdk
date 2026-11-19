@@ -16,6 +16,12 @@ Additive:
   claim or a cancel's refund lands where the wallet shows it; a wallet with no
   stake part or a pointer pays the insured key alone. `g3AddressView` reads a
   bech32 address as the routes name it, and `g3FeedNamed` finds a feed by pair.
+- **A wallet's outputs** — `readWalletOutputs(address, opts)` reads every output at
+  an address from Koios, paging past 1,000 rows, and once the listing runs past 50
+  pages reads the richest rows instead (`koiosRichestRows`) and says it was cut, so
+  a wallet padded with dust still funds from what it holds. `g3FundingFor` takes the
+  richest outputs until they cover a spend and its change, and `g3CollateralOf`
+  the richest UTxO of lovelace alone at 5 ADA or over.
 - **`koiosHeaders`** — a Koios read sends `KoiosReadOptions.token` as a bearer.
 - **The Node entry, `@fluxpointstudios/aegis-sdk/node`** — `walletDirSigner` (until
   now `examples/wallet-dir-signer.ts`) and `openWalletDir`, a CIP-30-shaped signer

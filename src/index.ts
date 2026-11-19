@@ -332,6 +332,19 @@ export type {
 } from './book';
 export { G3_CLASSES, g3AddressView, g3PayoutOf, g3FeedNamed, g3CoverRequest } from './book_buyer';
 export type { G3CoverAsk, G3CoverWallet } from './book_buyer';
+export {
+  KOIOS_PAGE_ROWS,
+  KOIOS_MAX_PAGES,
+  KOIOS_UTXO_BATCH,
+  G3_CHANGE_RESERVE,
+  G3_COLLATERAL_FLOOR,
+  koiosRichestRows,
+  readWalletOutputs,
+  heldBy,
+  g3FundingFor,
+  g3CollateralOf,
+} from './book_wallet';
+export type { WalletListing, WalletListingOptions } from './book_wallet';
 export { koiosUtxos, koiosHeaders } from './koios';
 export type { KoiosReadOptions, KoiosUtxo, KoiosAsset } from './koios';
 
