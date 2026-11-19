@@ -27,6 +27,8 @@ export type AegisErrorCode =
   | 'PREMIUM_GE_COVERAGE'
   | 'DEPEG_STRIKE_OUT_OF_BAND'
   | 'LOAN_NOT_COVERABLE'
+  // the Sovereign Book's API
+  | 'BOOK_REFUSED'
   // pool state
   | 'POOL_CANNOT_COVER'
   | 'CONCENTRATION_CAP'

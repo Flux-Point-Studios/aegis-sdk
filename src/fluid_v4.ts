@@ -10,10 +10,11 @@
 import { bech32Address, decodeBech32Address } from './address';
 import type { Network } from './address';
 import { bytesToHex, hexToBytes } from './cbor';
-import { ChainError, InputError, InsurabilityError } from './errors';
-import type { MinimalFetch } from './fetch_quote';
+import { InputError, InsurabilityError } from './errors';
 import { CHAIN_FACTS } from './networks';
-import { decodePlutusData } from './plutus_data';
+import { koiosUtxos } from './koios';
+import type { KoiosAsset, KoiosReadOptions, KoiosUtxo } from './koios';
+import { constrOf, dataHex as hex, dataInt as int, decodePlutusData, fieldsOf } from './plutus_data';
 import type { PlutusConstr, PlutusData } from './plutus_data';
 
 /** The config policy of each network's FluidTokens V4 suite this SDK reads. */
@@ -35,6 +36,11 @@ export interface FluidV4Suite {
   configRef: string;
   loanPolicyId: string;
   loanSpendScriptHash: string;
+  poolPolicyId: string;
+  poolSpendScriptHash: string;
+  poolBorrowActionScriptHash: string;
+  borrowerBondPolicyId: string;
+  lenderBondPolicyId: string;
 }
 
 export interface FluidAsset {
@@ -92,13 +98,7 @@ export interface FluidLoan {
   datum: FluidLoanDatum;
 }
 
-export interface FluidReadOptions {
-  network: Network;
-  /** Override fetch (default: globalThis.fetch). */
-  fetchImpl?: MinimalFetch;
-  /** Koios base URL (default: the network's public Koios). */
-  koios?: string;
-}
+export type FluidReadOptions = KoiosReadOptions;
 
 export interface Rational {
   numerator: bigint;
@@ -146,48 +146,8 @@ export interface FluidCoverRequest extends Rh1CoverParams {
   };
 }
 
-interface KoiosAsset {
-  policy_id: string;
-  asset_name: string | null;
-  quantity: string;
-}
-
-interface KoiosUtxo {
-  tx_hash: string;
-  tx_index: number;
-  payment_cred: string | null;
-  value: string;
-  is_spent: boolean;
-  inline_datum: { bytes: string } | null;
-  asset_list: KoiosAsset[] | null;
-}
-
 function refuse(message: string): never {
   throw new InputError('INVALID_INPUT', message);
-}
-
-export function constrOf(node: PlutusData, what: string): PlutusConstr {
-  if (typeof node !== 'object' || node instanceof Uint8Array || Array.isArray(node) || !('fields' in node)) {
-    refuse(`${what} is no constructor`);
-  }
-  return node;
-}
-
-function fieldsOf(node: PlutusData, what: string, arity: number): PlutusData[] {
-  const c = constrOf(node, what);
-  if (c.constructor !== 0) refuse(`${what} is constructor ${c.constructor}, not 0`);
-  if (c.fields.length !== arity) refuse(`${what} takes ${arity} fields, got ${c.fields.length}`);
-  return c.fields;
-}
-
-function int(node: PlutusData, what: string): bigint {
-  if (typeof node !== 'bigint') refuse(`${what} is no integer`);
-  return node;
-}
-
-function hex(node: PlutusData, what: string): string {
-  if (!(node instanceof Uint8Array)) refuse(`${what} is no bytestring`);
-  return bytesToHex(node);
 }
 
 function bool(node: PlutusData, what: string): boolean {
@@ -209,6 +169,11 @@ export function decodeFluidSuite(datum: Uint8Array | string, network: Network, c
     configRef,
     loanPolicyId: hex(f[6], 'ConfigDatum.loanPolicyId'),
     loanSpendScriptHash: hex(f[10], 'ConfigDatum.loanSpendScriptHash'),
+    poolPolicyId: hex(f[2], 'ConfigDatum.poolPolicyId'),
+    poolSpendScriptHash: hex(f[8], 'ConfigDatum.poolSpendScriptHash'),
+    poolBorrowActionScriptHash: hex(f[23], 'ConfigDatum.poolBorrowActionScriptHash'),
+    borrowerBondPolicyId: hex(f[4], 'ConfigDatum.borrowerBondPolicyId'),
+    lenderBondPolicyId: hex(f[5], 'ConfigDatum.lenderBondPolicyId'),
   };
 }
 
@@ -313,20 +278,6 @@ function collateralQuantity(lovelace: bigint, assets: KoiosAsset[], c: FluidColl
   return assets
     .filter((a) => a.policy_id === c.policyId && (c.assetName === null || (a.asset_name ?? '') === c.assetName))
     .reduce((n, a) => n + BigInt(a.quantity), 0n);
-}
-
-async function koiosUtxos(opts: FluidReadOptions, path: string, body: unknown): Promise<KoiosUtxo[]> {
-  const f: MinimalFetch | undefined = opts.fetchImpl ?? (globalThis as { fetch?: MinimalFetch }).fetch;
-  if (!f) refuse('no fetch available: pass opts.fetchImpl');
-  const res = await f(`${opts.koios ?? CHAIN_FACTS[opts.network].koios}/${path}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new ChainError('UNKNOWN', `Koios ${path} answered HTTP ${res.status}`);
-  const rows: unknown = await res.json();
-  if (!Array.isArray(rows)) throw new ChainError('UNKNOWN', `Koios ${path} answered no row listing`);
-  return rows as KoiosUtxo[];
 }
 
 /**
@@ -463,11 +414,12 @@ export async function coverFluidLoan(
     collateralLovelacePerUnit: opts.collateralLovelacePerUnit,
   });
   const c = loan.datum.collateral;
+  const { network: _network, ...pinned } = suite;
   return {
     network: opts.network,
     row: 'RH1',
     settlement: 'lovelace',
-    suite: { configRef: suite.configRef, loanPolicyId: suite.loanPolicyId, loanSpendScriptHash: suite.loanSpendScriptHash },
+    suite: pinned,
     loan: {
       ref: loan.ref,
       loanId: loan.loanId,

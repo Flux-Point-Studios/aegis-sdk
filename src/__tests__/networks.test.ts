@@ -4,13 +4,44 @@
 
 import { describe, it, expect } from 'vitest';
 import { CHAIN_FACTS, posixMsToSlot, slotToPosixMs } from '../networks';
-import { bech32Address, decodeBech32Address } from '../address';
+import { addressBytes, addressHex, bech32Address, decodeBech32Address } from '../address';
 import { bytesToHex, hexToBytes } from '../cbor';
 import { InputError } from '../errors';
 import loans from './fixtures/preview_borrower_loans.json';
 
 const BORROWER =
   'addr_test1qr0prpt3anm70ey4dam4yp2v7jm6g8wsrzwe8vkvr279plkjlqjza7zcf2gs6ymzgdwck9at45ntyrva68jhrfjpym0q6k0yqq';
+
+/** BIP-173 bech32 of `bytes` under `hrp`, written independently of the module under test. */
+function bech32Of(hrp: string, bytes: Uint8Array): string {
+  const charset = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+  const words: number[] = [];
+  let acc = 0;
+  let bits = 0;
+  for (const b of bytes) {
+    acc = (acc << 8) | b;
+    bits += 8;
+    while (bits >= 5) {
+      bits -= 5;
+      words.push((acc >> bits) & 31);
+    }
+  }
+  if (bits > 0) words.push((acc << (5 - bits)) & 31);
+  const gen = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
+  const polymod = (values: number[]) =>
+    values.reduce((chk, v) => {
+      const top = chk >>> 25;
+      let next = ((chk & 0x1ffffff) << 5) ^ v;
+      gen.forEach((g, i) => {
+        if ((top >> i) & 1) next ^= g;
+      });
+      return next;
+    }, 1);
+  const expanded = [...hrp].map((c) => c.charCodeAt(0) >> 5).concat([0], [...hrp].map((c) => c.charCodeAt(0) & 31));
+  const mod = polymod([...expanded, ...words, 0, 0, 0, 0, 0, 0]) ^ 1;
+  const checksum = [0, 1, 2, 3, 4, 5].map((i) => (mod >> (5 * (5 - i))) & 31);
+  return hrp + '1' + [...words, ...checksum].map((w) => charset[w]).join('');
+}
 
 /** The message of the InputError `call` throws. */
 function refusalOf(call: () => unknown): string {
@@ -108,5 +139,28 @@ describe('bech32Address / decodeBech32Address', () => {
     expect(() => decodeBech32Address('stake_test1urf0sfpwlpvy4ygdzd3yxhvtz7466f4jpkwaret35eqjdhs7r6spt')).toThrow(
       /payment/,
     );
+  });
+});
+
+describe('address bytes', () => {
+  it('reads the bytes an output carries and writes them back from the credentials', () => {
+    const bytes = addressBytes(BORROWER);
+    expect(bytes[0]).toBe(0x00);
+    expect(bytes.length).toBe(57);
+    const decoded = decodeBech32Address(BORROWER);
+    expect(addressHex({ payment: decoded.payment, stake: decoded.stake }, 0)).toBe(bytesToHex(bytes));
+    expect(addressHex({ payment: decoded.payment, stake: null }, 0)).toBe('60' + bytesToHex(bytes.slice(1, 29)));
+    expect(addressHex({ payment: { kind: 'script', hash: bytes.slice(1, 29) }, stake: decoded.stake }, 1)).toBe(
+      '11' + bytesToHex(bytes.slice(1)),
+    );
+  });
+
+  it('refuses a header its prefix denies', () => {
+    expect(bytesToHex(addressBytes('stake_test1urf0sfpwlpvy4ygdzd3yxhvtz7466f4jpkwaret35eqjdhs7r6spt'))).toMatch(/^e0/);
+    const body = addressBytes(BORROWER);
+    expect(refusalOf(() => addressBytes(bech32Of('addr_test', Uint8Array.of(0x01, ...body.slice(1)))))).toMatch(/network id 1/);
+    expect(refusalOf(() => addressBytes(bech32Of('stake_test', body)))).toMatch(/payment address under the prefix stake_test/);
+    expect(refusalOf(() => addressBytes(bech32Of('addr_test', Uint8Array.of(0xe0, ...body.slice(29)))))).toMatch(/reward address/);
+    expect(refusalOf(() => addressBytes(bech32Of('pool', body)))).toMatch(/pool bech32 string is no address/);
   });
 });

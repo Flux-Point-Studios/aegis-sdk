@@ -18,10 +18,10 @@
 import { blake2b, blake2b224 } from './blake2b';
 import { bytesToHex, encodeConstr, encodeFullAddress } from './cbor';
 import { InputError } from './errors';
-import { ceilDiv, constrOf, floorDiv } from './fluid_v4';
+import { ceilDiv, floorDiv } from './fluid_v4';
 import type { FluidAsset, FluidLiquidation, Rational } from './fluid_v4';
 import { hexToBytesStrict } from './generic_data';
-import { decodePlutusData, encodePlutusData } from './plutus_data';
+import { constrOf, decodePlutusData, encodePlutusData, outRefDigest } from './plutus_data';
 import type { PlutusConstr, PlutusData } from './plutus_data';
 import type { PlutusFullAddress } from './types';
 
@@ -131,8 +131,7 @@ function outRef(ref: string): PlutusConstr {
 
 /** blake2b-224 of the reference as serialiseData writes it: utils.ak's hash_output_ref. */
 function digestOf(ref: string): string {
-  const [tx, index] = outRefParts(ref);
-  return bytesToHex(blake2b224(encodeConstr(0, [encodePlutusData(tx), encodePlutusData(index)])));
+  return outRefDigest(...outRefParts(ref));
 }
 
 /** The loan NFT's and both bonds' asset name: the hash of the pool input the borrow spends. */

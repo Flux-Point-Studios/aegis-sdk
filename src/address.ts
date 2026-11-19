@@ -11,7 +11,7 @@
 //   payload     = header(1) || script_hash(28)  = 29 bytes
 //   bech32 (NOT bech32m) over the 5-bit regrouped payload, HRP "addr"/"addr_test".
 
-import { hexToBytes } from './cbor';
+import { bytesToHex, hexToBytes } from './cbor';
 import { InputError } from './errors';
 import type { PlutusCredential, PlutusFullAddress } from './types';
 
@@ -216,6 +216,13 @@ function credentialBytes(c: PlutusCredential, role: string): Uint8Array {
   return c.hash;
 }
 
+/** The bytes, hex, of a base or enterprise address on network id `networkId`: what an output carries. */
+export function addressHex(addr: PlutusFullAddress, networkId: number): string {
+  const type = ADDRESS_TYPE[`${addr.payment.kind}/${addr.stake?.kind ?? 'none'}`];
+  const parts = [credentialBytes(addr.payment, 'payment'), ...(addr.stake ? [credentialBytes(addr.stake, 'stake')] : [])];
+  return ((type << 4) | networkId).toString(16).padStart(2, '0') + parts.map(bytesToHex).join('');
+}
+
 /**
  * Bech32 base or enterprise address for any payment and optional stake credential, each a
  * key or a script: the general form of {@link keyAddress}, {@link scriptEnterpriseAddress}
@@ -254,29 +261,45 @@ function convertBits5to8(words: number[]): Uint8Array {
 }
 
 /**
- * The credentials and network id of a bech32 base or enterprise address (CIP-19 types 0-3,
- * 6, 7). A pointer, Byron or reward address carries no payment and inline stake pair this
- * reads, and is refused.
+ * The bytes a bech32 Shelley address (payment or reward) spells, its network id checked
+ * against its prefix: what a transaction output or a withdrawal carries.
  */
-export function decodeBech32Address(address: string): DecodedAddress {
+export function addressBytes(address: string): Uint8Array {
   const lower = address.toLowerCase();
   if (lower !== address && address.toUpperCase() !== address) {
     throw new InputError('INVALID_INPUT', 'bech32 address mixes cases');
   }
   const sep = lower.lastIndexOf('1');
   const hrp = lower.slice(0, sep);
-  if (hrp !== 'addr' && hrp !== 'addr_test') {
-    throw new InputError('INVALID_INPUT', `a ${hrp || 'headless'} bech32 string is no payment address`);
+  if (!['addr', 'addr_test', 'stake', 'stake_test'].includes(hrp)) {
+    throw new InputError('INVALID_INPUT', `a ${hrp || 'headless'} bech32 string is no address`);
   }
   const words = Array.from(lower.slice(sep + 1), (ch) => CHARSET.indexOf(ch));
   if (words.length < 6 || words.some((w) => w < 0)) throw new InputError('INVALID_INPUT', 'bech32 address has a bad character');
   if (polymod(hrpExpand(hrp).concat(words)) !== 1) throw new InputError('INVALID_INPUT', 'bech32 address has a bad checksum');
   const bytes = convertBits5to8(words.slice(0, -6));
-  const type = bytes[0] >> 4;
+  if (bytes.length === 0) throw new InputError('INVALID_INPUT', 'bech32 address carries no header');
   const networkId = bytes[0] & 0x0f;
-  if (networkId !== (hrp === 'addr' ? 1 : 0)) {
+  if (networkId !== (hrp.endsWith('_test') ? 0 : 1)) {
     throw new InputError('INVALID_INPUT', `address network id ${networkId} does not match its prefix ${hrp}`);
   }
+  const reward = bytes[0] >> 5 === 7;
+  if (reward !== hrp.startsWith('stake')) {
+    throw new InputError('INVALID_INPUT', `a ${reward ? 'reward' : 'payment'} address under the prefix ${hrp}`);
+  }
+  return bytes;
+}
+
+/**
+ * The credentials and network id of a bech32 base or enterprise address (CIP-19 types 0-3,
+ * 6, 7). A pointer, Byron or reward address carries no payment and inline stake pair this
+ * reads, and is refused.
+ */
+export function decodeBech32Address(address: string): DecodedAddress {
+  if (/^stake/i.test(address)) throw new InputError('INVALID_INPUT', 'a stake bech32 string is no payment address');
+  const bytes = addressBytes(address);
+  const type = bytes[0] >> 4;
+  const networkId = bytes[0] & 0x0f;
   const kinds = Object.keys(ADDRESS_TYPE).find((k) => ADDRESS_TYPE[k] === type);
   const [payment, stake] = (kinds ?? '').split('/') as ['key' | 'script', 'key' | 'script' | 'none'];
   if (kinds === undefined || bytes.length !== (stake === 'none' ? 29 : 57)) {

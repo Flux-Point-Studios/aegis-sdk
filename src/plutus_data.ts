@@ -7,7 +7,8 @@
 // The encoder writes one form of each, the definite form the cbor2 Python library writes,
 // so a builder ported from Python writes its bytes exactly.
 
-import { concat, encodeBytes, encodeHeader, encodeInt } from './cbor';
+import { blake2b224 } from './blake2b';
+import { bytesToHex, concat, encodeBytes, encodeConstr, encodeHeader, encodeInt } from './cbor';
 import { InputError } from './errors';
 import { hexToBytesStrict } from './generic_data';
 
@@ -188,4 +189,43 @@ export function encodePlutusData(data: PlutusData): Uint8Array {
     ]);
   }
   return concat([constrTag(data.constructor), list(data.fields)]);
+}
+
+// --- reading decoded data -------------------------------------------------------------
+// Their refusals name the field alone: vector suites replay them byte for byte.
+
+function refuseField(message: string): never {
+  throw new InputError('INVALID_INPUT', message);
+}
+
+export function constrOf(node: PlutusData, what: string): PlutusConstr {
+  if (typeof node !== 'object' || node instanceof Uint8Array || Array.isArray(node) || !('fields' in node)) {
+    refuseField(`${what} is no constructor`);
+  }
+  return node;
+}
+
+export function fieldsOf(node: PlutusData, what: string, arity: number): PlutusData[] {
+  const c = constrOf(node, what);
+  if (c.constructor !== 0) refuseField(`${what} is constructor ${c.constructor}, not 0`);
+  if (c.fields.length !== arity) refuseField(`${what} takes ${arity} fields, got ${c.fields.length}`);
+  return c.fields;
+}
+
+export function dataInt(node: PlutusData, what: string): bigint {
+  if (typeof node !== 'bigint') refuseField(`${what} is no integer`);
+  return node;
+}
+
+export function dataHex(node: PlutusData, what: string): string {
+  if (!(node instanceof Uint8Array)) refuseField(`${what} is no bytestring`);
+  return bytesToHex(node);
+}
+
+/**
+ * blake2b-224 of an output reference as serialiseData writes it: the name a FluidTokens loan
+ * and a gen-3 position each take from the input that creates them.
+ */
+export function outRefDigest(txId: Uint8Array, index: bigint): string {
+  return bytesToHex(blake2b224(encodeConstr(0, [encodePlutusData(txId), encodePlutusData(index)])));
 }

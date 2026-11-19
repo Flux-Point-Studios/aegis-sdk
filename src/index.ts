@@ -66,6 +66,8 @@ export {
   scriptStakeAddress,
   bech32Address,
   decodeBech32Address,
+  addressBytes,
+  addressHex,
 } from './address';
 export type { Network, DecodedAddress } from './address';
 export { CHAIN_FACTS, slotToPosixMs, posixMsToSlot } from './networks';
@@ -167,7 +169,7 @@ export {
 export type { EventReading, BuildEventUnderwritePartsParams } from './event';
 export { readGenericData } from './generic_data';
 export type { GenericData } from './generic_data';
-export { decodePlutusData, encodePlutusData } from './plutus_data';
+export { decodePlutusData, encodePlutusData, outRefDigest } from './plutus_data';
 export type { PlutusData, PlutusConstr, PlutusMap } from './plutus_data';
 
 // ---------------------------------------------------------------------------
@@ -265,6 +267,60 @@ export type {
   DecodedTransaction,
   ProtocolParams,
 } from './tx';
+
+// ---------------------------------------------------------------------------
+// Gen-3 Sovereign Book cover bought from the buyer's own wallet: the request,
+// the reservation the wallet signs, the API calls, and the judgement of the
+// presented sale before it is signed.
+// ---------------------------------------------------------------------------
+export {
+  G3_PREVIEW_ADA,
+  G3_BARRIER,
+  G3_DEPEG,
+  G3_QUOTE_VALIDITY_MS,
+  G3_MAX_UNDERWRITE_SPAN_MS,
+  G3_MAX_SPOT_AGE_MS,
+  G3_MIN_LEG_LOVELACE,
+  BookRefusal,
+  canonicalJson,
+  g3RequestHash,
+  g3ReservationPayload,
+  quoteG3Cover,
+  prepareG3Cover,
+  submitG3Sale,
+  g3Digest,
+  g3DigestDatum,
+  g3PolicyDatum,
+  decodeG3PolicyDatum,
+  decodeG3LegDatum,
+  decodeFeedReading,
+  resolvedOutputsFromKoios,
+  readResolvedOutputs,
+  outputsNamedBy,
+  g3PLegDeposit,
+  g3ProtocolFee,
+  g3Donation,
+  g3DepthBps,
+  g3SheetCell,
+  g3LegPremium,
+  verifyG3Sale,
+} from './book';
+export type {
+  G3Instance,
+  G3CoverRequest,
+  G3Quote,
+  G3Prepared,
+  DataSignature,
+  BookApiOptions,
+  G3PolicyTerms,
+  G3PolicyDatum,
+  G3LegDatum,
+  FeedReading,
+  ResolvedOutput,
+  G3SaleProblem,
+  VerifyG3SaleInput,
+} from './book';
+export type { KoiosReadOptions, KoiosUtxo, KoiosAsset } from './koios';
 
 // ---------------------------------------------------------------------------
 // Named oracle-feed registry (mainnet + preprod, network-aware lookup).

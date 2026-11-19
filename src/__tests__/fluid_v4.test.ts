@@ -10,7 +10,6 @@ import {
   FLUID_V4_CONFIG_POLICY,
   RH1_MAX_TERM_DAYS,
   ceilDiv,
-  constrOf,
   coverFluidLoan,
   decodeFluidLoanDatum,
   decodeFluidSuite,
@@ -20,7 +19,7 @@ import {
   rh1CoverParams,
 } from '../fluid_v4';
 import { bech32Address, decodeBech32Address } from '../address';
-import { decodePlutusData } from '../plutus_data';
+import { constrOf, decodePlutusData } from '../plutus_data';
 import { encodeBytes, encodeConstr, encodeInt, hexToBytes } from '../cbor';
 import { InputError, InsurabilityError } from '../errors';
 import config from './fixtures/preview_suite_config.json';
@@ -99,7 +98,7 @@ describe('decodePlutusData', () => {
 });
 
 describe('decodeFluidSuite', () => {
-  it("names the preview suite's loan policy and loan script from its 29-field config", () => {
+  it("names the preview suite's pool, borrow, bond and loan scripts from its 29-field config", () => {
     const row = config.response[0];
     const suite = decodeFluidSuite(row.inline_datum.bytes, 'preview', `${row.tx_hash}#${row.tx_index}`);
     expect(suite).toEqual({
@@ -107,6 +106,11 @@ describe('decodeFluidSuite', () => {
       configRef: '8dd38e97b79cc7c8a3c59400944b7cd9f724876a1d49ea17ffb5e49b3785091c#0',
       loanPolicyId: '2f1aa941f437e351e3870f7247d735b2bc2952f1c7977426e8960d17',
       loanSpendScriptHash: '31e0dc1d75076e4f7795b24c4cc4b5515791bb4eff4af7961e404f3e',
+      poolPolicyId: 'a33aee4034165f1772e57af5fb975f26c35f7e9080b7e44b4634f227',
+      poolSpendScriptHash: 'bf8c4378bab7de15baddbb5d8805255d89174c08bf36179c21cad685',
+      poolBorrowActionScriptHash: '344755c30db0617ff43cb41e5212379b729985352a213371b15c90cd',
+      borrowerBondPolicyId: 'eadc69a5d2d1357acc9b9d49ec5390fcdf6e080c7a40139917223dcb',
+      lenderBondPolicyId: 'bcd713bb7858d4b08738bed90ee7068d8f9b38d02e0cae0b45ac7a9b',
     });
   });
 
@@ -328,6 +332,11 @@ describe('coverFluidLoan', () => {
         configRef: '8dd38e97b79cc7c8a3c59400944b7cd9f724876a1d49ea17ffb5e49b3785091c#0',
         loanPolicyId: '2f1aa941f437e351e3870f7247d735b2bc2952f1c7977426e8960d17',
         loanSpendScriptHash: '31e0dc1d75076e4f7795b24c4cc4b5515791bb4eff4af7961e404f3e',
+        poolPolicyId: 'a33aee4034165f1772e57af5fb975f26c35f7e9080b7e44b4634f227',
+        poolSpendScriptHash: 'bf8c4378bab7de15baddbb5d8805255d89174c08bf36179c21cad685',
+        poolBorrowActionScriptHash: '344755c30db0617ff43cb41e5212379b729985352a213371b15c90cd',
+        borrowerBondPolicyId: 'eadc69a5d2d1357acc9b9d49ec5390fcdf6e080c7a40139917223dcb',
+        lenderBondPolicyId: 'bcd713bb7858d4b08738bed90ee7068d8f9b38d02e0cae0b45ac7a9b',
       },
       loan: {
         ref: LOAN_REF,
