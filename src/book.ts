@@ -777,9 +777,66 @@ export function g3ProtocolFee(premium: bigint, instance: G3Instance, params: Pro
   return rate > floor ? rate : floor;
 }
 
-/** The least Treasury donation the position validator takes for `premium` on the ADA instance. */
-export function g3Donation(premium: bigint, instance: G3Instance): bigint {
-  return ceil(premium * instance.donationBps, BPS);
+/**
+ * The least Treasury donation, in lovelace, the position validator takes for `premium` at the
+ * ADA/USD reading `fx`: 1 on the ADA instance, whose premium is lovelace.
+ */
+export function g3Donation(premium: bigint, instance: G3Instance, fx = 1n): bigint {
+  if (fx <= 0n) refuse(`the fx reading must be positive, not ${fx}`);
+  return ceil(premium * instance.donationBps * instance.fxScale, BPS * fx);
+}
+
+/** What a sale of `premium` charges: the fee in the unit and the lovelace beside it, the donation, and the buyer's whole cost. */
+export interface G3Charges {
+  protocolFee: bigint;
+  feeLovelace: bigint;
+  donationLovelace: bigint;
+  /** What the buyer pays in the unit and in lovelace beside it, the deposit among it. */
+  needs: { unit: bigint; lovelace: bigint };
+}
+
+/**
+ * The charges of a sale of `premium` at the ADA/USD reading `fx` (1 on the ADA instance): on
+ * the ADA instance the fee is g3ProtocolFee's lovelace, otherwise the rate on the premium in the
+ * unit beside the lovelace its treasury output's min-UTxO takes.
+ */
+export function g3Charges(premium: bigint, instance: G3Instance, params: ProtocolParams, fx: bigint, deposit: bigint): G3Charges {
+  const donationLovelace = g3Donation(premium, instance, fx);
+  let protocolFee: bigint;
+  let feeLovelace = 0n;
+  if (instance.unitPolicy === '') {
+    protocolFee = g3ProtocolFee(premium, instance, params);
+  } else {
+    protocolFee = ceil(premium * instance.feeBps, BPS);
+    feeLovelace = minUtxo(
+      {
+        address: instance.treasury, lovelace: 0n, assets: { [instance.unitPolicy]: { [instance.unitName]: protocolFee } },
+        datum: { kind: 'inline', cbor: g3DigestDatum('00'.repeat(28)) }, scriptRef: null,
+      },
+      params,
+    );
+  }
+  return {
+    protocolFee, feeLovelace, donationLovelace,
+    needs: { unit: premium + protocolFee, lovelace: feeLovelace + donationLovelace + deposit },
+  };
+}
+
+/**
+ * The ADA/USD reading a sale of a unit instance converts its donation at: the first output of
+ * `refs` at the publisher's key holding the instance's fx feed and a positive reading. Null on
+ * the ADA instance or when none is resolved.
+ */
+export function g3FxReading(instance: G3Instance, refs: string[], resolved: Record<string, ResolvedOutput>): FeedReading | null {
+  if (!instance.fxFeed) return null;
+  for (const r of refs) {
+    const o = resolved[r];
+    if (!o || credentialsOf(o.address).payment?.hash !== instance.publisherVkh || credentialsOf(o.address).payment?.kind !== 'key') continue;
+    if (!Object.values(o.assets[instance.fxFeed] ?? {}).some((q) => q !== 0n) || o.datum?.kind !== 'inline') continue;
+    const reading = tryDecode(() => decodeFeedReading((o.datum as { cbor: string }).cbor));
+    if (reading && reading.spot > 0n) return reading;
+  }
+  return null;
 }
 
 function ceil(n: bigint, d: bigint): bigint {
@@ -872,6 +929,11 @@ function credentialsOf(addressHex: string): { payment: Credential | null; stake:
   return { payment, stake, networkId: header & 0x0f };
 }
 
+function samePin(committed: PlutusData | null, asked: G3ReceiptPin | null): boolean {
+  if (committed === null || asked === null) return committed === asked;
+  return bytesToHex(encodePlutusData(committed)) === bytesToHex(encodePlutusData(decodePlutusData(g3ReceiptPinCbor(asked))));
+}
+
 function samePayout(committed: PlutusData | null, asked: G3AddressView | null): boolean {
   if (committed === null || asked === null) return committed === asked;
   return bytesToHex(encodePlutusData(committed)) === bytesToHex(encodePlutusData(g3AddressData(asked)));
@@ -915,7 +977,6 @@ export function maxFee(params: ProtocolParams): bigint {
  */
 export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
   const { request, quote, instance: inst, resolved, params } = input;
-  if (inst.unit !== 'lovelace') refuse('verifyG3Sale judges sales of the ADA instance');
   const tx = decodeTransaction(input.tx);
   const problems: G3SaleProblem[] = [];
   const fail = (code: string, conjunct: string, detail: string) => problems.push({ code, conjunct, detail });
@@ -941,9 +1002,9 @@ export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
   // The P-leg, its digest and the Head it names.
   const head = tx.inputs.find((r) => resolved[r] && quantity(resolved[r].assets, inst.beaconPolicy, inst.beaconName) === 1n);
   const digest = head ? g3Digest(head) : null;
-  const pAt = tx.outputs.findIndex((o) => markerOf(o.assets, position, P_PREFIX) !== null);
-  const pOut = pAt >= 0 ? tx.outputs[pAt] : null;
-  const pd = pOut?.datum?.kind === 'inline' ? tryDecode(() => decodeG3PolicyDatum((pOut.datum as { cbor: string }).cbor)) : null;
+  const facts = g3SaleFacts(tx, inst);
+  const pOut = facts.pAt >= 0 ? tx.outputs[facts.pAt] : null;
+  const pd = facts.policy;
   const mintedHere = tx.mint[position] ?? {};
   if (!digest) fail('p-leg-not-at-the-position', 'head-not-spent', 'no spent input holds the lanes beacon');
   if (!digest || Object.keys(mintedHere).length !== 2 || mintedHere[P_PREFIX + digest] !== 1n || mintedHere[C_PREFIX + digest] === undefined) {
@@ -984,21 +1045,17 @@ export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
       ['receipt-commitment', pd.receiptCommitment === null],
       ['payout-datum', pd.payoutDatum === null],
       ['settlement-pins', pd.settlementPins === null],
-      ['extension', pd.extension === null && pd.tail === 0],
+      ['extension', samePin(pd.extension, request.pin) && pd.tail === 0],
       ['pool-not-the-instance', pd.poolNft === inst.beaconPolicy && pd.poolScriptHash === position],
     ];
     for (const [name, ok] of pins) if (!ok) fail('p-leg-off-the-core-pins', name, `the P-leg is off the core pin ${name}`);
   }
 
   // The legs.
-  const legs = tx.outputs
-    .map((o, at) => ({ o, at }))
-    .filter(({ o }) => credentialsOf(o.address).payment?.kind === 'script' && credentialsOf(o.address).payment?.hash === position &&
-      markerOf(o.assets, position, C_PREFIX) !== null);
+  const legs = facts.legs;
   if (legs.length === 0) fail('p-leg-not-at-the-position', 'no-leg', 'no output is a leg of the position');
   let premium = 0n;
-  for (const { o, at } of legs) {
-    const leg = o.datum?.kind === 'inline' ? tryDecode(() => decodeG3LegDatum((o.datum as { cbor: string }).cbor)) : null;
+  for (const { output: o, at, datum: leg } of legs) {
     if (!leg || leg.digest !== digest || markerOf(o.assets, position, C_PREFIX) !== C_PREFIX + digest) {
       fail('p-leg-not-at-the-position', 'leg-not-of-the-position', `output ${at} is no leg of this position`);
       continue;
@@ -1065,9 +1122,6 @@ export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
   };
   for (const r of tx.inputs) if (resolved[r]) flow(resolved[r], -1n);
   for (const o of tx.outputs) flow(o, 1n);
-  for (const [unit, q] of Object.entries(assetFlow)) {
-    if (q < 0n) fail('buyer-outflow-over-the-sale', 'net-asset-outflow', `the buyer's addresses lose ${-q} of ${unit}`);
-  }
   const unresolvedFunding = request.funding.filter((r) => !resolved[r]);
   if (unresolvedFunding.length) {
     fail('buyer-outflow-over-the-sale', 'net-lovelace-outflow', `named funding ${unresolvedFunding.join(', ')} cannot be resolved`);
@@ -1087,7 +1141,15 @@ export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
   if (unresolved.length) fail('sale-foreign-purpose', 'input-unresolved', `the buyer's reads resolve no ${unresolved.join(', ')}`);
   const foreignSigners = tx.requiredSigners.filter((k) => !payments.has(k));
   if (foreignSigners.length) fail('sale-foreign-purpose', 'foreign-required-signer', `required signers ${foreignSigners.join(', ')} are not the buyer's keys`);
-  if (tx.withdrawals.some((w) => !(w.credential.kind === 'script' && w.credential.hash === inst.observerHash) && !buyerCreds.has(w.credential.hash))) {
+  const atLiqwid = (w: { credential: { kind: string; hash: string } }) =>
+    inst.liqwidHash !== '' && w.credential.kind === 'script' && w.credential.hash === inst.liqwidHash;
+  const observed = tx.withdrawals.filter(atLiqwid).map((w) => w.amount);
+  if (request.pin ? !(observed.length === 1 && observed[0] === 0n) : observed.length !== 0) {
+    fail('liqwid-observer-not-the-pin', 'liqwid-withdrawal',
+      `the Liqwid observer withdraws [${observed.join(', ')}], where a sale withdraws zero from it once under a pin and never without one`);
+  }
+  if (tx.withdrawals.some((w) => !(w.credential.kind === 'script' && w.credential.hash === inst.observerHash) &&
+    !atLiqwid(w) && !buyerCreds.has(w.credential.hash))) {
     fail('sale-foreign-purpose', 'foreign-withdrawal', 'a withdrawal at neither the observer nor a buyer credential');
   }
   if (tx.certificates) fail('sale-foreign-purpose', 'certificate', `the body carries ${tx.certificates} certificate(s)`);
@@ -1129,12 +1191,16 @@ export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
   if (!feeOut) {
     fail('protocol-fee-short', 'fee-output-missing', 'no output pays the treasury');
   } else {
-    if (feeOut.lovelace * BPS < premium * inst.feeBps) fail('protocol-fee-short', 'fee-under-the-rate', `fee output ${feeOut.lovelace} under the rate`);
+    const feePaid = inst.unitPolicy === '' ? feeOut.lovelace : quantity(feeOut.assets, inst.unitPolicy, inst.unitName);
+    if (feePaid * BPS < premium * inst.feeBps) fail('protocol-fee-short', 'fee-under-the-rate', `fee output ${feePaid} under the rate`);
     if (!digest || feeOut.datum?.kind !== 'inline' || feeOut.datum.cbor !== g3DigestDatum(digest)) {
       fail('protocol-fee-short', 'fee-output-without-the-digest', 'the fee output does not carry the position digest');
     }
   }
-  const owed = g3Donation(premium, inst);
+  const fxReading = g3FxReading(inst, outputsNamedBy(tx), resolved);
+  if (inst.fxFeed && !fxReading) fail('sale-window', 'fx-reading-not-referenced', 'no publisher reading of the ADA/USD feed among the references');
+  const fx = fxReading?.spot ?? 1n;
+  const owed = g3Donation(premium, inst, fx);
   const pairOnly = Object.keys(tx.mint).length === 1 && Object.keys(mintedHere).length === 2;
   const accrual = scriptAddress(inst.accrualHash, inst.network);
   const accrued = tx.outputs.some((o) => o.address === accrual && digest && o.datum?.kind === 'inline' &&
@@ -1145,12 +1211,15 @@ export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
 
   // The quote.
   if (premium !== quote.premium) fail('sale-not-the-quote', 'premium', `the legs ask ${premium}, not the quoted ${quote.premium}`);
-  const fee = g3ProtocolFee(premium, inst, params);
-  const needs = { unit: premium + fee, lovelace: owed + request.deposit };
+  const { needs } = g3Charges(premium, inst, params, fx, request.deposit);
   if (needs.unit > quote.needs.unit || needs.lovelace > quote.needs.lovelace) {
     fail('sale-not-the-quote', 'charges', `the sale charges ${needs.unit} + ${needs.lovelace}, over the quoted ${quote.needs.unit} + ${quote.needs.lovelace}`);
   }
-  const allowed = needs.unit + needs.lovelace + tx.fee;
+  const unit = inst.unitPolicy === '' ? null : inst.unitPolicy + inst.unitName;
+  for (const [asset, q] of Object.entries(assetFlow)) {
+    if (-q > (asset === unit ? needs.unit : 0n)) fail('buyer-outflow-over-the-sale', 'net-asset-outflow', `the buyer's addresses lose ${-q} of ${asset}`);
+  }
+  const allowed = needs.lovelace + tx.fee + (unit ? 0n : needs.unit);
   if (!unresolvedFunding.length && -lovelaceFlow > allowed) {
     fail('buyer-outflow-over-the-sale', 'net-lovelace-outflow', `the buyer's addresses lose ${-lovelaceFlow}, over the sale's ${allowed}`);
   }
@@ -1161,7 +1230,7 @@ export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
   return problems;
 }
 
-/** The ledger's phase-one rules a buyer can check offline: balance, fee, min-UTxO, size, units and collateral. */
+/** The ledger's phase-one rules a buyer can check offline: balance, script sources, fee, min-UTxO, size, units and collateral. */
 function phaseOne(
   tx: DecodedTransaction,
   resolved: Record<string, ResolvedOutput>,
@@ -1187,7 +1256,16 @@ function phaseOne(
     const pay = credentialsOf(resolved[r].address).payment;
     if (pay?.kind === 'key') keys.add(pay.hash);
   }
-  const refBytes = [...new Set([...tx.inputs, ...tx.referenceInputs])].reduce((s, r) => s + (resolved[r].referenceScript?.size ?? 0), 0);
+  const sources = [...new Set([...tx.inputs, ...tx.referenceInputs])];
+  const carried = new Set(sources.map((r) => resolved[r].referenceScript?.hash));
+  const needed = new Set([
+    ...tx.inputs.map((r) => credentialsOf(resolved[r].address).payment).flatMap((c) => (c?.kind === 'script' ? [c.hash] : [])),
+    ...Object.keys(tx.mint),
+    ...tx.withdrawals.flatMap((w) => (w.credential.kind === 'script' ? [w.credential.hash] : [])),
+  ]);
+  const lacking = [...needed].filter((h) => !carried.has(h)).sort();
+  if (lacking.length) fail('phase-one', 'script-without-a-source', `no input or reference input carries ${lacking.join(', ')}`);
+  const refBytes = sources.reduce((s, r) => s + (resolved[r].referenceScript?.size ?? 0), 0);
   const least = minFee(draft, params, { witnesses: keys.size, referenceScriptBytes: refBytes });
   if (tx.fee < least) fail('phase-one', 'fee-under-the-min', `fee ${tx.fee} under the ledger's ${least}`);
   tx.outputs.forEach((o, at) => {

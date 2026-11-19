@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest';
 import {
   BookRefusal,
   G3_PREVIEW_ADA,
+  G3_PREVIEW_USDCX,
   canonicalJson,
   decodeFeedReading,
   decodeG3LegDatum,
@@ -320,10 +321,10 @@ describe('verifyG3Sale', () => {
     expect(await judged(sale.signed)).toContain('sale-already-witnessed/vkey-witness-present');
   });
 
-  it('refuses an instance it does not judge', () => {
-    expect(() =>
-      verifyG3Sale({ tx: sale.prepared, request, quote: {} as G3Quote, instance: { ...G3_PREVIEW_ADA, unit: 'ab' }, resolved, params: PARAMS }),
-    ).toThrow(/ADA instance/);
+  it("refuses a sale judged as another instance's", async () => {
+    expect(await judged(sale.prepared, { instance: G3_PREVIEW_USDCX })).toEqual(
+      expect.arrayContaining(['table-not-referenced/one-table', 'p-leg-not-at-the-position/head-not-spent']),
+    );
   });
 
   const b = (h: string) => hexToBytes(h);

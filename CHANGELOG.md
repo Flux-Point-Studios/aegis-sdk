@@ -50,6 +50,16 @@ Additive:
   now `examples/wallet-dir-signer.ts`) and `openWalletDir`, a CIP-30-shaped signer
   over a directory holding public.json and mnemonic.txt. Its signData answers and
   body witnesses equal the Python wallet signer's byte for byte.
+- **Unit instances and pinned sales in `verifyG3Sale`** — a sale of the USDCx
+  instance is judged on its own charges: `g3Charges(premium, instance, params,
+  fx, deposit)` prices the fee in the unit beside its output's min-UTxO and the
+  donation in lovelace at the ADA/USD reading `g3FxReading` finds among the
+  sale's references. The buyer may lose the unit up to those charges and no
+  other asset. A pinned sale must run the instance's Liqwid observer once at a
+  zero withdrawal and an unpinned one never (`liqwid-observer-not-the-pin`), and
+  the P-leg's extension must hold the request's pin.
+- **`phase-one/script-without-a-source`** — `verifyG3Sale` refuses a sale that
+  spends, mints or withdraws at a script no input or reference input carries.
 
 Changed:
 
@@ -64,6 +74,10 @@ Changed:
   answer that is not JSON.
 - `@noble/curves`, `@noble/hashes` and `@scure/bip39` are dependencies, read only
   by the Node entry; the main entry still imports none of them.
+- `verifyG3Sale` no longer throws for an instance other than ADA; `g3Donation`
+  takes the ADA/USD reading as an optional third argument (1 by default, the
+  ADA instance's) and throws for one of zero or below, which `g3FxReading`
+  never returns.
 
 ## Unreleased — N2 event-class cover
 
