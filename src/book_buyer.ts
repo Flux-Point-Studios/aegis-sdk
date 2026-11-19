@@ -9,9 +9,10 @@ import {
   G3_DEPEG,
   G3_PREVIEW_FEEDS,
   G3_QUOTE_VALIDITY_MS,
+  compactJson,
   g3PLegDeposit,
 } from './book';
-import type { G3AddressView, G3Credential, G3CoverRequest, G3Instance } from './book';
+import type { G3AddressView, G3Credential, G3CoverRequest, G3Instance, G3Quote } from './book';
 import type { ProtocolParams } from './tx';
 
 const UNIT = 1_000_000n;
@@ -123,4 +124,13 @@ export function g3CoverRequest(
   };
   request.deposit = g3PLegDeposit(request, instance, params);
   return request;
+}
+
+/** The line the buyer CLI prints of a quote: the API's answer as it came, the deposit and the cover asked. */
+export function g3QuoteLine(quote: G3Quote, request: G3CoverRequest): string {
+  return compactJson({
+    quote: quote.answer,
+    deposit: request.deposit,
+    cover: { feed: request.feed, class: request.class, strike: request.strike, coverage: request.coverage, term_ms: request.term_ms },
+  });
 }

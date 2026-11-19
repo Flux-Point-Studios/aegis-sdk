@@ -286,6 +286,10 @@ export {
   G3_MIN_LEG_LOVELACE,
   BookRefusal,
   canonicalJson,
+  bookPost,
+  maxFee,
+  ledgerPhaseOne,
+  compactJson,
   g3RequestHash,
   g3ReservationPayload,
   quoteG3Cover,
@@ -330,7 +334,7 @@ export type {
   G3SaleProblem,
   VerifyG3SaleInput,
 } from './book';
-export { G3_CLASSES, g3AddressView, g3PayoutOf, g3FeedNamed, g3CoverRequest } from './book_buyer';
+export { G3_CLASSES, g3AddressView, g3PayoutOf, g3FeedNamed, g3CoverRequest, g3QuoteLine } from './book_buyer';
 export type { G3CoverAsk, G3CoverWallet } from './book_buyer';
 export {
   KOIOS_PAGE_ROWS,
@@ -345,6 +349,26 @@ export {
   g3CollateralOf,
 } from './book_wallet';
 export type { WalletListing, WalletListingOptions } from './book_wallet';
+export {
+  G3_TERM_DAYS,
+  G3_DEPTH_BPS,
+  G3_DEPEG_DEPTH_BPS,
+  G3_EVENT_DEPTH_BPS,
+  G3_OFFER_LIFE_DAYS,
+  G3_MIN_FILL_UNITS,
+  G3_TOKEN_OFFER_ADA,
+  G3_OFFER_BUILD_PATH,
+  G3_STARTER,
+  g3Offer,
+  g3OfferDatum,
+  g3OfferOutput,
+  g3OfferAddress,
+  g3OfferSummary,
+  g3SheetCells,
+  buildG3OfferPost,
+  g3PostProblems,
+} from './book_offer';
+export type { G3OfferAsk, G3OfferFields, G3Offer, G3OfferPost } from './book_offer';
 export { koiosUtxos, koiosHeaders } from './koios';
 export type { KoiosReadOptions, KoiosUtxo, KoiosAsset } from './koios';
 

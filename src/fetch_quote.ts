@@ -22,7 +22,7 @@ export interface FetchQuoteParams {
 export type MinimalFetch = (
   url: string,
   init?: { method?: string; headers?: Record<string, string>; body?: string; signal?: unknown },
-) => Promise<{ ok: boolean; status: number; json: () => Promise<any> }>;
+) => Promise<{ ok: boolean; status: number; json: () => Promise<any>; text?: () => Promise<string> }>;
 
 export interface FetchQuoteOptions {
   /** Aegis API base URL. Default: https://api.aegis.fluxpointstudios.com */

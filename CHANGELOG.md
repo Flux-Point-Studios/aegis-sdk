@@ -22,6 +22,17 @@ Additive:
   a wallet padded with dust still funds from what it holds. `g3FundingFor` takes the
   richest outputs until they cover a spend and its change, and `g3CollateralOf`
   the richest UTxO of lovelace alone at 5 ADA or over.
+- **Underwriter offers** — `g3Offer(instance, ask, owner, nowMs, sheets)` writes
+  the offer an ask names, defaulting its depth band by the first row's class and
+  its term band to 7 to 45 days, and refuses one no sale could fill: every cell of
+  its sheet in its bands asks the whole coverage at its load
+  (`ask-reaches-the-cover`). `g3OfferOutput` places it at the book under the
+  owner's stake key, `buildG3OfferPost` has the hosted builder write its post, and
+  `g3PostProblems` judges that post before the wallet signs it. `G3_STARTER` is
+  each preview instance's starter set.
+- **`bookPost`** — the POST every Book route shares, exported for routes the SDK
+  has no call for; `compactJson` writes JSON in each object's own key order, as
+  `g3QuoteLine` prints a quote; `G3Quote.answer` holds the API's answer as it came.
 - **`koiosHeaders`** — a Koios read sends `KoiosReadOptions.token` as a bearer.
 - **The Node entry, `@fluxpointstudios/aegis-sdk/node`** — `walletDirSigner` (until
   now `examples/wallet-dir-signer.ts`) and `openWalletDir`, a CIP-30-shaped signer
@@ -36,6 +47,9 @@ Changed:
   request's.
 - `G3Instance` gains required fields (above); a caller building its own instance
   must supply them.
+- A Book route's refusal carries the code its answer names, else
+  `refused-<status>`, with the answer's detail, or the first 500 characters of an
+  answer that is not JSON.
 - `@noble/curves`, `@noble/hashes` and `@scure/bip39` are dependencies, read only
   by the Node entry; the main entry still imports none of them.
 

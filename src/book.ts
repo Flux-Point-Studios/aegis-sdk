@@ -296,6 +296,8 @@ export interface G3Quote {
   fx: bigint | null;
   carriers: bigint;
   validForMs: number;
+  /** The API's answer as it came. */
+  answer: unknown;
 }
 
 /** What prepare presents: the reservation holding the funding and the sale's unsigned bytes. */
@@ -340,12 +342,8 @@ function jsonString(s: string): string {
   return JSON.stringify(s).replace(/[\u0080-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
 }
 
-/**
- * JSON as Python's json.dumps(sort_keys=True, separators=(",", ":")) writes it: keys sorted,
- * no whitespace, non-ASCII escaped, a bigint as its integer. The API hashes a request in this
- * form, so a client must write it byte for byte.
- */
-export function canonicalJson(value: unknown): string {
+function pythonJson(value: unknown, sortKeys: boolean): string {
+  const write = (v: unknown) => pythonJson(v, sortKeys);
   if (value === null) return 'null';
   if (typeof value === 'bigint') return value.toString();
   if (typeof value === 'number') {
@@ -354,12 +352,27 @@ export function canonicalJson(value: unknown): string {
   }
   if (typeof value === 'boolean') return value ? 'true' : 'false';
   if (typeof value === 'string') return jsonString(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (Array.isArray(value)) return `[${value.map(write).join(',')}]`;
   if (typeof value === 'object') {
-    const keys = Object.keys(value as object).sort();
-    return `{${keys.map((k) => `${jsonString(k)}:${canonicalJson((value as Record<string, unknown>)[k])}`).join(',')}}`;
+    const keys = Object.keys(value as object);
+    if (sortKeys) keys.sort();
+    return `{${keys.map((k) => `${jsonString(k)}:${write((value as Record<string, unknown>)[k])}`).join(',')}}`;
   }
   return refuse(`canonical JSON has no form for a ${typeof value}`);
+}
+
+/**
+ * JSON as Python's json.dumps(sort_keys=True, separators=(",", ":")) writes it: keys sorted,
+ * no whitespace, non-ASCII escaped, a bigint as its integer. The API hashes a request in this
+ * form, so a client must write it byte for byte.
+ */
+export function canonicalJson(value: unknown): string {
+  return pythonJson(value, true);
+}
+
+/** JSON as Python's json.dumps(separators=(",", ":")) writes it: canonicalJson with each object's keys in their own order. */
+export function compactJson(value: unknown): string {
+  return pythonJson(value, false);
 }
 
 /** The request's hash the reservation names: blake2b-256 of its canonical JSON. */
@@ -384,7 +397,11 @@ export function g3ReservationPayload(request: G3CoverRequest): string {
 
 // --- the API --------------------------------------------------------------------------
 
-async function post(api: BookApiOptions, instance: G3Instance, path: string, body: unknown): Promise<any> {
+/**
+ * POST `body` as canonical JSON to an Aegis Book route for the instance and answer its JSON;
+ * any other answer is a BookRefusal under the route's code, or refused-<status> without one.
+ */
+export async function bookPost(api: BookApiOptions, instance: G3Instance, path: string, body: unknown): Promise<any> {
   const f: MinimalFetch | undefined = api.fetchImpl ?? (globalThis as { fetch?: MinimalFetch }).fetch;
   if (!f) refuse('no fetch available: pass fetchImpl');
   const query = `network=${encodeURIComponent(instance.network)}&unit=${encodeURIComponent(instance.unit)}`;
@@ -393,13 +410,28 @@ async function post(api: BookApiOptions, instance: G3Instance, path: string, bod
     headers: { 'content-type': 'application/json', accept: 'application/json' },
     body: canonicalJson(body),
   });
-  const answer: any = await res.json().catch(() => {
-    throw new BookRefusal(`refused-${res.status}`, `the API answered HTTP ${res.status} with no JSON body`);
-  });
-  if (!res.ok) {
-    const detail = answer?.detail;
-    const code = detail && typeof detail === 'object' && typeof detail.code === 'string' ? detail.code : `refused-${res.status}`;
-    throw new BookRefusal(code, detail ?? answer);
+  let answer: any;
+  let parsed = true;
+  if (typeof res.text === 'function') {
+    const text = await res.text();
+    try {
+      answer = JSON.parse(text);
+    } catch {
+      parsed = false;
+      answer = text.slice(0, 500);
+    }
+  } else {
+    answer = await res.json().catch(() => {
+      parsed = false;
+      return '';
+    });
+  }
+  if (!res.ok || !parsed) {
+    const detail = parsed ? (answer !== null && typeof answer === 'object' && !Array.isArray(answer) ? answer.detail ?? null : null) : answer;
+    const code = detail !== null && typeof detail === 'object' && !Array.isArray(detail) && typeof detail.code === 'string' && detail.code
+      ? detail.code
+      : `refused-${res.status}`;
+    throw new BookRefusal(code, detail);
   }
   return answer;
 }
@@ -428,12 +460,13 @@ function quoteOf(a: any): G3Quote {
     fx: a.fx === null ? null : whole(a.fx, 'fx'),
     carriers: whole(a.carriers, 'carriers'),
     validForMs: Number(whole(a.valid_for_ms, 'valid_for_ms')),
+    answer: a,
   };
 }
 
 /** What the Book would sell the request for, reserving nothing. Refuses cover the Book cannot sell whole. */
 export async function quoteG3Cover(api: BookApiOptions, instance: G3Instance, request: G3CoverRequest): Promise<G3Quote> {
-  const quote = quoteOf(await post(api, instance, '/api/book/g3/quote', request));
+  const quote = quoteOf(await bookPost(api, instance, '/api/book/g3/quote', request));
   if (!quote.available) {
     throw new BookRefusal('cover-unavailable', `the book sells ${quote.coverage} of the ${request.coverage} asked`);
   }
@@ -450,7 +483,7 @@ export async function prepareG3Cover(
   request: G3CoverRequest,
   signatures: Record<string, DataSignature>,
 ): Promise<G3Prepared> {
-  const answer = await post(api, instance, '/api/book/g3/prepare', { request, signatures });
+  const answer = await bookPost(api, instance, '/api/book/g3/prepare', { request, signatures });
   if (typeof answer?.reservation !== 'string' || typeof answer?.cbor !== 'string') {
     refuse('the prepare answer carries no reservation and sale bytes');
   }
@@ -469,7 +502,7 @@ export async function submitG3Sale(
 ): Promise<string> {
   const signed = spliceVkeyWitnesses(prepared.cbor, witnessSet);
   const id = transactionId(signed);
-  const answer = await post(api, instance, '/api/book/g3/submit', { reservation: prepared.reservation, cbor: signed });
+  const answer = await bookPost(api, instance, '/api/book/g3/submit', { reservation: prepared.reservation, cbor: signed });
   if (answer?.tx !== id) throw new BookRefusal('submit-answered-another-tx', `the API answered ${answer?.tx} for ${id}`);
   return id;
 }
@@ -868,7 +901,8 @@ function tryDecode<T>(read: () => T): T | null {
   }
 }
 
-function maxFee(params: ProtocolParams): bigint {
+/** The fee of a transaction at the maximum size and the maximum units. */
+export function maxFee(params: ProtocolParams): bigint {
   const [mn, md] = params.priceMem;
   const [sn, sd] = params.priceSteps;
   return params.minFeeA * BigInt(params.maxTxSize) + params.minFeeB +
@@ -1172,4 +1206,15 @@ function phaseOne(
       fail('phase-one', 'total-collateral-not-held', `the collateral nets ${held}, not the stated ${tx.totalCollateral}`);
     }
   }
+}
+
+/** The ledger's phase-one rules over a transaction whose every spent and referenced output `resolved` holds. */
+export function ledgerPhaseOne(
+  tx: string | Uint8Array,
+  resolved: Record<string, ResolvedOutput>,
+  params: ProtocolParams,
+): G3SaleProblem[] {
+  const problems: G3SaleProblem[] = [];
+  phaseOne(decodeTransaction(tx), resolved, params, (code, conjunct, detail) => problems.push({ code, conjunct, detail }));
+  return problems;
 }
