@@ -17,6 +17,10 @@ Additive:
   stake part or a pointer pays the insured key alone. `g3AddressView` reads a
   bech32 address as the routes name it, and `g3FeedNamed` finds a feed by pair.
 - **`koiosHeaders`** — a Koios read sends `KoiosReadOptions.token` as a bearer.
+- **The Node entry, `@fluxpointstudios/aegis-sdk/node`** — `walletDirSigner` (until
+  now `examples/wallet-dir-signer.ts`) and `openWalletDir`, a CIP-30-shaped signer
+  over a directory holding public.json and mnemonic.txt. Its signData answers and
+  body witnesses equal the Python wallet signer's byte for byte.
 
 Changed:
 
@@ -26,6 +30,8 @@ Changed:
   request's.
 - `G3Instance` gains required fields (above); a caller building its own instance
   must supply them.
+- `@noble/curves`, `@noble/hashes` and `@scure/bip39` are dependencies, read only
+  by the Node entry; the main entry still imports none of them.
 
 ## Unreleased — N2 event-class cover
 

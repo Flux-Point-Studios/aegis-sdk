@@ -1,7 +1,7 @@
 {
   "name": "@fluxpointstudios/aegis-sdk",
   "version": "1.0.5-v4.0",
-  "description": "Aegis parametric insurance SDK for Cardano. Build insurance policy datums, calculate premiums, and compose Aegis outputs into your own transactions -- zero runtime dependencies.",
+  "description": "Aegis parametric insurance SDK for Cardano. Build insurance policy datums, calculate premiums, and compose Aegis outputs into your own transactions. The main entry has zero runtime dependencies; the Node entry (wallet-directory signer and CLI) uses @noble and @scure.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/cjs/index.d.ts",
@@ -10,6 +10,11 @@
       "types": "./dist/cjs/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./node": {
+      "types": "./dist/cjs/node/index.d.ts",
+      "import": "./dist/esm/node/index.js",
+      "require": "./dist/cjs/node/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -48,11 +53,13 @@
     "PARTNERS.md",
     "CHANGELOG.md"
   ],
-  "devDependencies": {
+  "dependencies": {
     "@noble/curves": "1.9.1",
     "@noble/hashes": "1.8.0",
-    "@scure/base": "1.2.6",
-    "@scure/bip39": "1.6.0",
+    "@scure/bip39": "1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.58",
     "fast-check": "^4.10.2",
     "rimraf": "^5.0.0",
     "typescript": "^5.4.0",

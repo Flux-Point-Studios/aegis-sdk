@@ -1,15 +1,12 @@
-/**
- * examples/wallet-dir-signer.ts
- *
- * A CIP-30-shaped signer over a wallet directory holding public.json and mnemonic.txt, for
- * scripts and test wallets. The mnemonic is read inside each call that signs, the CIP-1852
- * account-0 keys are derived from it (Icarus master key, m/1852'/1815'/0'/0/0 and .../2/0),
- * and the key bytes are zeroed before the call returns. A wallet whose mnemonic derives
- * another address or payment key hash than its public.json names is refused. Nothing here
- * prints or returns a key; signTx answers a witness set and signData a CIP-30 DataSignature.
- *
- * In a browser, pass the wallet's own CIP-30 API instead: it answers the same three calls.
- */
+// A CIP-30-shaped signer over a wallet directory holding public.json and mnemonic.txt, for
+// scripts and test wallets. The mnemonic is read inside each call that signs, the CIP-1852
+// account-0 keys are derived from it (Icarus master key, m/1852'/1815'/0'/0/0 and .../2/0),
+// and the key bytes are zeroed before the call returns. A wallet whose mnemonic derives
+// another address or payment key hash than its public.json names is refused. Nothing here
+// prints or returns a key; signTx answers a witness set and signData a CIP-30 DataSignature.
+//
+// In a browser, pass the wallet's own CIP-30 API instead: it answers the same three calls.
+
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ed25519 } from '@noble/curves/ed25519.js';
@@ -18,7 +15,7 @@ import { hmac } from '@noble/hashes/hmac.js';
 import { pbkdf2 } from '@noble/hashes/pbkdf2.js';
 import { sha512 } from '@noble/hashes/sha2.js';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils.js';
-import { bech32 } from '@scure/base';
+import { addressBytes } from '../address';
 import { mnemonicToEntropy } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
 
@@ -118,9 +115,8 @@ const STAKE = [1852 + HARDENED, 1815 + HARDENED, HARDENED, 2, 0];
 export function walletDirSigner(walletDir: string, network: string): Cip30Signer {
   const pub = JSON.parse(readFileSync(join(walletDir, 'public.json'), 'utf8')) as PublicJson;
   if (pub.network !== network) throw new Error(`${walletDir} is a ${pub.network} wallet, not a ${network} one`);
-  const { prefix, words } = bech32.decode(pub.address as `${string}1${string}`, 120);
-  if (prefix !== 'addr_test') throw new Error(`${walletDir} names no testnet address`);
-  const address = Uint8Array.from(bech32.fromWords(words));
+  if (!pub.address.startsWith('addr_test1')) throw new Error(`${walletDir} names no testnet address`);
+  const address = addressBytes(pub.address);
 
   /** `use(payment key, vkey)` on keys freshly derived and checked against public.json, zeroed after. */
   function withKey<T>(use: (key: Uint8Array, vkey: Uint8Array) => T): T {
@@ -196,4 +192,18 @@ function itemLength(b: Uint8Array, at: number): number {
   else if (major === 5) for (let i = 0; i < 2 * n; i++) p += itemLength(b, p);
   else if (major === 6) p += itemLength(b, p);
   return p - at;
+}
+
+/** A wallet directory opened for `network`: its bech32 address, payment key hash and signer. */
+export interface WalletDir {
+  address: string;
+  vkh: string;
+  signer: Cip30Signer;
+}
+
+/** The wallet at `walletDir`, refused unless it is a `network` wallet whose keys derive its public.json. */
+export function openWalletDir(walletDir: string, network: string): WalletDir {
+  const signer = walletDirSigner(walletDir, network);
+  const pub = JSON.parse(readFileSync(join(walletDir, 'public.json'), 'utf8')) as PublicJson;
+  return { address: pub.address, vkh: pub.payment_vkh, signer };
 }

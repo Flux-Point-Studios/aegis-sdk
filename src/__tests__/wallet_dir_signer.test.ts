@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { describe, expect, it } from 'vitest';
-import { walletDirSigner } from '../../examples/wallet-dir-signer';
+import { walletDirSigner } from '../node/wallet_dir';
 import { hexToBytes } from '../cbor';
 import { decodeTransaction } from '../tx';
 import landed from './fixtures/g3_preview_sale.json';

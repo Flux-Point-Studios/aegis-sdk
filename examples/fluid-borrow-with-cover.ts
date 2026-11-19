@@ -15,7 +15,7 @@
  *   node examples/fluid-borrow-with-cover.ts --wallet-dir <dir> --pool <tx id>#<index> \
  *     [--principal-ada 50] [--term-days 7] [--depth-bps 3000] --api <Aegis API base URL> [--submit]
  *
- * <dir> holds public.json and mnemonic.txt (see wallet-dir-signer.ts); any CIP-30 wallet's
+ * <dir> holds public.json and mnemonic.txt (see src/node/wallet_dir.ts); any CIP-30 wallet's
  * API can stand in for the signer.
  */
 import {
@@ -40,8 +40,8 @@ import {
   protocolParamsFromCli,
 } from '../dist/esm/index.js';
 import type { FluidCoverPlan, KoiosUtxo } from '../dist/esm/index.js';
-import { walletDirSigner } from './wallet-dir-signer.ts';
-import type { Cip30Signer } from './wallet-dir-signer.ts';
+import { walletDirSigner } from '../dist/esm/node/index.js';
+import type { Cip30Signer } from '../dist/esm/node/index.js';
 
 const NETWORK = 'preview';
 const KOIOS = CHAIN_FACTS[NETWORK].koios;
