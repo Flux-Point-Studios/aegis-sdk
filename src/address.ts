@@ -13,6 +13,8 @@
 
 import { bytesToHex, hexToBytes } from './cbor';
 import { InputError } from './errors';
+import { constrOf, dataHex } from './plutus_data';
+import type { PlutusData } from './plutus_data';
 import type { PlutusCredential, PlutusFullAddress } from './types';
 
 const CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
@@ -309,5 +311,33 @@ export function decodeBech32Address(address: string): DecodedAddress {
     networkId: networkId as 0 | 1,
     payment: { kind: payment, hash: bytes.slice(1, 29) },
     stake: stake === 'none' ? null : { kind: stake, hash: bytes.slice(29, 57) },
+  };
+}
+
+function credentialOf(node: PlutusData, what: string): { kind: 'key' | 'script'; hash: Uint8Array } {
+  const c = constrOf(node, what);
+  if (c.constructor > 1 || c.fields.length !== 1) throw new InputError('INVALID_INPUT', `${what} is no credential`);
+  return { kind: c.constructor === 0 ? 'key' : 'script', hash: hexToBytes(dataHex(c.fields[0], what)) };
+}
+
+/** An Address as Data, inline stake only, as its bytes on `networkId`. */
+export function addressHexOfData(node: PlutusData, networkId: number): string {
+  const [payment, stake] = constrOf(node, 'an address').fields;
+  const pay = credentialOf(payment, 'the payment credential');
+  const opt = constrOf(stake, 'the stake credential');
+  const inlineStake = opt.constructor === 0 ? constrOf(opt.fields[0], 'the stake reference') : null;
+  if (inlineStake && inlineStake.constructor !== 0) throw new InputError('INVALID_INPUT', 'a pointer stake credential is no address this writes');
+  const st = inlineStake ? credentialOf(inlineStake.fields[0], 'the stake credential') : null;
+  return addressHex({ payment: pay, stake: st }, networkId);
+}
+
+/** The credentials of a base or enterprise address's bytes, hex. */
+export function fullAddressOfHex(hex: string): PlutusFullAddress {
+  const bytes = hexToBytes(hex);
+  const type = bytes[0] >> 4;
+  if (type > 3 && type !== 6 && type !== 7) throw new InputError('INVALID_INPUT', 'an address that is no base or enterprise address');
+  return {
+    payment: { kind: type & 1 ? 'script' : 'key', hash: bytes.slice(1, 29) },
+    stake: type < 4 ? { kind: type & 2 ? 'script' : 'key', hash: bytes.slice(29, 57) } : null,
   };
 }

@@ -7,7 +7,7 @@
 // the position validator counts only when its pair is the whole mint. The relay's mark is aux
 // data no script can read, so the whole body is built here, balanced on one change output.
 
-import { addressHex } from './address';
+import { addressHex, addressHexOfData, fullAddressOfHex } from './address';
 import { bytesToHex, hexToBytes } from './cbor';
 import { InputError } from './errors';
 import type { FluidV4Suite } from './fluid_v4';
@@ -33,11 +33,10 @@ import {
 } from './book';
 import type { G3Instance, ResolvedOutput } from './book';
 import { slotToPosixMs } from './networks';
-import { constrOf, dataHex, decodePlutusData, encodePlutusData } from './plutus_data';
+import { constrOf, decodePlutusData, encodePlutusData } from './plutus_data';
 import type { PlutusConstr, PlutusData } from './plutus_data';
-import { minFee, minUtxo, requiredCollateral, scriptDataHash } from './tx';
+import { minFee, minUtxo, requiredCollateral, scriptDataHash, sortRefs } from './tx';
 import type { Assets, ProtocolParams, TxDatum, TxDraft, TxOutput, TxRedeemer, Withdrawal } from './tx';
-import type { PlutusFullAddress } from './types';
 
 /** One leg of the cover: `coverage` from the offer at `offer`, priced at `cell` of the sheet `sheet`. */
 export interface G3LegPlan {
@@ -102,18 +101,6 @@ function refuse(message: string): never {
   throw new InputError('INVALID_INPUT', `fluid cover: ${message}`);
 }
 
-function sortRefs(refs: string[]): string[] {
-  const key = (r: string) => {
-    const [tx, ix] = r.split('#');
-    return [tx, Number(ix)] as const;
-  };
-  return [...new Set(refs)].sort((a, b) => {
-    const [ta, ia] = key(a);
-    const [tb, ib] = key(b);
-    return ta < tb ? -1 : ta > tb ? 1 : ia - ib;
-  });
-}
-
 function constr(index: number, fields: PlutusData[]): PlutusConstr {
   return { constructor: index, fields };
 }
@@ -140,33 +127,6 @@ function output(address: string, lovelace: bigint, assets: Assets, datum: string
 
 function atMinUtxo(o: TxOutput, params: ProtocolParams): TxOutput {
   return { ...o, lovelace: minUtxo(o, params) };
-}
-
-function credentialOf(node: PlutusData, what: string): { kind: 'key' | 'script'; hash: Uint8Array } {
-  const c = constrOf(node, what);
-  if (c.constructor > 1 || c.fields.length !== 1) refuse(`${what} is no credential`);
-  return { kind: c.constructor === 0 ? 'key' : 'script', hash: hexToBytes(dataHex(c.fields[0], what)) };
-}
-
-/** An Address as Data, inline stake only, as its bytes on `networkId`. */
-function addressOfData(node: PlutusData, networkId: number): string {
-  const [payment, stake] = constrOf(node, 'an address').fields;
-  const pay = credentialOf(payment, 'the payment credential');
-  const opt = constrOf(stake, 'the stake credential');
-  const inlineStake = opt.constructor === 0 ? constrOf(opt.fields[0], 'the stake reference') : null;
-  if (inlineStake && inlineStake.constructor !== 0) refuse('a pointer stake credential is no address this writes');
-  const st = inlineStake ? credentialOf(inlineStake.fields[0], 'the stake credential') : null;
-  return addressHex({ payment: pay, stake: st }, networkId);
-}
-
-function fullAddressOf(hex: string): PlutusFullAddress {
-  const bytes = hexToBytes(hex);
-  const type = bytes[0] >> 4;
-  if (type > 3 && type !== 6 && type !== 7) refuse('an address that is no base or enterprise address');
-  return {
-    payment: { kind: type & 1 ? 'script' : 'key', hash: bytes.slice(1, 29) },
-    stake: type < 4 ? { kind: type & 2 ? 'script' : 'key', hash: bytes.slice(29, 57) } : null,
-  };
 }
 
 function addAssets(into: Assets, from: Assets, sign: bigint): void {
@@ -202,7 +162,7 @@ export function composeFluidBorrowWithCover(plan: FluidCoverPlan): FluidCoverTx 
   if (poolIds.length !== 1) refuse(`the pool holds ${poolIds.length} pool NFTs`);
   const poolId = poolIds[0];
   const loanId = fluidLoanId(plan.pool);
-  const borrower = fullAddressOf(plan.borrower);
+  const borrower = fullAddressOfHex(plan.borrower);
   if (!borrower.stake) refuse('the borrower address carries no stake credential for the loan');
   const poolFields = constrOf(poolDatum, 'the pool datum').fields;
   const poolCont = output(poolOut.address, poolOut.lovelace - plan.principal, poolOut.assets, poolDatumHex);
@@ -215,7 +175,7 @@ export function composeFluidBorrowWithCover(plan: FluidCoverPlan): FluidCoverTx 
   );
   const borrowerBond = atMinUtxo(output(plan.borrower, 0n, { [suite.borrowerBondPolicyId]: { [loanId]: 1n } }, null), params);
   const lenderBond = atMinUtxo(
-    output(addressOfData(poolFields[4], networkId), 0n, { [suite.lenderBondPolicyId]: { [loanId]: 1n } },
+    output(addressHexOfData(poolFields[4], networkId), 0n, { [suite.lenderBondPolicyId]: { [loanId]: 1n } },
       bytesToHex(encodePlutusData(FLUID_LENDER_BOND_DATUM))),
     params,
   );
@@ -245,7 +205,7 @@ export function composeFluidBorrowWithCover(plan: FluidCoverPlan): FluidCoverTx 
     const offer = at(resolved, leg.offer, 'offer');
     const offerDatum = inline(offer, `offer ${leg.offer}`);
     const owner = constrOf(decodePlutusData(offerDatum), 'the offer datum').fields[0];
-    const offerStake = fullAddressOf(offer.address).stake;
+    const offerStake = fullAddressOfHex(offer.address).stake;
     if (!offerStake) refuse(`offer ${leg.offer} carries no stake credential a leg can keep`);
     legOuts.push(output(
       addressHex({ payment: { kind: 'script', hash: hexToBytes(inst.positionHash) }, stake: offerStake }, networkId),

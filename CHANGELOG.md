@@ -17,6 +17,20 @@ Additive:
   stake part or a pointer pays the insured key alone. `g3AddressView` reads a
   bech32 address as the routes name it, and `g3FeedNamed` finds a feed by pair.
 - **`koiosHeaders`** — a Koios read sends `KoiosReadOptions.token` as a bearer.
+- **The buyer's cancel** — `prepareG3BuyerCancel({ instance, position, wallet,
+  koios, tipMs?, params? })` reads the position from the sale that wrote it and
+  the publisher's standing reading of its feed from Koios, builds the unsigned
+  BuyerCancel (the refund less the 10% cancellation fee to the payee in the
+  instance's unit, each leg home less its own refund, the markers burned),
+  judges it with the pre-sign mirror and has Koios's Ogmios evaluate it. It
+  refuses with the Python CLI's codes and details, and its bytes and printed
+  summary are the CLI's byte for byte (`g3_cancel_vectors.json`). Its parts are
+  exported: `readG3Position`, `readG3Reading` / `g3StandingReading`,
+  `buildG3BuyerCancel`, `g3CancelSummary`, `g3CancelRefund` and
+  `g3BuyerCancelProblems`, the mirror of `settlement_problems` for a cancel.
+- **Koios calls** — `koiosTipMs`, `koiosProtocolParams`, `koiosRows`,
+  `koiosEvaluateTransaction` (Ogmios v6 or v5, read by `evaluationUnits`) and
+  `koiosSubmitTransaction`, which sends raw CBOR through a `BinaryFetch`.
 
 Changed:
 
