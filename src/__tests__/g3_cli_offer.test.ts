@@ -56,6 +56,18 @@ describe('an offer', () => {
     });
   });
 
+  it('refuses a feed the table holds at more than one row when no class is asked', () => {
+    const ada = preview.ada;
+    const twice = { ...ada, rows: [...ada.rows, { ...ada.rows.find((r) => r.class === 0)!, class: 1 }] };
+    let refused: BookRefusal | null = null;
+    try {
+      g3Offer(twice, { feeds: ['ADA/USD'], size: 100n }, OWNER, NOW, V.sheets.packed);
+    } catch (e) {
+      refused = e as BookRefusal;
+    }
+    expect({ code: refused?.refusal, detail: refused?.detail }).toEqual({ code: 'feed-not-a-row', detail: 'ADA/USD is 2 rows of the ada table' });
+  });
+
   it('starts each instance with the starter set the Python tool posts', () => {
     const starters = V.offers.filter((o: any) => o.ask.label);
     expect(starters.map((o: any) => [o.instance, o.ask])).toEqual(

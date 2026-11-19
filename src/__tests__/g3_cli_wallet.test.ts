@@ -101,6 +101,12 @@ describe('the funding a spend takes', () => {
     expect({ refused: refused?.refusal, detail: refused?.detail }).toEqual(V.funding.no_collateral);
   });
 
+  it('takes no more than one request names, holds the change reserve, and stands 5 ADA as collateral', () => {
+    const crowded = resolvedOutputsFromKoios(V.funding.crowded.rows);
+    expect(g3CollateralOf(crowded)).toBe(V.funding.crowded.collateral);
+    for (const c of V.funding.crowded.cases) expect(Object.keys(g3FundingFor(crowded, BigInt(c.lovelace), {}))).toEqual(c.chosen);
+  });
+
   for (const c of V.funding.cases) {
     it(`for ${c.lovelace} lovelace and ${JSON.stringify(c.tokens)} takes the outputs Python takes`, () => {
       const tokens = Object.fromEntries(Object.entries(c.tokens).map(([u, q]) => [u, BigInt(q as number)]));

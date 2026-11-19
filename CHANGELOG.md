@@ -30,6 +30,17 @@ Additive:
   owner's stake key, `buildG3OfferPost` has the hosted builder write its post, and
   `g3PostProblems` judges that post before the wallet signs it. `G3_STARTER` is
   each preview instance's starter set.
+- **`aegis-book`, the wallet CLI** (`bin`, Node entry) — `whoami`, `quote`, `buy`,
+  `post` and `starter` from a wallet directory on preview or preprod. A buy quotes,
+  signs the reservation with signData, has the API present the sale, judges it with
+  `verifyG3Sale` on Koios' reads and, only with `--submit`, signs, submits and waits
+  for the P-leg it judged to land. A post has the hosted builder write the offer's
+  post and judges it with `g3PostProblems` before signing. It refuses to run beside
+  an environment name that looks like key material, when `AEGIS_NETWORK` names
+  another network, or when Koios reports another network's magic; the Koios token
+  is read from `AEGIS_KOIOS_API_TOKEN`. No transaction bytes are printed.
+- **`g3SaleFacts`, `decodeG3ReceiptPin`** — a sale's P-leg and legs as its outputs
+  state them, and the receipt a pinned policy's extension names.
 - **`bookPost`** — the POST every Book route shares, exported for routes the SDK
   has no call for; `compactJson` writes JSON in each object's own key order, as
   `g3QuoteLine` prints a quote; `G3Quote.answer` holds the API's answer as it came.

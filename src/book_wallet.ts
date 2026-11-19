@@ -39,11 +39,9 @@ export interface WalletListing {
   cut: boolean;
 }
 
-/** A form value as Python's urllib.parse.quote_plus writes it. */
+/** A form value as Python's urllib.parse.quote_plus writes the values these queries carry, which hold no space. */
 function quotePlus(s: string): string {
-  return encodeURIComponent(s)
-    .replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)
-    .replace(/%20/g, '+');
+  return encodeURIComponent(s).replace(/[!'()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
 }
 
 function query(params: Array<[string, string | number]>): string {

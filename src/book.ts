@@ -426,7 +426,7 @@ export async function bookPost(api: BookApiOptions, instance: G3Instance, path: 
       return '';
     });
   }
-  if (!res.ok || !parsed) {
+  if (res.status !== 200 || !parsed) {
     const detail = parsed ? (answer !== null && typeof answer === 'object' && !Array.isArray(answer) ? answer.detail ?? null : null) : answer;
     const code = detail !== null && typeof detail === 'object' && !Array.isArray(detail) && typeof detail.code === 'string' && detail.code
       ? detail.code
@@ -1217,4 +1217,35 @@ export function ledgerPhaseOne(
   const problems: G3SaleProblem[] = [];
   phaseOne(decodeTransaction(tx), resolved, params, (code, conjunct, detail) => problems.push({ code, conjunct, detail }));
   return problems;
+}
+
+/** A sale's P-leg and legs as its outputs state them. */
+export interface G3SaleFacts {
+  /** The output holding the position's one P marker, -1 when none does. */
+  pAt: number;
+  policy: G3PolicyDatum | null;
+  /** Each output at the position script holding one C marker, its datum null when unreadable. */
+  legs: Array<{ at: number; output: TxOutput; datum: G3LegDatum | null }>;
+}
+
+export function g3SaleFacts(tx: DecodedTransaction, instance: G3Instance): G3SaleFacts {
+  const position = instance.positionHash;
+  const pAt = tx.outputs.findIndex((o) => markerOf(o.assets, position, P_PREFIX) !== null);
+  const pOut = pAt >= 0 ? tx.outputs[pAt] : null;
+  const policy = pOut?.datum?.kind === 'inline' ? tryDecode(() => decodeG3PolicyDatum((pOut.datum as { cbor: string }).cbor)) : null;
+  const legs = tx.outputs
+    .map((output, at) => ({ output, at }))
+    .filter(({ output }) => credentialsOf(output.address).payment?.kind === 'script' &&
+      credentialsOf(output.address).payment?.hash === position && markerOf(output.assets, position, C_PREFIX) !== null)
+    .map(({ output, at }) => ({
+      at, output,
+      datum: output.datum?.kind === 'inline' ? tryDecode(() => decodeG3LegDatum((output.datum as { cbor: string }).cbor)) : null,
+    }));
+  return { pAt, policy, legs };
+}
+
+/** A receipt pin as a policy's extension carries it. */
+export function decodeG3ReceiptPin(data: PlutusData): G3ReceiptPin {
+  const [policy, name] = fieldsOf(data, 'a ReceiptPin', 2);
+  return { policy: dataHex(policy, 'the pin policy'), name: dataHex(name, 'the pin name') };
 }

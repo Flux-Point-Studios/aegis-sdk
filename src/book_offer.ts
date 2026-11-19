@@ -118,7 +118,7 @@ function sellsUnderTheCover(f: G3OfferFields, referenceSheets: string[], sheets:
   const packed = sheets[f.sheet];
   if (packed === undefined) throw new BookRefusal('sheet-unread', `the cells of sheet ${f.sheet} were not read`);
   const loTerm = f.min_term_ms / DAY_MS;
-  const hiTerm = (f.max_term_ms + DAY_MS - 1n) / DAY_MS;
+  const hiTerm = f.max_term_ms / DAY_MS;
   return cells(packed).some((c) => (CLASS_BITS[c.class] ?? 0n) & f.classes &&
     c.minDepth <= f.max_depth_bps && f.min_depth_bps <= c.maxDepth &&
     c.minDays <= hiTerm && loTerm <= c.maxDays &&
