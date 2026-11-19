@@ -920,7 +920,7 @@ interface Credential {
   hash: string;
 }
 
-function credentialsOf(addressHex: string): { payment: Credential | null; stake: Credential | null; networkId: number | null } {
+export function credentialsOf(addressHex: string): { payment: Credential | null; stake: Credential | null; networkId: number | null } {
   const header = parseInt(addressHex.slice(0, 2), 16);
   const type = header >> 4;
   if (type > 7) return { payment: null, stake: null, networkId: null };
@@ -939,7 +939,7 @@ function samePayout(committed: PlutusData | null, asked: G3AddressView | null): 
   return bytesToHex(encodePlutusData(committed)) === bytesToHex(encodePlutusData(g3AddressData(asked)));
 }
 
-function quantity(assets: Assets, policy: string, name: string): bigint {
+export function quantity(assets: Assets, policy: string, name: string): bigint {
   return assets[policy]?.[name] ?? 0n;
 }
 
@@ -949,7 +949,7 @@ function onlyAsset(assets: Assets, policy: string, name: string): boolean {
     Object.values(assets[policy]).filter((q) => q !== 0n).length === 1;
 }
 
-function markerOf(assets: Assets, position: string, prefix: string): string | null {
+export function markerOf(assets: Assets, position: string, prefix: string): string | null {
   const names = Object.entries(assets[position] ?? {}).filter(([n, q]) => q === 1n && n.startsWith(prefix));
   return names.length === 1 ? names[0][0] : null;
 }

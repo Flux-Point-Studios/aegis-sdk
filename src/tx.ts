@@ -373,6 +373,20 @@ function copyOutput(o: TxOutput): TxOutput {
 
 // --- writing ------------------------------------------------------------------------
 
+/** Out-refs once each, in the ledger's order: by transaction id, then by index. */
+export function sortRefs(refs: string[]): string[] {
+  const key = (r: string) => {
+    const [tx, ix] = r.split('#');
+    return [tx, Number(ix)] as const;
+  };
+  return [...new Set(refs)].sort((a, b) => {
+    const [ta, ia] = key(a);
+    const [tb, ib] = key(b);
+    return ta < tb ? -1 : ta > tb ? 1 : ia - ib;
+  });
+}
+
+
 function hexItem(hex: string, what: string): CborItem {
   if (!/^(?:[0-9a-fA-F]{2})*$/.test(hex)) refuse(`${what} is not hex`);
   return cBytes(hexToBytes(hex));

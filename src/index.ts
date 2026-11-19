@@ -375,8 +375,39 @@ export {
   g3PostProblems,
 } from './book_offer';
 export type { G3OfferAsk, G3OfferFields, G3Offer, G3OfferPost } from './book_offer';
-export { koiosUtxos, koiosHeaders } from './koios';
-export type { KoiosReadOptions, KoiosUtxo, KoiosAsset } from './koios';
+export {
+  G3_CANCEL_FEE_BPS,
+  G3_CANCEL_WINDOW_MS,
+  g3CancelRefund,
+  readG3Position,
+  readG3Reading,
+  g3StandingReading,
+  buildG3BuyerCancel,
+  g3CancelSummary,
+  g3BuyerCancelProblems,
+  prepareG3BuyerCancel,
+} from './book_cancel';
+export type {
+  G3Position,
+  G3PositionOutput,
+  G3StandingReading,
+  G3CancelSummary,
+  G3SettlementProblem,
+  G3BuyerCancelPlan,
+  G3BuyerCancelRequest,
+  G3PreparedCancel,
+} from './book_cancel';
+export {
+  koiosUtxos,
+  koiosRows,
+  koiosHeaders,
+  koiosTipMs,
+  koiosProtocolParams,
+  evaluationUnits,
+  koiosEvaluateTransaction,
+  koiosSubmitTransaction,
+} from './koios';
+export type { KoiosReadOptions, KoiosSubmitOptions, BinaryFetch, KoiosUtxo, KoiosAsset, EvaluatedUnits } from './koios';
 
 // ---------------------------------------------------------------------------
 // One transaction that borrows from a FluidTokens V4 pool and buys gen-3 Book

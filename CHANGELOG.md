@@ -60,6 +60,20 @@ Additive:
   the P-leg's extension must hold the request's pin.
 - **`phase-one/script-without-a-source`** — `verifyG3Sale` refuses a sale that
   spends, mints or withdraws at a script no input or reference input carries.
+- **The buyer's cancel** — `prepareG3BuyerCancel({ instance, position, wallet,
+  koios, tipMs?, params? })` reads the position from the sale that wrote it and
+  the publisher's standing reading of its feed from Koios, builds the unsigned
+  BuyerCancel (the refund less the 10% cancellation fee to the payee in the
+  instance's unit, each leg home less its own refund, the markers burned),
+  judges it with the pre-sign mirror and has Koios's Ogmios evaluate it. It
+  refuses with the Python CLI's codes and details, and its bytes and printed
+  summary are the CLI's byte for byte (`g3_cancel_vectors.json`). Its parts are
+  exported: `readG3Position`, `readG3Reading` / `g3StandingReading`,
+  `buildG3BuyerCancel`, `g3CancelSummary`, `g3CancelRefund` and
+  `g3BuyerCancelProblems`, the mirror of `settlement_problems` for a cancel.
+- **Koios calls** — `koiosTipMs`, `koiosProtocolParams`, `koiosRows`,
+  `koiosEvaluateTransaction` (Ogmios v6 or v5, read by `evaluationUnits`) and
+  `koiosSubmitTransaction`, which sends raw CBOR through a `BinaryFetch`.
 
 Changed:
 
