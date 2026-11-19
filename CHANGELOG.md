@@ -31,10 +31,13 @@ Additive:
   `g3PostProblems` judges that post before the wallet signs it. `G3_STARTER` is
   each preview instance's starter set.
 - **`aegis-book`, the wallet CLI** (`bin`, Node entry) — `whoami`, `quote`, `buy`,
-  `post` and `starter` from a wallet directory on preview or preprod. A buy quotes,
-  signs the reservation with signData, has the API present the sale, judges it with
+  `cancel`, `post` and `starter` from a wallet directory on preview or preprod. A
+  buy quotes, signs the reservation with signData, has the API present the sale, judges it with
   `verifyG3Sale` on Koios' reads and, only with `--submit`, signs, submits and waits
-  for the P-leg it judged to land. A post has the hosted builder write the offer's
+  for the P-leg it judged to land. `cancel --position TX#IX` prints the buyer's
+  cancel `prepareG3BuyerCancel` builds, its collateral the wallet's own, and with
+  `--submit` signs and submits it; a read of the sale that Koios answers empty is
+  asked again up to `CHAIN_READ_TRIES` times, since its nodes trail one another. A post has the hosted builder write the offer's
   post and judges it with `g3PostProblems` before signing. It refuses to run beside
   an environment name that looks like key material, when `AEGIS_NETWORK` names
   another network, or when Koios reports another network's magic; the Koios token

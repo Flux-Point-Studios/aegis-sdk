@@ -5,6 +5,7 @@
 //   aegis-book quote   --network preview --wallet-dir DIR --instance ada|usdcx --feed ADA/USD
 //                      [--class barrier|depeg] --strike N --coverage 50 --term-days 7 [--pin] [--no-payout] --api URL
 //   aegis-book buy     ...the quote's arguments... [--submit]
+//   aegis-book cancel  --network preview --wallet-dir DIR --instance ada|usdcx --position TX#IX [--submit]
 //   aegis-book post    --network preview --wallet-dir DIR --instance ada|usdcx --feed ADA/USD [--feed ...]
 //                      --size 500 [--class barrier|depeg] [--min-depth-bps N --max-depth-bps N]
 //                      [--min-term-days 7] [--max-term-days 45] [--load-bps 0] [--min-fill 10] [--max-fill N]
@@ -22,6 +23,7 @@
 import {
   BookRefusal,
   CHAIN_FACTS,
+  ChainError,
   G3_INSTANCES,
   G3_STARTER,
   buildG3OfferPost,
@@ -45,6 +47,8 @@ import {
   koiosHeaders,
   koiosUtxos,
   outputsNamedBy,
+  prepareG3BuyerCancel,
+  koiosSubmitTransaction,
   prepareG3Cover,
   protocolParamsFromCli,
   quoteG3Cover,
@@ -60,6 +64,7 @@ import type {
   G3Instance,
   G3OfferAsk,
   G3SaleFacts,
+  BinaryFetch,
   KoiosReadOptions,
   MinimalFetch,
   Network,
@@ -67,7 +72,7 @@ import type {
   ResolvedOutput,
   TxOutput,
 } from '../index';
-import { bytesToHex, hexToBytes } from '../cbor';
+import { bytesToHex } from '../cbor';
 import { openWalletDir } from './wallet_dir';
 import type { WalletDir } from './wallet_dir';
 
@@ -79,6 +84,8 @@ const KEY_NAME_FRAGMENTS = ['MNEMONIC', 'SKEY', 'SIGNING_KEY', 'PRIVATE_KEY', 'S
   'AGENT_KEY', 'MARK_KEY', 'WALLET_PATH', 'XPRV', 'ROOT_KEY'];
 export const POLL_MS = 10_000;
 export const POLL_LIMIT = 180;
+/** Koios answers from nodes behind one another, so a read of a landed sale may come back empty. */
+export const CHAIN_READ_TRIES = 6;
 
 export interface CliDeps {
   env: Readonly<Record<string, string | undefined>>;
@@ -235,17 +242,6 @@ const sameOutput = (a: TxOutput, b: TxOutput) =>
   compactJson(JSON.parse(JSON.stringify(a, (_k, v) => (typeof v === 'bigint' ? v.toString() : v)))) ===
   compactJson(JSON.parse(JSON.stringify(b, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))));
 
-async function submitToKoios(ctx: Context, signed: string): Promise<string> {
-  const res = await ctx.deps.fetchImpl(`${CHAIN_FACTS[ctx.network].koios}/submittx`, {
-    method: 'POST',
-    headers: { ...koiosHeaders(ctx.koios), 'content-type': 'application/cbor' },
-    body: hexToBytes(signed) as unknown as string,
-  });
-  const answer = await res.json().catch(() => null);
-  if (!res.ok) throw new Refused('submit-refused', `Koios answered HTTP ${res.status}: ${JSON.stringify(answer)}`);
-  return String(answer);
-}
-
 function held(o: TxOutput | ResolvedOutput, inst: G3Instance, pin: { policy: string; name: string } | null) {
   const plain = inst.unitPolicy ? o.assets[inst.unitPolicy]?.[inst.unitName] ?? 0n : o.lovelace;
   return { plain, receipts: pin ? o.assets[pin.policy]?.[pin.name] ?? 0n : 0n };
@@ -309,6 +305,42 @@ async function buy(ctx: Context, cmd: string, args: Args, inst: G3Instance): Pro
   return 0;
 }
 
+/** Signs `cbor` with the wallet once its inputs are unspent, submits it and waits for it to land. */
+async function submitAndLand(ctx: Context, cbor: string, what: string) {
+  await assertUnspent(ctx, decodeTransaction(cbor).inputs, what);
+  const id = transactionId(cbor);
+  const signed = spliceVkeyWitnesses(cbor, await ctx.wallet.signer.signTx(cbor, false));
+  const answered = await koiosSubmitTransaction(signed, { ...ctx.koios, fetchImpl: ctx.deps.fetchImpl as unknown as BinaryFetch });
+  if (answered !== id) throw new Refused('submit-refused', `the provider answered ${answered} for ${id}`);
+  return { id, landed: await awaitLanding(ctx, id) };
+}
+
+/** The settlement each settling command builds from the wallet, as buy_g3_cover's ARMS names them. */
+const SETTLEMENTS = { cancel: prepareG3BuyerCancel } as const;
+
+async function settle(ctx: Context, cmd: keyof typeof SETTLEMENTS, args: Args, inst: G3Instance): Promise<number> {
+  const { outputs: wallet } = await readWalletOutputs(ctx.wallet.address, ctx.koios);
+  const ask = () => SETTLEMENTS[cmd]({
+    instance: inst, position: args.position as string, koios: ctx.koios,
+    wallet: { address: ctx.wallet.address, collateral: g3CollateralOf(wallet) },
+  });
+  let prepared: Awaited<ReturnType<typeof ask>> | undefined;
+  for (let tries = 1; !prepared; tries++) {
+    prepared = await ask().catch(async (e) => {
+      if (!(e instanceof ChainError) || tries >= CHAIN_READ_TRIES) throw e;
+      await ctx.deps.sleep(ctx.deps.pollMs ?? POLL_MS);
+      return undefined;
+    });
+  }
+  if (!args.submit) {
+    ctx.line({ dry_run: true, ...prepared.summary });
+    return 0;
+  }
+  const { id } = await submitAndLand(ctx, prepared.tx, `the ${cmd}'s inputs`);
+  ctx.line({ tx: id, ...prepared.summary });
+  return 0;
+}
+
 async function referenceSheets(ctx: Context, inst: G3Instance): Promise<Record<string, string>> {
   const resolved = await readResolvedOutputs(Object.values(inst.sheets), ctx.koios);
   const cells: Record<string, string> = {};
@@ -347,12 +379,7 @@ async function postOffers(ctx: Context, args: Args, inst: G3Instance, asks: read
         ctx.line({ label, dry_run: true, fee: tx.fee, offer: g3OfferSummary(offer) });
         continue;
       }
-      await assertUnspent(ctx, tx.inputs, 'the funding');
-      const id = transactionId(built.cbor);
-      const signed = spliceVkeyWitnesses(built.cbor, await ctx.wallet.signer.signTx(built.cbor, false));
-      const answered = await submitToKoios(ctx, signed);
-      if (answered !== id) throw new Refused('submit-refused', `the provider answered ${answered} for ${id}`);
-      const landed = await awaitLanding(ctx, id);
+      const { id, landed } = await submitAndLand(ctx, built.cbor, 'the funding');
       if (!sameOutput(landed.outputs[0], out)) throw new Refused('landed-another-offer', `${id} landed without the offer judged`);
       ctx.line({ label, tx: id, offer: `${id}#0` });
       const change = tx.outputs.flatMap((o, i): Array<[string, ResolvedOutput]> => (i > 0 && o.address === own
@@ -412,6 +439,7 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
     const inst = G3_INSTANCES[network]?.[args.instance as string];
     if (!inst) return refuse('instance-unrecorded', `${network} records no ${args.instance} instance`);
     if (cmd === 'quote' || cmd === 'buy') return await buy(ctx, cmd, args, inst);
+    if (cmd in SETTLEMENTS) return await settle(ctx, cmd as keyof typeof SETTLEMENTS, args, inst);
     if (cmd === 'post') return await postOffers(ctx, args, inst, [askOf(args)]);
     if (cmd === 'starter') {
       const only = args.only as string[] | undefined;
@@ -421,7 +449,7 @@ export async function main(argv: string[], deps: CliDeps): Promise<number> {
       if (unknown.length || !asks.length) return refuse('starter-label-unknown', `the ${inst.name} starter set has no ${JSON.stringify(unknown)}`);
       return await postOffers(ctx, args, inst, asks);
     }
-    return refuse('command-unbuilt', `${cmd} is not built`);
+    return refuse('command-unknown', cmd);
   } catch (e) {
     if (e instanceof Refused) return refuse(e.code, e.detail);
     if (e instanceof BookRefusal) return refuse(e.refusal, e.detail);

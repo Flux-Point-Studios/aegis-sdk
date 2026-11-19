@@ -59,7 +59,7 @@ export interface KoiosUtxo {
 }
 
 function fetchOf<F>(given: F | undefined): F {
-  const f = given ?? (globalThis as { fetch?: F }).fetch;
+  const f = given ?? (globalThis as unknown as { fetch?: F }).fetch;
   if (!f) throw new InputError('INVALID_INPUT', 'no fetch available: pass opts.fetchImpl');
   return f;
 }
