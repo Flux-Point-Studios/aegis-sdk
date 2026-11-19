@@ -140,7 +140,7 @@ settles it against that oracle ref input exactly as it does a price barrier.
 `decodeEventDatum` is the event-typed twin of `decodeFearDatum` (both share one
 GenericData reader), and `isTriggered(value, strike)` is the `value ≤ strike`
 settlement predicate. Event **pricing reuses the barrier quote** — `quoteEventCover`
-is a documented re-export of `quoteBarrier`, not a separate model.
+is a documented re-export of `quoteBarrier`.
 
 ### Borrow and cover in one transaction
 
