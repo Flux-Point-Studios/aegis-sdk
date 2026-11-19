@@ -10,7 +10,7 @@
 import type { Network } from './address';
 import { addressBytes, addressHex } from './address';
 import { blake2b } from './blake2b';
-import { bytesToHex, hexToBytes } from './cbor';
+import { bytesToHex, concat, encodeBytes, encodeConstr, hexToBytes } from './cbor';
 import { AegisError, InputError } from './errors';
 import type { MinimalFetch } from './fetch_quote';
 import { koiosUtxos } from './koios';
@@ -30,11 +30,48 @@ import {
 } from './tx';
 import type { Assets, DecodedTransaction, ProtocolParams, TxOutput } from './tx';
 
+/** A receipt a pinned policy may be paid part of its cover in: the one rate source an instance compiles. */
+export interface G3ReceiptPin {
+  policy: string;
+  name: string;
+}
+
+/** A rate source an instance's vector compiles: the receipt, its MarketState and the floor it reads. */
+export interface G3RateSource extends G3ReceiptPin {
+  statePolicy: string;
+  stateName: string;
+  stateScript: string;
+  floor: string[];
+  liqDiv: bigint;
+}
+
+/** A row of an instance's genesis table: a feed at a class, its kind (1 for an event slot) and its reference sheet. */
+export interface G3TableRow {
+  feed: string;
+  class: number;
+  kind: number;
+  sheet: string;
+}
+
 /** A deployed gen-3 instance: the scripts, tokens and rates a sale of it is judged against. */
 export interface G3Instance {
   network: Network;
-  /** 'lovelace' for the ADA instance. */
+  /** The launch record's name for it: 'ada' or 'usdcx'. */
+  name: string;
+  /** 'lovelace' for the ADA instance, else the unit's policy and name. */
   unit: string;
+  /** '' for the ADA instance. */
+  unitPolicy: string;
+  unitName: string;
+  /** The lovelace each leg carries beside the unit; 0 for the ADA instance. */
+  legCarrier: bigint;
+  /** The Liqwid observer a pinned sale withdraws zero from; '' for none. */
+  liqwidHash: string;
+  /** The ADA/USD feed the unit is priced against; '' for the ADA instance. */
+  fxFeed: string;
+  fxScale: bigint;
+  rates: G3RateSource[];
+  rows: G3TableRow[];
   positionHash: string;
   bookHash: string;
   /** The table script's hash, which is also its token's policy. */
@@ -55,15 +92,45 @@ export interface G3Instance {
   maxLegs: number;
   /** The lane Heads, by lane. */
   heads: string[];
-  refScripts: { position: string; book: string; observer: string; accrual: string; table: string };
+  refScripts: { position: string; book: string; observer: string; accrual: string; table: string; liqwid?: string };
   /** Pricing sheets by hash, each at the UTxO holding it. */
   sheets: Record<string, string>;
 }
 
+const ADA_USD_PREVIEW = '4bba53d510bf2af7d08e8edf57c3a49ccdb6b0406c8470eea03081ef';
+const USDC_USD_PREVIEW = '344a79ba3e109002b6e5c362e922963dc9ef8d5b4f91590cb0731c17';
+const USDT_USD_PREVIEW = '89e30ef6634ef796c26bf51c31fec4c0eb6893f5ecce3f2f7dd5da05';
+const RH1_PREVIEW = 'e78e97ccaa0b795eb7ca00a7b2f514e3419db33d5e8bed4af0054c82';
+const BARRIER_SHEET_PREVIEW = '972e9a6f37447d906eedaee839d6e2a67659189394090c2b49dab6a6f6c3f280';
+const STABLE_SHEET_PREVIEW = '66898227feaf904e3744250537476ecf2ae67a98c108945b6aaabe685346d499';
+const EVENT_SHEET_PREVIEW = '26f7e3bf9a8d2f465536796b95545d98ebac231c04f1f0b96d5f611a5950de64';
+
+/** Each preview feed by the pair the table vectors name it by, an event slot by its own. */
+export const G3_PREVIEW_FEEDS: Readonly<Record<string, string>> = {
+  [USDC_USD_PREVIEW]: 'USDC/USD',
+  [ADA_USD_PREVIEW]: 'ADA/USD',
+  [USDT_USD_PREVIEW]: 'USDT/USD',
+  [RH1_PREVIEW]: 'RH1',
+};
+
 /** The ADA instance on preview. */
 export const G3_PREVIEW_ADA: G3Instance = {
   network: 'preview',
+  name: 'ada',
   unit: 'lovelace',
+  unitPolicy: '',
+  unitName: '',
+  legCarrier: 0n,
+  liqwidHash: '',
+  fxFeed: '',
+  fxScale: 1n,
+  rates: [],
+  rows: [
+    { feed: ADA_USD_PREVIEW, class: 0, kind: 0, sheet: BARRIER_SHEET_PREVIEW },
+    { feed: USDC_USD_PREVIEW, class: 1, kind: 0, sheet: STABLE_SHEET_PREVIEW },
+    { feed: USDT_USD_PREVIEW, class: 1, kind: 0, sheet: STABLE_SHEET_PREVIEW },
+    { feed: RH1_PREVIEW, class: 0, kind: 1, sheet: EVENT_SHEET_PREVIEW },
+  ],
   positionHash: '60e9069318a5a5f6adcd8be58a04a616e50fe14f7359d82239843537',
   bookHash: '5027f0652fc707ea4fdba2bbc6d312beb6ed3b15ca65a9e7d625ccb5',
   tableHash: 'f07f33e36027037190ab528c3e03cbcabc0a3c4a6419355edcdaa3a9',
@@ -97,6 +164,68 @@ export const G3_PREVIEW_ADA: G3Instance = {
     '26f7e3bf9a8d2f465536796b95545d98ebac231c04f1f0b96d5f611a5950de64':
       'b3a56f4956935f674439b742700a871a469b5d7cbaaf7176c26659cd88f17ae3#0',
   },
+};
+
+/** The USDCx instance on preview: legs carry 2.5 ADA beside the unit, and a pin may name qUSDCx-i. */
+export const G3_PREVIEW_USDCX: G3Instance = {
+  network: 'preview',
+  name: 'usdcx',
+  unit: 'd8906ca5c7ba124a0407a32dab37b2c82b13b3dcd9111e42940dcea45553444378',
+  unitPolicy: 'd8906ca5c7ba124a0407a32dab37b2c82b13b3dcd9111e42940dcea4',
+  unitName: '5553444378',
+  legCarrier: 2_500_000n,
+  liqwidHash: 'b94e42c56ad25c04a0a047d4f04e257193fc8a3914495a6de75da926',
+  fxFeed: ADA_USD_PREVIEW,
+  fxScale: 1_000_000n,
+  rates: [
+    {
+      policy: '4c7cebfb861d35028b3e592d40d7b8de4edc4f7ffe6998f1cf46f529',
+      name: '',
+      statePolicy: 'a105d84b0a59ce79a155ce99933b6ee9d942d390d8abe97b3516a5c3',
+      stateName: '',
+      stateScript: '7ab46d57e607f4e18990c12d7bc060aeb846a915cc812696e9e2fc47',
+      floor: ['5553444358', '55534443', '4c4951574944'],
+      liqDiv: 10n,
+    },
+  ],
+  rows: [
+    { feed: ADA_USD_PREVIEW, class: 0, kind: 0, sheet: BARRIER_SHEET_PREVIEW },
+    { feed: USDT_USD_PREVIEW, class: 1, kind: 0, sheet: STABLE_SHEET_PREVIEW },
+  ],
+  positionHash: '2c7e04ff848e684df95ce990f0becad0e891eea4b0e5d9e5b1610534',
+  bookHash: 'b52e2dbcbccf5883431167c8af0abc85356db3d3e0adc31a00d6c25b',
+  tableHash: '99f4c22238e4c6ec481ba2f364dd2e72612a9857f54fd7c5a68f8d4f',
+  tableName: '41454749535f424f4f4b5f5441424c45',
+  accrualHash: '0457b39838e82e70bb0672860face954ce1c8c99d71591316ae43f30',
+  observerHash: '8f5b93aefb8f471f19128ab92e56d04b2435e9f88bcdfd35238211c8',
+  beaconPolicy: 'b3083a9db61f5d86136927d9d1f958fd452edc5bc22783cb07ef4fa7',
+  beaconName: '41454749535f424f4f4b5f4c414e45',
+  treasury: G3_PREVIEW_ADA.treasury,
+  publisherVkh: 'f4b09d9bd4226de67e6ac6b2352554d4d4aa7e405e1efcc1f54b3903',
+  feeBps: 200n,
+  donationBps: 50n,
+  minPremium: 10_000_000n,
+  minLegPremium: 1_000_000n,
+  minLegCoverage: 2_000_000n,
+  maxLegs: 10,
+  heads: [0, 1, 2, 3].map((i) => `3be298838d79087796fcd0df8e5b9c3e2054da864e4e15bbfd9fc0f3b4843652#${i}`),
+  refScripts: {
+    position: '57463c1df54b4bc6ee4d3b81d611545bdc31c41a9ed8be854f170e8159eee9c4#0',
+    book: 'ae24890fcd3721341dd93b0dc66e74610070c147fc3773b33647a443fad3472d#0',
+    observer: '9de2148efb27ee18e4c169566860c92928dfcf097c1349549ad74c4d810fc222#0',
+    accrual: '0b3f28848b6b718b083b44f1cc8f7b95fe196e9c484f44c010bd22a3a89f0c20#0',
+    table: 'bcb0f8aeadd54638dd349ba7917ced75aaaa7c8cb405b88404527c209b0a4de6#0',
+    liqwid: '917bece2234dc6b0fdc60243372b80772552c91e21860c68f45fc1aac994c383#0',
+  },
+  sheets: {
+    [BARRIER_SHEET_PREVIEW]: G3_PREVIEW_ADA.sheets[BARRIER_SHEET_PREVIEW],
+    [STABLE_SHEET_PREVIEW]: G3_PREVIEW_ADA.sheets[STABLE_SHEET_PREVIEW],
+  },
+};
+
+/** The gen-3 instances each network has launched, by name. */
+export const G3_INSTANCES: Readonly<Partial<Record<Network, Readonly<Record<string, G3Instance>>>>> = {
+  preview: { ada: G3_PREVIEW_ADA, usdcx: G3_PREVIEW_USDCX },
 };
 
 export const G3_BARRIER = 0;
@@ -135,9 +264,20 @@ export interface G3CoverRequest {
   lane: number;
   ttl_ms: number;
   transport_cap: null;
-  payout_address: null;
+  /** Where the cover pays: the insured's own staked address (g3PayoutOf), or null for the insured key alone. */
+  payout_address: G3AddressView | null;
   saturn_order: null;
-  pin: null;
+  /** The receipt a receipt-backed sale pins, or null. */
+  pin: G3ReceiptPin | null;
+}
+
+/** A credential as the API's JSON names it. */
+export type G3Credential = { key: string } | { script: string };
+
+/** An address as the API's JSON names it: a payment credential and a stake part, a pointer or none. */
+export interface G3AddressView {
+  payment: G3Credential;
+  stake: G3Credential | { pointer: number[] } | null;
 }
 
 export interface G3Quote {
@@ -361,23 +501,53 @@ export interface G3PolicyTerms {
   expiryMs: bigint;
   feed: string;
   class: number;
+  /** The payout address the policy commits; none pays the insured key alone. */
+  payout?: G3AddressView | null;
+  /** The receipt a pinned sale writes into the extension. */
+  pin?: G3ReceiptPin | null;
 }
 
-/** The P-leg's PolicyDatum: AegisSelf, no partner, payout to the insured, no pins or extension. */
+function credentialData(c: G3Credential): PlutusData {
+  return 'key' in c ? { constructor: 0, fields: [hexToBytes(c.key)] } : { constructor: 1, fields: [hexToBytes(c.script)] };
+}
+
+/** An address view as Plutus Data, as the routes write a payout address. */
+export function g3AddressData(view: G3AddressView): PlutusData {
+  const stake = view.stake;
+  const staked: PlutusData = stake === null
+    ? NONE
+    : 'pointer' in stake
+      ? { constructor: 0, fields: [{ constructor: 1, fields: stake.pointer.map(BigInt) }] }
+      : { constructor: 0, fields: [{ constructor: 0, fields: [credentialData(stake)] }] };
+  return { constructor: 0, fields: [credentialData(view.payment), staked] };
+}
+
+/** A ReceiptPin as serialiseData writes it, the form a pinned policy's extension carries. */
+export function g3ReceiptPinCbor(pin: G3ReceiptPin): Uint8Array {
+  return encodeConstr(0, [encodeBytes(hexToBytes(pin.policy)), encodeBytes(hexToBytes(pin.name))]);
+}
+
+/**
+ * The P-leg's PolicyDatum: AegisSelf, no partner, the committed payout address, no pins, and
+ * the receipt pin, if any, in the extension.
+ */
 export function g3PolicyDatum(terms: G3PolicyTerms, instance: G3Instance): Uint8Array {
   const b = (h: string) => hexToBytes(h);
-  return encodePlutusData({
-    constructor: 0,
-    fields: [
-      b(terms.digest), b(terms.insured), terms.strike, terms.coverage, terms.premium, terms.startMs, terms.expiryMs,
-      b(terms.feed), b(instance.positionHash), b(instance.beaconPolicy), { constructor: AEGIS_SELF, fields: [] },
-      NONE, 0n, { constructor: terms.class, fields: [] }, NONE, NONE, NONE, NONE, NONE,
-    ],
-  });
+  const fields: PlutusData[] = [
+    b(terms.digest), b(terms.insured), terms.strike, terms.coverage, terms.premium, terms.startMs, terms.expiryMs,
+    b(terms.feed), b(instance.positionHash), b(instance.beaconPolicy), { constructor: AEGIS_SELF, fields: [] },
+    NONE, 0n, { constructor: terms.class, fields: [] },
+    terms.payout ? { constructor: 0, fields: [g3AddressData(terms.payout)] } : NONE, NONE, NONE, NONE,
+  ];
+  const extension = terms.pin ? concat([SOME_HEAD, g3ReceiptPinCbor(terms.pin)]) : encodePlutusData(NONE);
+  return concat([CONSTR_0_OF_19, ...fields.map(encodePlutusData), extension]);
 }
 
+const CONSTR_0_OF_19 = new Uint8Array([0xd8, 0x79, 0x93]);
+const SOME_HEAD = new Uint8Array([0xd8, 0x79, 0x81]);
+
 /** A P-leg's PolicyDatum as the position validator reads it. */
-export interface G3PolicyDatum extends G3PolicyTerms {
+export interface G3PolicyDatum extends Omit<G3PolicyTerms, 'payout' | 'pin'> {
   poolScriptHash: string;
   poolNft: string;
   provider: number;
@@ -550,7 +720,7 @@ export function g3PLegDeposit(request: G3CoverRequest, instance: G3Instance, par
   const terms: G3PolicyTerms = {
     digest: '00'.repeat(28), insured: request.insured, strike: request.strike, coverage: WIDEST_UINT,
     premium: WIDEST_UINT, startMs: WIDEST_UINT - request.term_ms, expiryMs: WIDEST_UINT, feed: request.feed,
-    class: request.class,
+    class: request.class, payout: request.payout_address, pin: request.pin,
   };
   return minUtxo(
     {
@@ -669,6 +839,11 @@ function credentialsOf(addressHex: string): { payment: Credential | null; stake:
   return { payment, stake, networkId: header & 0x0f };
 }
 
+function samePayout(committed: PlutusData | null, asked: G3AddressView | null): boolean {
+  if (committed === null || asked === null) return committed === asked;
+  return bytesToHex(encodePlutusData(committed)) === bytesToHex(encodePlutusData(g3AddressData(asked)));
+}
+
 function quantity(assets: Assets, policy: string, name: string): bigint {
   return assets[policy]?.[name] ?? 0n;
 }
@@ -765,7 +940,7 @@ export function verifyG3Sale(input: VerifyG3SaleInput): G3SaleProblem[] {
       ['strike', pd.strike === request.strike],
       ['coverage', pd.coverage === request.coverage],
       ['term', pd.expiryMs - pd.startMs === request.term_ms],
-      ['payout-address', pd.payoutAddress === null],
+      ['payout-address', samePayout(pd.payoutAddress, request.payout_address)],
     ];
     for (const [name, ok] of checks) if (!ok) fail('insured-not-the-buyer', name, `the P-leg's ${name} is not the request's`);
     const pins: Array<[string, boolean]> = [

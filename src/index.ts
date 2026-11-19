@@ -275,6 +275,9 @@ export type {
 // ---------------------------------------------------------------------------
 export {
   G3_PREVIEW_ADA,
+  G3_PREVIEW_USDCX,
+  G3_PREVIEW_FEEDS,
+  G3_INSTANCES,
   G3_BARRIER,
   G3_DEPEG,
   G3_QUOTE_VALIDITY_MS,
@@ -291,6 +294,8 @@ export {
   g3Digest,
   g3DigestDatum,
   g3PolicyDatum,
+  g3AddressData,
+  g3ReceiptPinCbor,
   decodeG3PolicyDatum,
   decodeG3LegDatum,
   decodeFeedReading,
@@ -307,6 +312,11 @@ export {
 } from './book';
 export type {
   G3Instance,
+  G3RateSource,
+  G3TableRow,
+  G3ReceiptPin,
+  G3AddressView,
+  G3Credential,
   G3CoverRequest,
   G3Quote,
   G3Prepared,
@@ -320,7 +330,9 @@ export type {
   G3SaleProblem,
   VerifyG3SaleInput,
 } from './book';
-export { koiosUtxos } from './koios';
+export { G3_CLASSES, g3AddressView, g3PayoutOf, g3FeedNamed, g3CoverRequest } from './book_buyer';
+export type { G3CoverAsk, G3CoverWallet } from './book_buyer';
+export { koiosUtxos, koiosHeaders } from './koios';
 export type { KoiosReadOptions, KoiosUtxo, KoiosAsset } from './koios';
 
 // ---------------------------------------------------------------------------

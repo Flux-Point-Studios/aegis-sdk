@@ -11,6 +11,15 @@ export interface KoiosReadOptions {
   fetchImpl?: MinimalFetch;
   /** Koios base URL (default: the network's public Koios). */
   koios?: string;
+  /** A Koios API token, sent as a bearer; the public tier answers without one. */
+  token?: string;
+}
+
+/** The headers a Koios request carries: JSON both ways, and the token as a bearer when one is set. */
+export function koiosHeaders(opts: KoiosReadOptions): Record<string, string> {
+  const headers: Record<string, string> = { 'content-type': 'application/json', accept: 'application/json' };
+  if (opts.token) headers.authorization = `Bearer ${opts.token}`;
+  return headers;
 }
 
 export interface KoiosAsset {
@@ -38,7 +47,7 @@ export async function koiosUtxos(opts: KoiosReadOptions, path: string, body: unk
   if (!f) throw new InputError('INVALID_INPUT', 'no fetch available: pass opts.fetchImpl');
   const res = await f(`${opts.koios ?? CHAIN_FACTS[opts.network].koios}/${path}`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
+    headers: koiosHeaders(opts),
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new ChainError('UNKNOWN', `Koios ${path} answered HTTP ${res.status}`);

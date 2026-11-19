@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased — gen-3 wallet CLI
+
+Additive:
+
+- **The USDCx instance on preview** — `G3_PREVIEW_USDCX` beside `G3_PREVIEW_ADA`,
+  both in `G3_INSTANCES`, with `G3_PREVIEW_FEEDS` naming each preview feed by its
+  pair. An instance now carries its name, unit policy and name, the lovelace each
+  leg carries beside the unit, its Liqwid observer, the ADA/USD feed its unit is
+  priced on, the receipt rates it compiles and its genesis table rows with their
+  reference sheets.
+- **Cover requests** — `g3CoverRequest(instance, ask, wallet, params)` writes the
+  request the API's routes read, its deposit sized by `g3PLegDeposit`.
+  `g3PayoutOf(view)` commits a staked wallet's own address as the payout, so a
+  claim or a cancel's refund lands where the wallet shows it; a wallet with no
+  stake part or a pointer pays the insured key alone. `g3AddressView` reads a
+  bech32 address as the routes name it, and `g3FeedNamed` finds a feed by pair.
+- **`koiosHeaders`** — a Koios read sends `KoiosReadOptions.token` as a bearer.
+
+Changed:
+
+- `G3CoverRequest.pin` takes a `G3ReceiptPin` and `payout_address` a
+  `G3AddressView`, each or null; `g3PolicyDatum` writes them into the payout
+  address and the extension, and `verifyG3Sale` holds the P-leg's payout to the
+  request's.
+- `G3Instance` gains required fields (above); a caller building its own instance
+  must supply them.
+
 ## Unreleased — N2 event-class cover
 
 Additive (no breaking changes):
